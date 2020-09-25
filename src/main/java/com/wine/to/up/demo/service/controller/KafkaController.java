@@ -12,10 +12,7 @@ import com.wine.to.up.demo.service.logging.DemoServiceNotableEvents;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Collections;
 import java.util.concurrent.ExecutionException;
@@ -110,4 +107,10 @@ public class KafkaController {
         log.info("Sent: " + sent);
         eventLogger.warn(DemoServiceNotableEvents.W_SOME_WARN_EVENT, "Demo warning message");
     }
+
+    @GetMapping("/newController")
+    public void test() {
+        log.error("Not implemented yet", new RuntimeException("fake exception to se the stacktrace"));
+    }
+
 }
