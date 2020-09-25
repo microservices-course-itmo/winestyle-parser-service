@@ -108,7 +108,7 @@ public class KafkaController {
         eventLogger.warn(DemoServiceNotableEvents.W_SOME_WARN_EVENT, "Demo warning message");
     }
 
-    @GetMapping("/newController")
+    @GetMapping(value = "/newController")
     public void test() {
         log.error("Not implemented yet", new RuntimeException("fake exception to se the stacktrace"));
     }
