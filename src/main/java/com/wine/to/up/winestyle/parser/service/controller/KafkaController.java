@@ -1,4 +1,4 @@
-package com.wine.to.up.demo.service.controller;
+package com.wine.to.up.winestyle.parser.service.controller;
 
 import com.google.protobuf.ByteString;
 import com.wine.to.up.commonlib.annotations.InjectEventLogger;
@@ -8,7 +8,7 @@ import com.wine.to.up.commonlib.messaging.KafkaMessageSender;
 import com.wine.to.up.demo.service.api.dto.DemoServiceMessage;
 import com.wine.to.up.demo.service.api.message.KafkaMessageHeaderOuterClass;
 import com.wine.to.up.demo.service.api.message.KafkaMessageSentEventOuterClass.KafkaMessageSentEvent;
-import com.wine.to.up.demo.service.logging.DemoServiceNotableEvents;
+import com.wine.to.up.winestyle.parser.service.logging.WinestyleParserServiceNotableEvents;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
@@ -58,7 +58,7 @@ public class KafkaController {
      */
     @PostMapping(value = "/send")
     public void sendMessage(@RequestBody String message) {
-        eventLogger.info(DemoServiceNotableEvents.I_CONTROLLER_RECEIVED_MESSAGE, message);
+        eventLogger.info(WinestyleParserServiceNotableEvents.I_CONTROLLER_RECEIVED_MESSAGE, message);
         sendMessageWithHeaders(new DemoServiceMessage(Collections.emptyMap(), message));
     }
 
@@ -69,7 +69,7 @@ public class KafkaController {
     @PostMapping(value = "/send/headers")
     public void sendMessageWithHeaders(@RequestBody DemoServiceMessage message) {
         AtomicInteger counter = new AtomicInteger(0);
-        eventLogger.warn(DemoServiceNotableEvents.W_SOME_WARN_EVENT, "Demo warning message");
+        eventLogger.warn(WinestyleParserServiceNotableEvents.W_SOME_WARN_EVENT, "Demo warning message");
 
         KafkaMessageSentEvent event = KafkaMessageSentEvent.newBuilder()
                 .addAllHeaders(message.getHeaders().entrySet().stream()
@@ -88,7 +88,7 @@ public class KafkaController {
                     for (int j = 0; j < numOfMessages; j++) {
                         kafkaSendMessageService.sendMessage(event);
                         counter.incrementAndGet();
-                        eventLogger.info(DemoServiceNotableEvents.I_KAFKA_SEND_MESSAGE_SUCCESS, message);
+                        eventLogger.info(WinestyleParserServiceNotableEvents.I_KAFKA_SEND_MESSAGE_SUCCESS, message);
                     }
                     return numOfMessages;
                 }))
@@ -105,7 +105,7 @@ public class KafkaController {
                 .sum();
 
         log.info("Sent: " + sent);
-        eventLogger.warn(DemoServiceNotableEvents.W_SOME_WARN_EVENT, "Demo warning message");
+        eventLogger.warn(WinestyleParserServiceNotableEvents.W_SOME_WARN_EVENT, "Demo warning message");
     }
 
     @GetMapping(value = "/newController")

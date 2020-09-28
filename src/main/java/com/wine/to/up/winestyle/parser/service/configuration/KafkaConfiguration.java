@@ -1,14 +1,14 @@
-package com.wine.to.up.demo.service.configuration;
+package com.wine.to.up.winestyle.parser.service.configuration;
 
 import com.wine.to.up.commonlib.messaging.BaseKafkaHandler;
 import com.wine.to.up.commonlib.messaging.KafkaMessageHandler;
 import com.wine.to.up.commonlib.messaging.KafkaMessageSender;
 import com.wine.to.up.demo.service.api.DemoServiceApiProperties;
 import com.wine.to.up.demo.service.api.message.KafkaMessageSentEventOuterClass.KafkaMessageSentEvent;
-import com.wine.to.up.demo.service.components.DemoServiceMetricsCollector;
-import com.wine.to.up.demo.service.messaging.TestTopicKafkaMessageHandler;
-import com.wine.to.up.demo.service.messaging.serialization.EventDeserializer;
-import com.wine.to.up.demo.service.messaging.serialization.EventSerializer;
+import com.wine.to.up.winestyle.parser.service.components.WinestyleParserServiceMetricsCollector;
+import com.wine.to.up.winestyle.parser.service.messaging.TestTopicKafkaMessageHandler;
+import com.wine.to.up.winestyle.parser.service.messaging.serialization.EventDeserializer;
+import com.wine.to.up.winestyle.parser.service.messaging.serialization.EventSerializer;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.clients.consumer.OffsetResetStrategy;
@@ -108,7 +108,7 @@ public class KafkaConfiguration {
     @Bean
     KafkaMessageSender<KafkaMessageSentEvent> testTopicKafkaMessageSender(Properties producerProperties,
                                                                           DemoServiceApiProperties demoServiceApiProperties,
-                                                                          DemoServiceMetricsCollector metricsCollector) {
+                                                                          WinestyleParserServiceMetricsCollector metricsCollector) {
         // set appropriate serializer for value
         producerProperties.setProperty(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, EventSerializer.class.getName());
 

@@ -1,4 +1,4 @@
-package com.wine.to.up.demo.service.messaging;
+package com.wine.to.up.winestyle.parser.service.messaging;
 
 import com.wine.to.up.commonlib.messaging.KafkaMessageHandler;
 import lombok.extern.slf4j.Slf4j;
