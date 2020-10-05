@@ -17,7 +17,7 @@ import java.util.ArrayList;
 public class ParserService implements IParserService {
     private final IWineService wineService;
     private final IDocumentService documentService;
-    private volatile Boolean iAmUsed = false; // TODO: проверить
+    private volatile Boolean iAmUsed = false;
 
     String mainUrl = "https://spb.winestyle.ru";
     String wineUrl = "/wine/wines_ll/";
@@ -46,12 +46,16 @@ public class ParserService implements IParserService {
     }
 
     //At 00:00; every day
-    @Scheduled(cron = "0 0 0 * * *") // second, minute, hour, day of month, month, day(s) of week(0-6)
-    public void onScheduleParseWinePages(){
-        try {
-            parseByPages(wineUrl);
-        } catch (InterruptedException e) {
-            log.error("Error on schedule with parsing wines pages!", e);
+    @Scheduled(cron = "${cron.expression}") // second, minute, hour, day of month, month, day(s) of week(0-6)
+    public void onScheduleParseWinePages() throws ServiceIsBusyException {
+        if (!iAmUsed) {
+            try {
+                parseByPages(wineUrl);
+            } catch (InterruptedException e) {
+                log.error("Error on schedule with parsing wines pages!", e);
+            }
+        } else {
+            throw ServiceIsBusyException.createWith("parsing job is already running.");
         }
     }
 
