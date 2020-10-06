@@ -3,21 +3,25 @@ package com.wine.to.up.winestyle.parser.service.dto;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 
 @Data
 public class WineDto implements Serializable {
     private String url;
     private String imageUrl;
     private String name;
-    private Long year;
+    private Integer cropYear;
+    private String manufacturer;
     private String brand;
     private String color;
+    private String country;
     private String region;
-    private String volume;
+    private Double volume;
     private String strength;
     private String sugar;
-    private String price;
+    private BigDecimal price;
     private String grape;
     private String tastingNotes;
-    private String rating;
+    private Double rating;
+    private String description;
 }

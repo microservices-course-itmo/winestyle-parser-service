@@ -1,15 +1,23 @@
 package com.wine.to.up.winestyle.parser.service.domain.entity;
 
-import lombok.Data;
+import lombok.*;
 
 import javax.persistence.*;
+import java.math.BigDecimal;
 
+@Setter
+@Getter
 @Entity
-@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Wine {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column
+    private String name;
 
     @Column
     private String url;
@@ -18,10 +26,10 @@ public class Wine {
     private String imageUrl;
 
     @Column
-    private String name;
+    private Integer cropYear;
 
     @Column
-    private Long year;
+    private String manufacturer;
 
     @Column
     private String brand;
@@ -30,10 +38,13 @@ public class Wine {
     private String color;
 
     @Column
+    private String country;
+
+    @Column
     private String region;
 
     @Column
-    private String volume;
+    private Double volume;
 
     @Column
     private String strength;
@@ -42,16 +53,25 @@ public class Wine {
     private String sugar;
 
     @Column
-    private String price;
+    private BigDecimal price;
 
     @Column
     private String grape;
 
-    @Column(columnDefinition="text")
-    private String tastingNotes;
+    @Column(columnDefinition="TEXT")
+    private String taste;
 
     @Column
-    private String rating;
+    private String aroma;
+
+    @Column(columnDefinition="TEXT")
+    private String foodPairing;
+
+    @Column
+    private Double rating;
+
+    @Column(columnDefinition="TEXT")
+    private String description;
 
     @Override
     public String toString(){
@@ -66,6 +86,7 @@ public class Wine {
                 + sugar + " "
                 + price + " "
                 + rating + " "
-                + year;
+                + cropYear + " "
+                + description;
     }
 }

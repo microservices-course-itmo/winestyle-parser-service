@@ -1,5 +1,6 @@
-package com.wine.to.up.winestyle.parser.service.service;
+package com.wine.to.up.winestyle.parser.service.service.implementation;
 
+import com.wine.to.up.winestyle.parser.service.service.IDocumentService;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -25,7 +26,7 @@ public class DocumentService implements IDocumentService {
                 log.error("Couldn't get a connection to website! ", ex);
             } // Берем страничку html
         }
-        Thread.sleep(600);
+        Thread.sleep(650);
         return doc;
     }
 
