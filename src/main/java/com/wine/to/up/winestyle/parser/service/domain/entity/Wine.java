@@ -5,6 +5,31 @@ import lombok.*;
 import javax.persistence.*;
 import java.math.BigDecimal;
 
+/**
+ * <pre>
+ * Класс - сущность вино, содержащий поля :
+ * id - никальный номер, 
+ * name - название вина, 
+ * url - ссылка на страницу вина,
+ * imageUrl - ссылка на изображение вина,
+ * cropYear - год сбора,
+ * manufacturer - производитель,
+ * brand - бренд,
+ * color - оттенок,
+ * contry - страна,
+ * region - регион винограда,
+ * volume - обьем,
+ * strength - крепость,
+ * sugar - сладость/сухость, 
+ * price - цена в рублях,
+ * grape - сорт винограда,
+ * taste - вкус,
+ * aroma - аромат,
+ * foodPairing - сочетания с блюдами,
+ * rating - рейтинг,
+ * description - описание вина.
+ * </pre>
+ */
 @Setter
 @Getter
 @Entity
@@ -73,6 +98,9 @@ public class Wine {
     @Column
     private Double rating;
 
+    /**
+     * Преобразование класса к строке.
+     */
     @Override
     public String toString(){
         return url + " "

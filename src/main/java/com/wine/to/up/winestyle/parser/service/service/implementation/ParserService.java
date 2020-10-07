@@ -14,6 +14,9 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 
+/**
+ * Класс-парсер.
+ */
 @Service
 @Slf4j
 public class ParserService implements IParserService {
@@ -24,6 +27,11 @@ public class ParserService implements IParserService {
     String mainUrl = "https://spb.winestyle.ru";
     String wineUrl = "/wine/wines_ll/";
 
+    /**
+     * Конструктор.
+     * @param wineService 
+     * @param documentService 
+     */
     public ParserService(IWineService wineService, IDocumentService documentService) {
         this.wineService = wineService;
         this.documentService = documentService;
@@ -94,7 +102,11 @@ public class ParserService implements IParserService {
         iAmUsed = false;
     }
 
-    // Main page parsing
+    /**
+     * Main page parsing
+     * @param productElement Контейнер, в котором лежинт информация о вине.
+     * @param builder Билдер сущности вина.
+     */
     private void parseMainPageInfo(Element productElement, Wine.WineBuilder builder) {
         String name;
         BigDecimal price;
@@ -138,7 +150,11 @@ public class ParserService implements IParserService {
                 .grape(grape);
     }
 
-    // Product's page parsing
+    /**
+     * Product's page parsing
+     * @param doc Страница в формате документа, с помощью класса DocumentService {@link com.wine.to.up.winestyle.parser.service.service.implementation.DocumentService}.
+     * @param builder Билдер сущности вина. 
+     */
     private void parseProductPageInfo(Document doc, Wine.WineBuilder builder) {
         String imageUrl;
         String taste;
@@ -166,7 +182,11 @@ public class ParserService implements IParserService {
         builder.imageUrl(imageUrl).taste(taste).aroma(aroma).foodPairing(foodPairing).description(description);
     }
 
-    // Update potentially modified data
+    /**
+     * Update potentially modified data
+     * @param el Контейнер, в котором лежит цена и рейтинг вина.
+     * @param url Строка-ссылка на страницу вина.
+     */
     private void updatePriceAndRating(Element el, String url){
         BigDecimal priceForUpdate = parsePrice(el);
         Double ratingForUpdate = parseWinestyleRating(el);
@@ -176,9 +196,9 @@ public class ParserService implements IParserService {
     }
 
     /**
-     *
-     * @param el Element
-     * @return name String
+     * Парсер названия вина.
+     * @param el Контейнер, в котором лежит название вина.
+     * @return Название вина.
      */
     private String parseName(Element el){
         Element nameElement = el.selectFirst(".title");
@@ -186,9 +206,9 @@ public class ParserService implements IParserService {
     }
 
     /**
-     *
-     * @param el Element
-     * @return price int
+     * Парсер цены вина.
+     * @param el Контейнер, в котором лежит стоимость вина.
+     * @return Стоимость вина ИЛИ null, если её нет.
      */
     private BigDecimal parsePrice(Element el){
         try {
@@ -201,6 +221,11 @@ public class ParserService implements IParserService {
         }
     }
 
+    /**
+     * Парсер рейтинга вина.
+     * @param el Контейнер, в котором лежит рейтинг вина.
+     * @return Рейтинг вина ИЛИ null, если его нет.
+     */
     private Double parseWinestyleRating(Element el) {
         try {
             String ratingElement = el.selectFirst(".rating-text").child(1).text();
@@ -211,6 +236,11 @@ public class ParserService implements IParserService {
         }
     }
 
+    /**
+     * Парсер вкуса вина.
+     * @param el Контейнер, в котором лежит описание вкуса вина.
+     * @return Вкус вина ИЛИ null, если нет его описания.
+     */
     private String parseTaste(Element el) {
         try {
             Element tasteElement = el.selectFirst("span:contains(Вкус)").nextElementSibling();
@@ -221,6 +251,11 @@ public class ParserService implements IParserService {
         }
     }
 
+    /**
+     * Парсер аромата вина.
+     * @param el Контейнер, в котором описан аромат вина.
+     * @return Аромат ИЛИ null, если нет его описания.
+     */
     private String parseAroma(Element el) {
         try {
             Element aromaElement = el.selectFirst("span:contains(Аром)").nextElementSibling();
@@ -231,6 +266,11 @@ public class ParserService implements IParserService {
         }
     }
 
+    /**
+     * Парсер сочетания вина с блюдами. 
+     * @param el Контейнер, в котором перечислены хорошие сочетания вина с блюдами.
+     * @return Строку сочетаний ИЛИ null, если их нет.
+     */
     private String parseFoodPairing(Element el) {
         try {
             Element foodPairingElement = el.selectFirst("span:contains(Гаст)").nextElementSibling();
@@ -241,6 +281,11 @@ public class ParserService implements IParserService {
         }
     }
 
+    /**
+     * Парсер винограда, свойство: год сбора.
+     * @param name Контейнер, в котором лежит год сбора винограда.
+     * @return Год сбора ИЛИ null, если его нет.
+     */
     private Integer parseCropYear(String name) {
         try {
             String[] titleInfo = name.split(", ");
@@ -258,6 +303,11 @@ public class ParserService implements IParserService {
         }
     }
 
+    /**
+     * Парсер объема.
+     * @param el Контейнер, в котором лежит объем вина.
+     * @return Объем в мл ИЛИ null, если его нет.
+     */
     private Double parseVolume(Element el) {
         try {
             Element volumeElement = el.selectFirst("label");
@@ -274,6 +324,11 @@ public class ParserService implements IParserService {
         }
     }
 
+    /**
+     * Парсер свойств: страна и регион.
+     * @param el Контейнер, в котором лежит описание происхождения вина.
+     * @return  Свойства: страна и регион в виде массива из двух элементов, которые мы достали, ИЛИ массив из двух Null, если таковых нет.
+     */
     private String[] parseCountryAndRegions(Element el){
         try {
             Element countryElement = el.selectFirst("span:contains(Рег)").nextElementSibling();
@@ -299,6 +354,11 @@ public class ParserService implements IParserService {
         }
     }
 
+    /**
+     * Парсер производителя вина.
+     * @param el Контейнер, в котором лежит производитель вина.
+     * @return Производитель ИЛИ null, если его нет.
+     */
     private String parseManufacturer(Element el) {
         try {
             Element manufacturerElement = el.selectFirst("span:contains(Прои)").nextElementSibling();
@@ -309,6 +369,11 @@ public class ParserService implements IParserService {
         }
     }
 
+    /**
+     * Парсер бренда вина.
+     * @param el Контейнер, в котором лежит бренд вина.
+     * @return Бренд ИЛИ null, если его нет.
+     */
     private String parseBrand(Element el) {
         try {
             Element brandElement = el.selectFirst("span:contains(Брен)").nextElementSibling();
@@ -319,6 +384,11 @@ public class ParserService implements IParserService {
         }
     }
 
+    /**
+     * Парсер крепости вина.
+     * @param el Контейнер, в котором лежит описание крепости вина.
+     * @return Крепость ИЛИ null, если совйства нет.
+     */
     private String parseStrength(Element el) {
         try {
             Element strengthElement = el.selectFirst("span:contains(Креп)").nextElementSibling();
@@ -329,6 +399,11 @@ public class ParserService implements IParserService {
         }
     }
 
+    /**
+     * Парсер сорта винограда.
+     * @param el Контейнер, в котором лежит описание сорта винограда.
+     * @return Объединенная строка сортов винограда ИЛИ null, если их нет.
+     */
     private String parseGrape(Element el) {
         try {
             Element grapeElement = el.selectFirst("span:contains(Сорт)").nextElementSibling();
@@ -346,11 +421,16 @@ public class ParserService implements IParserService {
 
             return grapeElement.text();
         } catch (NullPointerException ex) {
-            log.warn("product's strength is not specified");
+            log.warn("product's grape sort is not specified");
             return null;
         }
     }
 
+    /**
+     * Парсер свойств: оттенок и сладость/сухость.
+     * @param el Контейнер, в котором лежит описание свойств вина.
+     * @return Свойства: оттенок и сладость/сухость в виде массива из дыух элементов, которые мы достали, ИЛИ массив из двух Null, если таковых нет.
+     */
     private String[] parseColorAndSugar(Element el) {
         try {
             Element colorElement = el.selectFirst("span:contains(Вино:)").nextElementSibling();
@@ -362,6 +442,11 @@ public class ParserService implements IParserService {
         }
     }
 
+    /**
+     * Парсер картинки.
+     * @param el Контейнер, в котором лежит ссылка на картинку.
+     * @return Ссылка на картинку, которую мы достали, ИЛИ Null, если картинки нет.
+     */
     private String parseImageUrl(Element el) {
         try {
             Element imageElement = el.selectFirst("a.img-container");
@@ -372,6 +457,11 @@ public class ParserService implements IParserService {
         }
     }
 
+    /**
+     * Парсер описания.
+     * @param el Контейнер, в котором лежит описание.
+     * @return Описание, которое мы достали, ИЛИ Null, если описания нет.
+     */
     private String parseDescription(Element el) {
         try {
             Element descriptionElement = el.selectFirst(".description-block");

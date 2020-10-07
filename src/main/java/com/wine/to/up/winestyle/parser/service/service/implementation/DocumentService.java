@@ -7,6 +7,10 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.springframework.stereotype.Service;
 
+/**
+ * 
+ * Класс, который парсит страницы сайта. Скачивает html и возвращает Document.
+ */
 @Service
 @Slf4j
 public class DocumentService implements IDocumentService {
@@ -30,6 +34,9 @@ public class DocumentService implements IDocumentService {
         return doc;
     }
 
+    /**
+     * @return количество страниц с вином
+     */
     public Integer pagesNumber(Document doc) {
         Element pagingElement = doc.getElementById("CatalogPagingBottom");
         String pagesNumber = pagingElement.getElementsByTag("li").last().text();
