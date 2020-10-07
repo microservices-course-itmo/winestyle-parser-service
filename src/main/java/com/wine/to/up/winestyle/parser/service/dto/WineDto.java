@@ -5,6 +5,9 @@ import lombok.Data;
 import java.io.Serializable;
 import java.math.BigDecimal;
 
+/**
+ * Передаваемый объект сущности вино. 
+ */
 @Data
 public class WineDto implements Serializable {
     private String url;

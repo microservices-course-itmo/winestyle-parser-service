@@ -14,6 +14,9 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.List;
 
+/**
+ * Класс, создающий csv-файл.
+ */
 @Slf4j
 public class CSVUtility implements ICSVUtility {
     public void toCsvFile(WineRepository wineRepository) throws IOException {

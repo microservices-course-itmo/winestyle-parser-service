@@ -10,6 +10,10 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.util.List;
 
+/**
+ * Класс бизнес-логики для работы с вином. Выполняет интерфейс IWineService
+ * {@link com.wine.to.up.winestyle.parser.service.service.IWineService}
+ */
 @Service
 @Slf4j
 public class WineService implements IWineService {
