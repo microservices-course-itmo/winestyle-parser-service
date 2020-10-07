@@ -69,7 +69,7 @@ public class ParserService implements IParserService {
 
         int pages = documentService.pagesNumber(mainDoc);
 
-        for (int i = 515; i <= pages; i++) {
+        for (int i = 2; i <= pages; i++) {
             Elements productElements = mainDoc.getElementsByClass("item-block");
 
             for (Element productElement : productElements) {
