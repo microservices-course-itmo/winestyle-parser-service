@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Класс бизнес-логики для работы с вином. Выполняет интерфейс IWineService
@@ -64,5 +65,14 @@ public class WineService implements IWineService {
             log.error("Error on saving wine!!!: {}", wine.toString(), ex);
         }
         return wine;
+    }
+
+    @Override
+    public Wine getWineByID(long id) {
+        Optional<Wine> wine = wineRepository.findById(id);
+        if (wine.isEmpty()) {
+            return null;
+        }
+        return wine.get();
     }
 }

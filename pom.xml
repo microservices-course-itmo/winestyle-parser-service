@@ -87,6 +87,15 @@
             <version>5.2</version>
         </dependency>
 
+        <!-- Apache commons -->
+
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>1.3.2</version>
+        </dependency>
+
+
         <!--Our custom artifacts-->
         <!--        TODO create-service: replace-->
         <dependency>

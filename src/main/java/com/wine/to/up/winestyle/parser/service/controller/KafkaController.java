@@ -27,7 +27,7 @@ import static java.util.stream.Collectors.toList;
  * REST controller of the service
  */
 @RestController
-@RequestMapping("/kafka")
+@RequestMapping("/winestyle/kafka")
 @Validated
 @Slf4j
 public class KafkaController {

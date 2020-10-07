@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @AllArgsConstructor
-@RequestMapping("api/parse")
+@RequestMapping("/winestyle/api/parse")
 public class ParseController {
     private final IParserService parserService;
 
