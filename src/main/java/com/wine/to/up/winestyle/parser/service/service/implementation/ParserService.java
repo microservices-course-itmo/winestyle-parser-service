@@ -31,7 +31,7 @@ public class ParserService implements IParserService {
 
     // Start parsing job in a separate thread
     public void startParsingJob(String alcoholType) throws ServiceIsBusyException {
-        if (!this.iAmUsed) {
+        if (!iAmUsed) {
             if (alcoholType.equals("wine")) {
                 Thread newThread = new Thread(() -> {
                     try {
@@ -50,23 +50,26 @@ public class ParserService implements IParserService {
     // At 00:00; every day
     @Scheduled(cron = "0 0 0 * * *") // second, minute, hour, day of month, month, day(s) of week(0-6)
     public void onScheduleParseWinePages(){
-        try {
-            parseByPages(wineUrl);
-        } catch (InterruptedException e) {
-            log.error("Error on schedule with parsing wines pages!", e);
+        if (!iAmUsed) {
+            try {
+                parseByPages(wineUrl);
+            } catch (InterruptedException e) {
+                log.error("Error on schedule with parsing wines pages!", e);
+            }
         }
     }
 
     // Page by page parsing
     private void parseByPages(String relativeUrl) throws InterruptedException {
-        this.iAmUsed = true;
-        Document mainDoc = documentService.getJsoupDocument(mainUrl + relativeUrl);
+        iAmUsed = true;
+        String alcoholUrl = mainUrl + relativeUrl;
 
+        Document mainDoc = documentService.getJsoupDocument(alcoholUrl);
         Document productDoc;
 
         int pages = documentService.pagesNumber(mainDoc);
 
-        for (int i = 2; i <= pages; i++) {
+        for (int i = 515; i <= pages; i++) {
             Elements productElements = mainDoc.getElementsByClass("item-block");
 
             for (Element productElement : productElements) {
@@ -86,9 +89,9 @@ public class ParserService implements IParserService {
                     updatePriceAndRating(productElement, urlToProductPage);
                 }
             }
-            mainDoc = documentService.getJsoupDocument(mainUrl + relativeUrl + "?page=" + i);
+            mainDoc = documentService.getJsoupDocument(alcoholUrl + "?page=" + i);
         }
-        this.iAmUsed = false;
+        iAmUsed = false;
     }
 
     // Main page parsing

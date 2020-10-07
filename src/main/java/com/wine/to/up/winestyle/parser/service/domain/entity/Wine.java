@@ -61,17 +61,17 @@ public class Wine {
     @Column(columnDefinition="TEXT")
     private String taste;
 
-    @Column
+    @Column(columnDefinition="TEXT")
     private String aroma;
 
     @Column(columnDefinition="TEXT")
     private String foodPairing;
 
-    @Column
-    private Double rating;
-
     @Column(columnDefinition="TEXT")
     private String description;
+
+    @Column
+    private Double rating;
 
     @Override
     public String toString(){
