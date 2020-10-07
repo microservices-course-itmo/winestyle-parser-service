@@ -17,6 +17,13 @@ public interface IWineService {
     Wine add(Wine wine);
 
     /**
+     * Получить вино по id в базн данных.
+     * @param id id вина в базе
+     * @return сущность вина.
+     */
+    Wine getWineByID(long id);
+
+    /**
      * Получить вино по имени.
      * @param name название вина.
      * @return сущность вина.
@@ -32,8 +39,8 @@ public interface IWineService {
 
     /**
      * Обновить цену вина.
-     * @param price  новая цена вина.
-     * @param url  ссылка на вино.
+     * @param price новая цена вина.
+     * @param url ссылка на вино.
      * @return измененную сущность вина.
      */
     Wine updatePrice(BigDecimal price, String url);
@@ -47,7 +54,7 @@ public interface IWineService {
     Wine updateRating(Double rating, String url);
 
     /**
-     * 
+     * Получить список всех вин
      * @return Список всех вин.
      */
     List<Wine> getAllWines();
