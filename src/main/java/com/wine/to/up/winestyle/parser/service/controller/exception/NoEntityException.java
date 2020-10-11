@@ -19,6 +19,6 @@ public class NoEntityException extends Exception {
     }
 
     public String getMessage() {
-        return "The server reported: " + entity + " with ID=" + id + " is not found.";
+        return "The server reported: " + entity + " with ID=" + id + " was not found.";
     }
 }

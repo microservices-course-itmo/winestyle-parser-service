@@ -1,7 +1,6 @@
 package com.wine.to.up.winestyle.parser.service.service;
 
 import com.wine.to.up.winestyle.parser.service.controller.exception.NoEntityException;
-import com.wine.to.up.winestyle.parser.service.controller.exception.ServiceIsBusyException;
 import com.wine.to.up.winestyle.parser.service.domain.entity.Wine;
 
 import java.math.BigDecimal;
@@ -10,7 +9,7 @@ import java.util.List;
 /**
  * Интерфейс для бизнес-логики для работы с вином.
  */
-public interface IWineService {
+public interface WineService {
     /**
      * Добавляет вино.
      * @param wine сущность вина.

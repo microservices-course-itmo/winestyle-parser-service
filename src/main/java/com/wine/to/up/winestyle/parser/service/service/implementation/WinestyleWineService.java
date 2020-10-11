@@ -1,9 +1,10 @@
 package com.wine.to.up.winestyle.parser.service.service.implementation;
 
+import com.wine.to.up.winestyle.parser.service.service.WineService;
 import com.wine.to.up.winestyle.parser.service.controller.exception.NoEntityException;
 import com.wine.to.up.winestyle.parser.service.domain.entity.Wine;
 import com.wine.to.up.winestyle.parser.service.repository.WineRepository;
-import com.wine.to.up.winestyle.parser.service.service.IWineService;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.InvalidDataAccessResourceUsageException;
 import org.springframework.stereotype.Service;
@@ -13,16 +14,13 @@ import java.util.List;
 
 /**
  * Класс бизнес-логики для работы с вином. Выполняет интерфейс IWineService
- * {@link com.wine.to.up.winestyle.parser.service.service.IWineService}
+ * {@link com.wine.to.up.winestyle.parser.service.service.WineService}
  */
 @Service
+@AllArgsConstructor
 @Slf4j
-public class WineService implements IWineService {
+public class WinestyleWineService implements WineService {
     private final WineRepository wineRepository;
-
-    public WineService(WineRepository wineRepository){
-        this.wineRepository = wineRepository;
-    }
 
     @Override
     public Wine updatePrice(BigDecimal price, String url){
@@ -70,7 +68,7 @@ public class WineService implements IWineService {
     @Override
     public Wine getWineByID(long id) throws NoEntityException {
         return wineRepository.findById(id).orElseThrow(() ->
-                NoEntityException.createWith("wine", id)
+                NoEntityException.createWith(Wine.class.getSimpleName().toLowerCase(), id)
         );
     }
 }

@@ -2,8 +2,8 @@ package com.wine.to.up.winestyle.parser.service.controller;
 
 import com.wine.to.up.winestyle.parser.service.controller.exception.NoEntityException;
 import com.wine.to.up.winestyle.parser.service.domain.entity.Wine;
-import com.wine.to.up.winestyle.parser.service.service.IWineService;
-import com.wine.to.up.winestyle.parser.service.utility.CSVUtility;
+import com.wine.to.up.winestyle.parser.service.service.WineService;
+import com.wine.to.up.winestyle.parser.service.utility.implementation.CSVUtility;
 
 import lombok.RequiredArgsConstructor;
 
@@ -30,7 +30,7 @@ import javax.servlet.http.HttpServletResponse;
 @RequiredArgsConstructor
 @RequestMapping("/winestyle/api")
 public class MainController {
-    private final IWineService wineService;
+    private final WineService wineService;
 
     // TODO: возвращать распаршенные записи по конкретной ссылке
     // TODO: возвращать только запрашиваемые столбцы
@@ -59,10 +59,13 @@ public class MainController {
         Set<String> requiredFields = new HashSet<>(Arrays.asList(fieldsList.split(",")));
         Map<String, Object> res = new HashMap<>();
         Wine parsedWine = wineService.getWineByID(id);
-        for (java.lang.reflect.Field field : Wine.class.getFields()) {
-            if (requiredFields.contains(field.getName())) {
+        String fieldName;
+        for (java.lang.reflect.Field field : Wine.class.getDeclaredFields()) {
+            field.setAccessible(true);
+            fieldName = field.getName();
+            if (requiredFields.contains(fieldName)) {
                 try {
-                    res.put(field.getName(), field.get(parsedWine));
+                    res.put(fieldName, field.get(parsedWine));
                 } catch (IllegalArgumentException | IllegalAccessException e) {
                     // TODO: обрабатывать исключения
                 }
