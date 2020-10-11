@@ -1,5 +1,6 @@
 package com.wine.to.up.winestyle.parser.service.controller;
 
+import com.wine.to.up.winestyle.parser.service.controller.exception.NoEntityException;
 import com.wine.to.up.winestyle.parser.service.domain.entity.Wine;
 import com.wine.to.up.winestyle.parser.service.service.IWineService;
 import com.wine.to.up.winestyle.parser.service.utility.CSVUtility;
@@ -45,14 +46,14 @@ public class MainController {
     }
 
     @GetMapping("/wine/{id}")
-    public ResponseEntity<Wine> getParsedWine(@PathVariable long id) {
+    public ResponseEntity<Wine> getParsedWine(@PathVariable long id) throws NoEntityException {
         Wine parsedWine = wineService.getWineByID(id);
         return ResponseEntity.status(HttpStatus.OK).body(parsedWine);
     }
 
     @GetMapping("/wine/with_fields/{id}")
     public ResponseEntity<Map<String, Object>> getParsedWineWithFields(@PathVariable long id,
-            @RequestParam String fieldsList) {
+            @RequestParam String fieldsList) throws NoEntityException {
         Set<String> requiredFields = new HashSet<>();
         for (String field : fieldsList.split(",")) {
             requiredFields.add(field);

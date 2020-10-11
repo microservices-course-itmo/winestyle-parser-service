@@ -1,5 +1,7 @@
 package com.wine.to.up.winestyle.parser.service.service;
 
+import com.wine.to.up.winestyle.parser.service.controller.exception.NoEntityException;
+import com.wine.to.up.winestyle.parser.service.controller.exception.ServiceIsBusyException;
 import com.wine.to.up.winestyle.parser.service.domain.entity.Wine;
 
 import java.math.BigDecimal;
@@ -20,8 +22,9 @@ public interface IWineService {
      * Получить вино по id в базн данных.
      * @param id id вина в базе
      * @return сущность вина.
+     * @throws NoEntityException когда не находит сущность с заданным id.
      */
-    Wine getWineByID(long id);
+    Wine getWineByID(long id) throws NoEntityException;
 
     /**
      * Получить вино по имени.

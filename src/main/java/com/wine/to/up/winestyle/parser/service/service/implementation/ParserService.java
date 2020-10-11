@@ -22,7 +22,7 @@ import java.math.BigDecimal;
 public class ParserService implements IParserService {
     private final IWineService wineService;
     private final IDocumentService documentService;
-    private volatile Boolean iAmUsed = false; // TODO: проверить
+    private volatile Boolean iAmUsed = false;
 
     String mainUrl = "https://spb.winestyle.ru";
     String wineUrl = "/wine/wines_ll/";
@@ -56,7 +56,7 @@ public class ParserService implements IParserService {
     }
 
     // At 00:00; every day
-    @Scheduled(cron = "0 0 0 * * *") // second, minute, hour, day of month, month, day(s) of week(0-6)
+    @Scheduled(cron = "${scheduler.cron.expression}")
     public void onScheduleParseWinePages(){
         if (!iAmUsed) {
             try {
