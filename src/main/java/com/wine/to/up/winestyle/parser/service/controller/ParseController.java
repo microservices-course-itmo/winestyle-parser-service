@@ -21,7 +21,7 @@ public class ParseController {
 
     /**
      * @param alcohol тип алкоголя для парсинга(wine).
-     * @return возвращаем статус ОК и сообщение о начале парсинга, если он запущен.
+     * @return HTTP-статус 200(ОК) и сообщение о начале парсинга в теле ответа.
      * @throws ServiceIsBusyException когда парсинг уже запущен.
      */
     @PostMapping("/{alcohol}")

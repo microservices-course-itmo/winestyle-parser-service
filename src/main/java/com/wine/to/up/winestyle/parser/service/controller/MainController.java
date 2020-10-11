@@ -19,11 +19,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -51,13 +47,16 @@ public class MainController {
         return ResponseEntity.status(HttpStatus.OK).body(parsedWine);
     }
 
+    /**
+     * @param id id вина в базе данных.
+     * @param fieldsList список запрашиваемых полей.
+     * @return HTTP-статус 200(ОК) и вино с запрошенными полями в теле ответа.
+     * @throws NoEntityException если искомое вино не найдено.
+     */
     @GetMapping("/wine/with_fields/{id}")
     public ResponseEntity<Map<String, Object>> getParsedWineWithFields(@PathVariable long id,
             @RequestParam String fieldsList) throws NoEntityException {
-        Set<String> requiredFields = new HashSet<>();
-        for (String field : fieldsList.split(",")) {
-            requiredFields.add(field);
-        }
+        Set<String> requiredFields = new HashSet<>(Arrays.asList(fieldsList.split(",")));
         Map<String, Object> res = new HashMap<>();
         Wine parsedWine = wineService.getWineByID(id);
         for (java.lang.reflect.Field field : Wine.class.getFields()) {
@@ -65,6 +64,7 @@ public class MainController {
                 try {
                     res.put(field.getName(), field.get(parsedWine));
                 } catch (IllegalArgumentException | IllegalAccessException e) {
+                    // TODO: обрабатывать исключения
                 }
             }
         }
