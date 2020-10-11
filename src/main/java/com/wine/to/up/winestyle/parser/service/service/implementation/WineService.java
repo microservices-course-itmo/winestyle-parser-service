@@ -70,7 +70,7 @@ public class WineService implements IWineService {
     @Override
     public Wine getWineByID(long id) throws NoEntityException {
         return wineRepository.findById(id).orElseThrow(() ->
-                NoEntityException.createWith("Entity not found!")
+                NoEntityException.createWith("wine", id)
         );
     }
 }

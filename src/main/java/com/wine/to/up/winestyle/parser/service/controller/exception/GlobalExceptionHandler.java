@@ -34,7 +34,7 @@ public class GlobalExceptionHandler {
         }
 
         if (ex instanceof NoEntityException) {
-            HttpStatus status = HttpStatus.NO_CONTENT;
+            HttpStatus status = HttpStatus.NOT_FOUND;
             NoEntityException noEntityException = (NoEntityException) ex;
 
             return handleNoEntityException(noEntityException, headers, status, request);
