@@ -4,7 +4,6 @@ import com.wine.to.up.winestyle.parser.service.controller.exception.NoEntityExce
 import com.wine.to.up.winestyle.parser.service.domain.entity.Wine;
 import com.wine.to.up.winestyle.parser.service.service.WineService;
 import com.wine.to.up.winestyle.parser.service.utility.CSVUtility;
-
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.http.HttpStatus;
@@ -31,7 +30,6 @@ import javax.servlet.http.HttpServletResponse;
 @RequestMapping("/winestyle/api")
 public class MainController {
     private final WineService wineService;
-    private final CSVUtility csvUtility;
 
     // TODO: возвращать распаршенные записи по конкретной ссылке
     // TODO: возвращать только запрашиваемые столбцы
@@ -80,7 +78,7 @@ public class MainController {
         File file = new File("data.csv");
         if (!file.exists()) {
             try {
-                csvUtility.toCsvFile(wineService);
+                CSVUtility.toCsvFile(wineService);
             } catch (IOException e) {
                 throw new RuntimeException("Cannot write database to file");
             }
