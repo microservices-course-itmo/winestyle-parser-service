@@ -1,6 +1,6 @@
 package com.wine.to.up.winestyle.parser.service.service.implementation;
 
-import com.wine.to.up.winestyle.parser.service.service.IDocumentService;
+import com.wine.to.up.winestyle.parser.service.service.DocumentService;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
  */
 @Service
 @Slf4j
-public class DocumentService implements IDocumentService {
+public class WinestyleDocumentService implements DocumentService {
     public Document getJsoupDocument(String url) throws InterruptedException {
         Document doc = null;
 

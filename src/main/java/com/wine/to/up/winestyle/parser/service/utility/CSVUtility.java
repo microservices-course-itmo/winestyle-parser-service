@@ -6,8 +6,9 @@ import com.opencsv.bean.StatefulBeanToCsvBuilder;
 import com.opencsv.exceptions.CsvDataTypeMismatchException;
 import com.opencsv.exceptions.CsvRequiredFieldEmptyException;
 import com.wine.to.up.winestyle.parser.service.domain.entity.Wine;
-import com.wine.to.up.winestyle.parser.service.service.IWineService;
+import com.wine.to.up.winestyle.parser.service.service.WineService;
 
+import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
@@ -17,13 +18,16 @@ import java.util.List;
 /**
  * Класс, сохраняющий все распаршенные вина в csv-файл data.csv.
  */
+@UtilityClass
 @Slf4j
-public class CSVUtility implements ICSVUtility {
-    public void toCsvFile(IWineService wineService) throws IOException {
+public class CSVUtility {
+    public void toCsvFile(WineService wineService) throws IOException {
         List<Wine> wines = wineService.getAllWines();
         try (PrintWriter writer = new PrintWriter("data.csv")) {
+            HeaderColumnNameMappingStrategy<Wine> strategy = new HeaderColumnNameMappingStrategy<>();
+            strategy.setType(Wine.class);
             StatefulBeanToCsv<Wine> winecsv = new StatefulBeanToCsvBuilder<Wine>(writer)
-                    .withMappingStrategy(new HeaderColumnNameMappingStrategy<>())
+                    .withMappingStrategy(strategy)
                     .build();
             try {
                 winecsv.write(wines);
@@ -31,6 +35,5 @@ public class CSVUtility implements ICSVUtility {
                 log.error("Error while csv writing! ", e);
             }
         }
-
     }
 }

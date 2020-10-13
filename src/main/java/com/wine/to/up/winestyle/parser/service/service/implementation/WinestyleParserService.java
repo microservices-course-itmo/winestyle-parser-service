@@ -1,10 +1,12 @@
 package com.wine.to.up.winestyle.parser.service.service.implementation;
 
+import com.wine.to.up.winestyle.parser.service.service.ParserService;
 import com.wine.to.up.winestyle.parser.service.controller.exception.ServiceIsBusyException;
 import com.wine.to.up.winestyle.parser.service.domain.entity.Wine;
-import com.wine.to.up.winestyle.parser.service.service.IDocumentService;
-import com.wine.to.up.winestyle.parser.service.service.IParserService;
-import com.wine.to.up.winestyle.parser.service.service.IWineService;
+import com.wine.to.up.winestyle.parser.service.service.DocumentService;
+import com.wine.to.up.winestyle.parser.service.service.WineService;
+import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -18,24 +20,15 @@ import java.math.BigDecimal;
  * Класс-парсер.
  */
 @Service
+@RequiredArgsConstructor
 @Slf4j
-public class ParserService implements IParserService {
-    private final IWineService wineService;
-    private final IDocumentService documentService;
-    private volatile Boolean iAmUsed = false; // TODO: проверить
+public class WinestyleParserService implements ParserService {
+    private final WineService wineService;
+    private final DocumentService documentService;
+    private volatile Boolean iAmUsed = false;
 
     String mainUrl = "https://spb.winestyle.ru";
     String wineUrl = "/wine/wines_ll/";
-
-    /**
-     * Конструктор.
-     * @param wineService 
-     * @param documentService 
-     */
-    public ParserService(IWineService wineService, IDocumentService documentService) {
-        this.wineService = wineService;
-        this.documentService = documentService;
-    }
 
     // Start parsing job in a separate thread
     public void startParsingJob(String alcoholType) throws ServiceIsBusyException {
@@ -56,7 +49,7 @@ public class ParserService implements IParserService {
     }
 
     // At 00:00; every day
-    @Scheduled(cron = "0 0 0 * * *") // second, minute, hour, day of month, month, day(s) of week(0-6)
+    @Scheduled(cron = "${scheduler.cron.expression}")
     public void onScheduleParseWinePages(){
         if (!iAmUsed) {
             try {
@@ -152,7 +145,7 @@ public class ParserService implements IParserService {
 
     /**
      * Product's page parsing
-     * @param doc Страница в формате документа, с помощью класса DocumentService {@link com.wine.to.up.winestyle.parser.service.service.implementation.DocumentService}.
+     * @param doc Страница в формате документа, с помощью класса DocumentService {@link com.wine.to.up.winestyle.parser.service.service.implementation.WinestyleDocumentService}.
      * @param builder Билдер сущности вина. 
      */
     private void parseProductPageInfo(Document doc, Wine.WineBuilder builder) {

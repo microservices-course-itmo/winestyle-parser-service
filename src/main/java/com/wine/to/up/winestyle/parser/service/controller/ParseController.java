@@ -1,7 +1,7 @@
 package com.wine.to.up.winestyle.parser.service.controller;
 
 import com.wine.to.up.winestyle.parser.service.controller.exception.ServiceIsBusyException;
-import com.wine.to.up.winestyle.parser.service.service.IParserService;
+import com.wine.to.up.winestyle.parser.service.service.ParserService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,11 +17,11 @@ import org.springframework.web.bind.annotation.RestController;
 @AllArgsConstructor
 @RequestMapping("/winestyle/api/parse")
 public class ParseController {
-    private final IParserService parserService;
+    private final ParserService parserService;
 
     /**
      * @param alcohol тип алкоголя для парсинга(wine).
-     * @return возвращаем статус ОК и сообщение о начале парсинга, если он запущен.
+     * @return HTTP-статус 200(ОК) и сообщение о начале парсинга в теле ответа.
      * @throws ServiceIsBusyException когда парсинг уже запущен.
      */
     @PostMapping("/{alcohol}")

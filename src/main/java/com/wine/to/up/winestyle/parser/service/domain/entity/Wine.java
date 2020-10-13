@@ -32,6 +32,7 @@ import java.math.BigDecimal;
  */
 @Setter
 @Getter
+@ToString
 @Entity
 @Builder
 @NoArgsConstructor
@@ -97,24 +98,4 @@ public class Wine {
 
     @Column
     private Double rating;
-
-    /**
-     * Преобразование класса к строке.
-     */
-    @Override
-    public String toString(){
-        return url + " "
-                + name + " "
-                + color + " "
-                + grape + " "
-                + brand + " "
-                + region + " "
-                + volume + " "
-                + strength + " "
-                + sugar + " "
-                + price + " "
-                + rating + " "
-                + cropYear + " "
-                + description;
-    }
 }

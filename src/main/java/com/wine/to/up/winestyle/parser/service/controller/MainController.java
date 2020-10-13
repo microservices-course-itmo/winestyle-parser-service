@@ -1,9 +1,9 @@
 package com.wine.to.up.winestyle.parser.service.controller;
 
+import com.wine.to.up.winestyle.parser.service.controller.exception.NoEntityException;
 import com.wine.to.up.winestyle.parser.service.domain.entity.Wine;
-import com.wine.to.up.winestyle.parser.service.service.IWineService;
+import com.wine.to.up.winestyle.parser.service.service.WineService;
 import com.wine.to.up.winestyle.parser.service.utility.CSVUtility;
-
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.http.HttpStatus;
@@ -18,11 +18,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -33,7 +29,7 @@ import javax.servlet.http.HttpServletResponse;
 @RequiredArgsConstructor
 @RequestMapping("/winestyle/api")
 public class MainController {
-    private final IWineService wineService;
+    private final WineService wineService;
 
     // TODO: возвращать распаршенные записи по конкретной ссылке
     // TODO: возвращать только запрашиваемые столбцы
@@ -45,25 +41,32 @@ public class MainController {
     }
 
     @GetMapping("/wine/{id}")
-    public ResponseEntity<Wine> getParsedWine(@PathVariable long id) {
+    public ResponseEntity<Wine> getParsedWine(@PathVariable long id) throws NoEntityException {
         Wine parsedWine = wineService.getWineByID(id);
         return ResponseEntity.status(HttpStatus.OK).body(parsedWine);
     }
 
+    /**
+     * @param id id вина в базе данных.
+     * @param fieldsList список запрашиваемых полей.
+     * @return HTTP-статус 200(ОК) и вино с запрошенными полями в теле ответа.
+     * @throws NoEntityException если искомое вино не найдено.
+     */
     @GetMapping("/wine/with_fields/{id}")
     public ResponseEntity<Map<String, Object>> getParsedWineWithFields(@PathVariable long id,
-            @RequestParam String fieldsList) {
-        Set<String> requiredFields = new HashSet<>();
-        for (String field : fieldsList.split(",")) {
-            requiredFields.add(field);
-        }
+            @RequestParam String fieldsList) throws NoEntityException {
+        Set<String> requiredFields = new HashSet<>(Arrays.asList(fieldsList.split(",")));
         Map<String, Object> res = new HashMap<>();
         Wine parsedWine = wineService.getWineByID(id);
-        for (java.lang.reflect.Field field : Wine.class.getFields()) {
-            if (requiredFields.contains(field.getName())) {
+        String fieldName;
+        for (java.lang.reflect.Field field : Wine.class.getDeclaredFields()) {
+            field.setAccessible(true);
+            fieldName = field.getName();
+            if (requiredFields.contains(fieldName)) {
                 try {
-                    res.put(field.getName(), field.get(parsedWine));
+                    res.put(fieldName, field.get(parsedWine));
                 } catch (IllegalArgumentException | IllegalAccessException e) {
+                    // TODO: обрабатывать исключения
                 }
             }
         }
@@ -75,7 +78,7 @@ public class MainController {
         File file = new File("data.csv");
         if (!file.exists()) {
             try {
-                new CSVUtility().toCsvFile(wineService);
+                CSVUtility.toCsvFile(wineService);
             } catch (IOException e) {
                 throw new RuntimeException("Cannot write database to file");
             }
