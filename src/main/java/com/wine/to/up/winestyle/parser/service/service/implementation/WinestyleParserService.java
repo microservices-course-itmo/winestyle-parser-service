@@ -62,7 +62,11 @@ public class WinestyleParserService implements ParserService {
         }
     }
 
-    // Page by page parsing
+    /**
+     * Парсер по страницам. Пишет сообщения в кафку.
+     * @param relativeUrl Ссылка на страницу
+     * @throws InterruptedException Ошибка при прерывании программы
+     */
     private void parseByPages(String relativeUrl) throws InterruptedException {
         iAmUsed = true;
         String alcoholUrl = MAIN_URL + relativeUrl;

@@ -42,6 +42,14 @@ public class GlobalExceptionHandler {
         return handleExceptionInternal(ex, null, new HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR, request);
     }
 
+    /**
+     * Обработчик ошибки запуска сервера
+     * @param ex Ошибка занятости сервера
+     * @param headers HTTP заголовки
+     * @param status HTTP статус
+     * @param request запрос
+     * @return
+     */
     protected ResponseEntity<ApiError> handleServiceIsBusyException(ServiceIsBusyException ex,
                                                                     HttpHeaders headers, HttpStatus status,
                                                                     WebRequest request) {
@@ -49,6 +57,14 @@ public class GlobalExceptionHandler {
         return handleExceptionInternal(ex, new ApiError(errors), headers, status, request);
     }
 
+    /**
+     * Обработчик ошибки отутствия сущности
+     * @param ex Ошибка отсутствия сущности
+     * @param headers HTTP заголовки
+     * @param status HTTP статус
+     * @param request запрос
+     * @return
+     */
     protected ResponseEntity<ApiError> handleNoEntityException(NoEntityException ex,
                                                                     HttpHeaders headers, HttpStatus status,
                                                                     WebRequest request) {
@@ -56,6 +72,15 @@ public class GlobalExceptionHandler {
         return handleExceptionInternal(ex, new ApiError(errors), headers, status, request);
     }
 
+    /**
+     * Обработчик оставшихся ошибок
+     * @param ex Общее исключение 
+     * @param body Список ошибок
+     * @param headers HTTP заголовки
+     * @param status HTTP статус
+     * @param request Запрос
+     * @return
+     */
     protected ResponseEntity<ApiError> handleExceptionInternal(Exception ex, @Nullable ApiError body,
                                                                HttpHeaders headers, HttpStatus status,
                                                                WebRequest request) {

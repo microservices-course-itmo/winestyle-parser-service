@@ -104,6 +104,10 @@ public class Wine {
     @Column
     private Double rating;
 
+    /**
+     * Преобразование нашего класса Wine в общий для парсеров класс Product
+     * @return Product
+     */
     public UpdateProducts.Product asProduct() {
         UpdateProducts.Product.Builder builder = UpdateProducts.Product.newBuilder();
         if (name != null)
