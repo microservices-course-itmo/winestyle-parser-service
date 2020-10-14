@@ -31,9 +31,6 @@ import javax.servlet.http.HttpServletResponse;
 public class MainController {
     private final WineService wineService;
 
-    // TODO: возвращать распаршенные записи по конкретной ссылке
-    // TODO: возвращать только запрашиваемые столбцы
-
     @GetMapping("/wine")
     public ResponseEntity<List<Wine>> getParsedWines() {
         List<Wine> parsedWine = wineService.getAllWines();
@@ -43,6 +40,12 @@ public class MainController {
     @GetMapping("/wine/{id}")
     public ResponseEntity<Wine> getParsedWine(@PathVariable long id) throws NoEntityException {
         Wine parsedWine = wineService.getWineByID(id);
+        return ResponseEntity.status(HttpStatus.OK).body(parsedWine);
+    }
+
+    @GetMapping("/wine/by-url/{url}")
+    public ResponseEntity<Wine> getParsedWineByURL(@PathVariable String url) throws NoEntityException {
+        Wine parsedWine = wineService.getWineByUrl(url);
         return ResponseEntity.status(HttpStatus.OK).body(parsedWine);
     }
 
@@ -66,7 +69,6 @@ public class MainController {
                 try {
                     res.put(fieldName, field.get(parsedWine));
                 } catch (IllegalArgumentException | IllegalAccessException e) {
-                    // TODO: обрабатывать исключения
                 }
             }
         }

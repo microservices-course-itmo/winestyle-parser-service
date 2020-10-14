@@ -11,7 +11,6 @@ public enum WinestyleParserServiceNotableEvents implements NotableEvent {
     I_KAFKA_SEND_MESSAGE_SUCCESS("Kafka send message: {}"),
     I_CONTROLLER_RECEIVED_MESSAGE("Message: {}"),
     W_SOME_WARN_EVENT("Warn situation. Description: {}");
-    //TODO create-service: replace
     private final String template;
 
     WinestyleParserServiceNotableEvents(String template) {

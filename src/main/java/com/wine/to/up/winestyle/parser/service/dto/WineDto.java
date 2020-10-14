@@ -10,6 +10,8 @@ import java.math.BigDecimal;
  */
 @Data
 public class WineDto implements Serializable {
+    private static final long serialVersionUID = -6729161659875598272L;
+    
     private String url;
     private String imageUrl;
     private String name;

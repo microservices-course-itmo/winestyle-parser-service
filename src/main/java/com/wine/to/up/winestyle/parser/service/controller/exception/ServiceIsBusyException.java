@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 @AllArgsConstructor
 @ResponseStatus(code = HttpStatus.CONFLICT, reason = "Service is busy.")
 public class ServiceIsBusyException extends Exception {
+
+    private static final long serialVersionUID = -1034054051600551718L;
     private final String cause;
 
     public static ServiceIsBusyException createWith(String cause) {

@@ -1,11 +1,12 @@
 package com.wine.to.up.winestyle.parser.service.service.implementation;
 
 import com.wine.to.up.winestyle.parser.service.service.ParserService;
+import com.wine.to.up.commonlib.messaging.KafkaMessageSender;
+import com.wine.to.up.parser.common.api.schema.UpdateProducts;
 import com.wine.to.up.winestyle.parser.service.controller.exception.ServiceIsBusyException;
 import com.wine.to.up.winestyle.parser.service.domain.entity.Wine;
 import com.wine.to.up.winestyle.parser.service.service.DocumentService;
 import com.wine.to.up.winestyle.parser.service.service.WineService;
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.nodes.Document;
@@ -25,10 +26,11 @@ import java.math.BigDecimal;
 public class WinestyleParserService implements ParserService {
     private final WineService wineService;
     private final DocumentService documentService;
+    private final KafkaMessageSender<UpdateProducts.UpdateProductsMessage> kafkaSendMessageService;
     private volatile Boolean iAmUsed = false;
 
-    String mainUrl = "https://spb.winestyle.ru";
-    String wineUrl = "/wine/wines_ll/";
+    private static final String MAIN_URL = "https://spb.winestyle.ru";
+    private static final String WINE_URL = "/wine/wines_ll/";
 
     // Start parsing job in a separate thread
     public void startParsingJob(String alcoholType) throws ServiceIsBusyException {
@@ -36,7 +38,7 @@ public class WinestyleParserService implements ParserService {
             if (alcoholType.equals("wine")) {
                 Thread newThread = new Thread(() -> {
                     try {
-                        parseByPages(wineUrl);
+                        parseByPages(WINE_URL);
                     } catch (InterruptedException e) {
                         log.error("Thread is sleeping!", e);
                     }
@@ -53,7 +55,7 @@ public class WinestyleParserService implements ParserService {
     public void onScheduleParseWinePages(){
         if (!iAmUsed) {
             try {
-                parseByPages(wineUrl);
+                parseByPages(WINE_URL);
             } catch (InterruptedException e) {
                 log.error("Error on schedule with parsing wines pages!", e);
             }
@@ -63,7 +65,7 @@ public class WinestyleParserService implements ParserService {
     // Page by page parsing
     private void parseByPages(String relativeUrl) throws InterruptedException {
         iAmUsed = true;
-        String alcoholUrl = mainUrl + relativeUrl;
+        String alcoholUrl = MAIN_URL + relativeUrl;
 
         Document mainDoc = documentService.getJsoupDocument(alcoholUrl);
         Document productDoc;
@@ -77,15 +79,17 @@ public class WinestyleParserService implements ParserService {
 
                 String urlToProductPage = productElement.selectFirst("a").attr("href");
 
-                if (wineService.getWineByUrl(urlToProductPage) == null){
+                if (wineService.getWineByUrl(urlToProductPage) == null) {
                     Wine.WineBuilder wineBuilder = Wine.builder().url(urlToProductPage);
 
                     parseMainPageInfo(productElement, wineBuilder);
 
-                    productDoc = documentService.getJsoupDocument(mainUrl + urlToProductPage);
+                    productDoc = documentService.getJsoupDocument(MAIN_URL + urlToProductPage);
                     parseProductPageInfo(productDoc, wineBuilder);
 
-                    wineService.add(wineBuilder.build());
+                    Wine res = wineBuilder.build();
+                    res = wineService.add(res);
+                    kafkaSendMessageService.sendMessage(UpdateProducts.UpdateProductsMessage.newBuilder().setShopLink(MAIN_URL).addProducts(res.asProduct()).build());
                 } else {
                     updatePriceAndRating(productElement, urlToProductPage);
                 }
@@ -184,8 +188,10 @@ public class WinestyleParserService implements ParserService {
         BigDecimal priceForUpdate = parsePrice(el);
         Double ratingForUpdate = parseWinestyleRating(el);
 
+
         wineService.updatePrice(priceForUpdate, url);
-        wineService.updateRating(ratingForUpdate, url);
+        Wine res = wineService.updateRating(ratingForUpdate, url);
+        kafkaSendMessageService.sendMessage(UpdateProducts.UpdateProductsMessage.newBuilder().setShopLink(MAIN_URL).addProducts(res.asProduct()).build());
     }
 
     /**

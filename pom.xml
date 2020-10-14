@@ -16,11 +16,10 @@
     </parent>
 
     <properties>
-        <current-version>0.1.0</current-version>
+        <current-version>0.2.0</current-version>
 
         <service.commonlib.version>0.2.1-SNAPSHOT</service.commonlib.version>
-        <!--        TODO create-service: replace-->
-        <demo.service.api.version>0.3.0-SNAPSHOT</demo.service.api.version>
+        <parser.common.api.version>0.2.1-SNAPSHOT</parser.common.api.version>
     </properties>
 
     <dependencies>
@@ -97,11 +96,10 @@
 
 
         <!--Our custom artifacts-->
-        <!--        TODO create-service: replace-->
         <dependency>
             <groupId>com.wine.to.up</groupId>
-            <artifactId>demo-service-api</artifactId>
-            <version>${demo.service.api.version}</version>
+            <artifactId>parser-common-api</artifactId>
+            <version>${parser.common.api.version}</version>
         </dependency>
     </dependencies>
 </project>
