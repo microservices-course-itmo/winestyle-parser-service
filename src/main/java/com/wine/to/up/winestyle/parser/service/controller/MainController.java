@@ -3,7 +3,8 @@ package com.wine.to.up.winestyle.parser.service.controller;
 import com.wine.to.up.winestyle.parser.service.controller.exception.NoEntityException;
 import com.wine.to.up.winestyle.parser.service.domain.entity.Sparkling;
 import com.wine.to.up.winestyle.parser.service.domain.entity.Wine;
-import com.wine.to.up.winestyle.parser.service.service.implementation.repository.RepositoryService;
+import com.wine.to.up.winestyle.parser.service.service.implementation.repository.SparklingRepositoryService;
+import com.wine.to.up.winestyle.parser.service.service.implementation.repository.WineRepositoryService;
 import com.wine.to.up.winestyle.parser.service.utility.CSVUtility;
 import lombok.RequiredArgsConstructor;
 
@@ -30,8 +31,8 @@ import javax.servlet.http.HttpServletResponse;
 @RequiredArgsConstructor
 @RequestMapping("/winestyle/api")
 public class MainController {
-    private final RepositoryService wineRepositoryService;
-    private final RepositoryService sparklingRepositoryService;
+    private final WineRepositoryService wineRepositoryService;
+    private final SparklingRepositoryService sparklingRepositoryService;
 
     // TODO: возвращать распаршенные записи по конкретной ссылке
 
@@ -130,7 +131,7 @@ public class MainController {
         File file = new File("data.csv");
         if (!file.exists()) {
             try {
-                CSVUtility.toCsvFile(sparklingRepositoryService);
+                CSVUtility.toCsvFile(wineRepositoryService);
             } catch (IOException e) {
                 throw new RuntimeException("Cannot write database to file");
             }

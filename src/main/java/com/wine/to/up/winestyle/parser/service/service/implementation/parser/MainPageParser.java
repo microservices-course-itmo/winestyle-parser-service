@@ -1,26 +1,16 @@
 package com.wine.to.up.winestyle.parser.service.service.implementation.parser;
 
-import com.wine.to.up.winestyle.parser.service.domain.entity.Sparkling;
-import com.wine.to.up.winestyle.parser.service.domain.entity.Wine;
-import com.wine.to.up.winestyle.parser.service.service.MainPageParserService;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.nodes.Element;
 
 @Slf4j
-public abstract class MainPageParser implements MainPageParserService {
-    public void parseMainPageInfo(Element productElement, Wine.WineBuilder builder) {
-        throw new UnsupportedOperationException();
-    }
-    public void parseMainPageInfo(Element productElement, Sparkling.SparklingBuilder builder) {
-        throw new UnsupportedOperationException();
-    }
-
+public abstract class MainPageParser implements com.wine.to.up.winestyle.parser.service.service.MainPageParser {
     /**
      * Парсер названия вина.
      * @param el Контейнер, в котором лежит название вина.
      * @return Название вина.
      */
-    String parseName(Element el){
+    public String parseName(Element el){
         Element nameElement = el.selectFirst(".title");
         return nameElement.attr("data-prodname");
     }
@@ -61,7 +51,7 @@ public abstract class MainPageParser implements MainPageParserService {
      * @param el Контейнер, в котором лежит объем вина.
      * @return Объем в мл ИЛИ null, если его нет.
      */
-    Float parseVolume(Element el) {
+    public Float parseVolume(Element el) {
         try {
             Element volumeElement = el.selectFirst("label");
             String volumeValue = volumeElement.ownText();
@@ -82,7 +72,7 @@ public abstract class MainPageParser implements MainPageParserService {
      * @param el Контейнер, в котором лежит производитель вина.
      * @return Производитель ИЛИ null, если его нет.
      */
-    String parseManufacturer(Element el) {
+    public String parseManufacturer(Element el) {
         try {
             Element manufacturerElement = el.selectFirst("span:contains(Прои)").nextElementSibling();
             return manufacturerElement.text();
@@ -97,7 +87,7 @@ public abstract class MainPageParser implements MainPageParserService {
      * @param el Контейнер, в котором лежит бренд вина.
      * @return Бренд ИЛИ null, если его нет.
      */
-    String parseBrand(Element el) {
+    public String parseBrand(Element el) {
         try {
             Element brandElement = el.selectFirst("span:contains(Брен)").nextElementSibling();
             return brandElement.text();
@@ -112,7 +102,7 @@ public abstract class MainPageParser implements MainPageParserService {
      * @param el Контейнер, в котором лежит описание происхождения вина.
      * @return  Свойства: страна и регион в виде массива из двух элементов, которые мы достали, ИЛИ массив из двух Null, если таковых нет.
      */
-    String[] parseCountryAndRegions(Element el){
+    public String[] parseCountryAndRegions(Element el){
         try {
             Element countryElement = el.selectFirst("span:contains(Рег)").nextElementSibling();
             String country = countryElement.text();
@@ -142,7 +132,7 @@ public abstract class MainPageParser implements MainPageParserService {
      * @param el Контейнер, в котором лежит описание крепости вина.
      * @return Крепость ИЛИ null, если совйства нет.
      */
-    String parseStrength(Element el) {
+    public String parseStrength(Element el) {
         try {
             Element strengthElement = el.selectFirst("span:contains(Креп)").nextElementSibling();
             return strengthElement.text();
@@ -157,7 +147,7 @@ public abstract class MainPageParser implements MainPageParserService {
      * @param el Контейнер, в котором лежит описание сорта винограда.
      * @return Объединенная строка сортов винограда ИЛИ null, если их нет.
      */
-    String parseGrape(Element el) {
+    public String parseGrape(Element el) {
         try {
             Element grapeElement = el.selectFirst("span:contains(Сорт)").nextElementSibling();
             String allGrape = grapeElement.text();

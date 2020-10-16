@@ -7,7 +7,7 @@ import com.opencsv.exceptions.CsvDataTypeMismatchException;
 import com.opencsv.exceptions.CsvRequiredFieldEmptyException;
 import com.wine.to.up.winestyle.parser.service.domain.entity.Wine;
 
-import com.wine.to.up.winestyle.parser.service.service.implementation.repository.RepositoryService;
+import com.wine.to.up.winestyle.parser.service.service.implementation.repository.WineRepositoryService;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 
@@ -21,7 +21,7 @@ import java.util.List;
 @UtilityClass
 @Slf4j
 public class CSVUtility {
-    public void  toCsvFile(RepositoryService repositoryService) throws IOException {
+    public void toCsvFile(WineRepositoryService repositoryService) throws IOException {
         List<Wine> wines = repositoryService.getAll();
         try (PrintWriter writer = new PrintWriter("data.csv")) {
             HeaderColumnNameMappingStrategy<Wine> strategy = new HeaderColumnNameMappingStrategy<>();

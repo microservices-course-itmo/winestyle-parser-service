@@ -2,10 +2,7 @@ package com.wine.to.up.winestyle.parser.service.service.implementation;
 
 import com.wine.to.up.winestyle.parser.service.controller.exception.UnsupportedAlcoholTypeException;
 import com.wine.to.up.winestyle.parser.service.controller.exception.ServiceIsBusyException;
-import com.wine.to.up.winestyle.parser.service.domain.entity.Sparkling;
-import com.wine.to.up.winestyle.parser.service.domain.entity.Wine;
 import com.wine.to.up.winestyle.parser.service.service.implementation.document.DocumentService;
-import com.wine.to.up.winestyle.parser.service.service.implementation.repository.RepositoryService;
 
 import com.google.common.collect.ImmutableMap;
 import lombok.RequiredArgsConstructor;
@@ -26,8 +23,6 @@ import java.util.Map;
 @RequiredArgsConstructor
 @Slf4j
 public class WinestyleParserService {
-    private final RepositoryService wineRepositoryService;
-    private final RepositoryService sparklingRepositoryService;
     private final DocumentService documentService;
     private final ParserDirectorService parserDirectorService;
 
@@ -89,54 +84,26 @@ public class WinestyleParserService {
     // Page by page parsing
     private void parseByPages(String relativeUrl, String alcoholType) throws InterruptedException {
         statusChange(alcoholType);
-        String alcoholUrl = mainUrl + relativeUrl;
 
-        Document mainDoc = documentService.getJsoupDocument(alcoholUrl);
-        Document productDoc;
-
-        Element productPageElement;
-
+        String alcoholMainPageUrl = mainUrl + relativeUrl;
+        Document mainDoc = documentService.getJsoupDocument(alcoholMainPageUrl);
         int pages = documentService.pagesNumber(mainDoc);
 
+        Elements productElements;
+
         for (int i = 2; i <= pages; i++) {
-            Elements productElements = mainDoc.getElementsByClass("item-block");
-
+            productElements = mainDoc.getElementsByClass("item-block");
             for (Element productElement : productElements) {
-
-                String urlToProductPage = productElement.selectFirst("a").attr("href");
-
                 switch (alcoholType) {
                     case "wine":
-                        if (wineRepositoryService.getByUrl(urlToProductPage) == null) {
-                            Wine.WineBuilder wineBuilder = Wine.builder();
-
-                            productDoc = documentService.getJsoupDocument(mainUrl + urlToProductPage);
-                            productPageElement = productDoc.selectFirst(".main-content");
-
-                            parserDirectorService.parseWine(productElement, productPageElement, wineBuilder);
-
-                            wineRepositoryService.add(wineBuilder.url(urlToProductPage).build());
-                        } else {
-                            parserDirectorService.updatePriceAndRating(productElement, urlToProductPage, alcoholType);
-                        }
+                        parserDirectorService.parseWine(productElement);
                         break;
                     case "sparkling":
-                        if (sparklingRepositoryService.getByUrl(urlToProductPage) == null) {
-                            Sparkling.SparklingBuilder sparklingBuilder = Sparkling.builder();
-
-                            productDoc = documentService.getJsoupDocument(mainUrl + urlToProductPage);
-                            productPageElement = productDoc.selectFirst(".main-content");
-
-                            parserDirectorService.parseSparkling(productElement, productPageElement, sparklingBuilder);
-
-                            sparklingRepositoryService.add(sparklingBuilder.url(urlToProductPage).build());
-                        } else {
-                            parserDirectorService.updatePriceAndRating(productElement, urlToProductPage, alcoholType);
-                        }
+                        parserDirectorService.parseSparkling(productElement);
                         break;
                 }
             }
-            mainDoc = documentService.getJsoupDocument(alcoholUrl + "?page=" + i);
+            mainDoc = documentService.getJsoupDocument(alcoholMainPageUrl + "?page=" + i);
         }
         statusChange(alcoholType);
     }

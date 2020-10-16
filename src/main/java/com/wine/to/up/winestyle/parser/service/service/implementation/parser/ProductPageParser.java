@@ -1,29 +1,16 @@
 package com.wine.to.up.winestyle.parser.service.service.implementation.parser;
 
-import com.wine.to.up.winestyle.parser.service.domain.entity.Sparkling;
-import com.wine.to.up.winestyle.parser.service.domain.entity.Wine;
-import com.wine.to.up.winestyle.parser.service.service.ProductPageParserService;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.nodes.Element;
 
 @Slf4j
-public abstract class ProductPageParser implements ProductPageParserService {
-    @Override
-    public void parseProductPageInfo(Element productPageElement, Wine.WineBuilder builder) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void parseProductPageInfo(Element productPageElement, Sparkling.SparklingBuilder builder) {
-        throw new UnsupportedOperationException();
-    }
-
+public class ProductPageParser implements com.wine.to.up.winestyle.parser.service.service.ProductPageParser {
     /**
      * Парсер картинки.
      * @param el Контейнер, в котором лежит ссылка на картинку.
      * @return Ссылка на картинку, которую мы достали, ИЛИ Null, если картинки нет.
      */
-    String parseImageUrl(Element el) {
+    public String parseImageUrl(Element el) {
         try {
             Element imageElement = el.selectFirst("a.img-container");
             return imageElement.attr("href");
@@ -38,7 +25,7 @@ public abstract class ProductPageParser implements ProductPageParserService {
      * @param el Контейнер, в котором лежит описание.
      * @return Описание, которое мы достали, ИЛИ Null, если описания нет.
      */
-    String parseDescription(Element el) {
+    public String parseDescription(Element el) {
         try {
             Element descriptionElement = el.selectFirst(".description-block");
             return descriptionElement.text();
@@ -53,7 +40,7 @@ public abstract class ProductPageParser implements ProductPageParserService {
      * @param el Контейнер, в котором лежит описание вкуса вина.
      * @return Вкус вина ИЛИ null, если нет его описания.
      */
-    String parseTaste(Element el) {
+    public String parseTaste(Element el) {
         try {
             Element tasteElement = el.selectFirst("span:contains(Вкус)").nextElementSibling();
             return tasteElement.text();
@@ -68,7 +55,7 @@ public abstract class ProductPageParser implements ProductPageParserService {
      * @param el Контейнер, в котором описан аромат вина.
      * @return Аромат ИЛИ null, если нет его описания.
      */
-    String parseAroma(Element el) {
+    public String parseAroma(Element el) {
         try {
             Element aromaElement = el.selectFirst("span:contains(Аром)").nextElementSibling();
             return aromaElement.text();
@@ -83,7 +70,7 @@ public abstract class ProductPageParser implements ProductPageParserService {
      * @param el Контейнер, в котором перечислены хорошие сочетания вина с блюдами.
      * @return Строку сочетаний ИЛИ null, если их нет.
      */
-    String parseFoodPairing(Element el) {
+    public String parseFoodPairing(Element el) {
         try {
             Element foodPairingElement = el.selectFirst("span:contains(Гаст)").nextElementSibling();
             return foodPairingElement.text();
