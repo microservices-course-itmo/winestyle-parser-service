@@ -2,7 +2,9 @@ package com.wine.to.up.winestyle.parser.service.service.implementation.parser;
 
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.nodes.Element;
+import org.springframework.stereotype.Component;
 
+@Component
 @Slf4j
 public class ProductPageParser implements com.wine.to.up.winestyle.parser.service.service.ProductPageParser {
     /**

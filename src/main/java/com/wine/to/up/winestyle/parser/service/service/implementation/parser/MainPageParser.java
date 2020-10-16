@@ -110,9 +110,10 @@ public abstract class MainPageParser implements com.wine.to.up.winestyle.parser.
             Element regionElement = countryElement.nextElementSibling();
             String allRegions = regionElement.text();
 
-            //add region names to the result string as long as there are elements containing them
+            // Add region names to the resulting string as long as there are elements containing them
             String nextRegion;
             Element nextElement;
+
             while (regionElement.nextElementSibling() != null) {
                 nextElement = regionElement.nextElementSibling();
                 nextRegion = nextElement.text();
@@ -152,9 +153,10 @@ public abstract class MainPageParser implements com.wine.to.up.winestyle.parser.
             Element grapeElement = el.selectFirst("span:contains(Сорт)").nextElementSibling();
             String allGrape = grapeElement.text();
 
-            //add grape sorts to the result string as long as there are elements containing them
+            // Add grape sorts to the resulting string as long as there are elements containing them
             String nextGrape;
             Element nextElement;
+
             while (grapeElement.nextElementSibling() != null) {
                 nextElement = grapeElement.nextElementSibling();
                 nextGrape = nextElement.text();
