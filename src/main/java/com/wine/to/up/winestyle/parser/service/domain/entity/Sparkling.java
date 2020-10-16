@@ -7,11 +7,10 @@ import javax.persistence.*;
 /**
  * <pre>
  * Класс - сущность вино, содержащий поля :
- * id - никальный номер, 
- * name - название вина, 
+ * id - никальный номер,
+ * name - название вина,
  * url - ссылка на страницу вина,
  * imageUrl - ссылка на изображение вина,
- * cropYear - год сбора,
  * manufacturer - производитель,
  * brand - бренд,
  * color - оттенок,
@@ -19,9 +18,10 @@ import javax.persistence.*;
  * region - регион винограда,
  * volume - обьем,
  * strength - крепость,
- * sugar - сладость/сухость, 
+ * sugar - сладость/сухость,
  * price - цена в рублях,
  * grape - сорт винограда,
+ * type - тип игристого вина,
  * taste - вкус,
  * aroma - аромат,
  * foodPairing - сочетания с блюдами,
@@ -36,7 +36,7 @@ import javax.persistence.*;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Wine {
+public class Sparkling {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -49,9 +49,6 @@ public class Wine {
 
     @Column
     private String imageUrl;
-
-    @Column
-    private Integer cropYear;
 
     @Column
     private String manufacturer;
@@ -82,6 +79,9 @@ public class Wine {
 
     @Column
     private String grape;
+
+    @Column
+    private String type;
 
     @Column(columnDefinition="TEXT")
     private String taste;

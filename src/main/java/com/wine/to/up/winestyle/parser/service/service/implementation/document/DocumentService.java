@@ -1,10 +1,8 @@
-package com.wine.to.up.winestyle.parser.service.service.implementation;
+package com.wine.to.up.winestyle.parser.service.service.implementation.document;
 
-import com.wine.to.up.winestyle.parser.service.service.DocumentService;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
 import org.springframework.stereotype.Service;
 
 /**
@@ -13,7 +11,7 @@ import org.springframework.stereotype.Service;
  */
 @Service
 @Slf4j
-public class WinestyleDocumentService implements DocumentService {
+public class DocumentService {
     public Document getJsoupDocument(String url) throws InterruptedException {
         Document doc = null;
 
@@ -35,11 +33,10 @@ public class WinestyleDocumentService implements DocumentService {
     }
 
     /**
-     * @return количество страниц с вином
+     * @return количество страниц с выбранным продуктом.
      */
     public Integer pagesNumber(Document doc) {
-        Element pagingElement = doc.getElementById("CatalogPagingBottom");
-        String pagesNumber = pagingElement.getElementsByTag("li").last().text();
+        String pagesNumber = doc.selectFirst("#CatalogPagingBottom li:last-of-type").text();
         return Integer.parseInt(pagesNumber);
     }
 }
