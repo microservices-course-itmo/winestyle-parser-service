@@ -22,7 +22,7 @@ public abstract class MainPageParser implements com.wine.to.up.winestyle.parser.
      * @return Год сбора ИЛИ null, если его нет.
      */
     public Integer parseCropYear(String name) {
-        String[] titleInfo = name.split("[, ]+");
+        String[] titleInfo = name.split(",? ");
         // Checks each word in the name for year format matching
         for (String word : titleInfo) {
             if (word.matches("\\d{4}")) {
