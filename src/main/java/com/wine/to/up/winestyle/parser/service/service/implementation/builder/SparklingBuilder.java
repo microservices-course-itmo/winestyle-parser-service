@@ -19,18 +19,17 @@ public class SparklingBuilder {
     private final SparklingRepositoryService sparklingRepositoryService;
     @Qualifier("sparklingMainPageParser")
     private final MainPageParser sparklingMainPageParser;
-    @Qualifier("sparklingProductPageParser")
     private final ProductPageParser sparklingProductPageParser;
 
     public void parseAndBuild(Element productElement) throws InterruptedException {
         String mainUrl = "https://spb.winestyle.ru";
         String urlToProductPage = productElement.selectFirst("a").attr("href");
-        Document productDoc = documentService.getJsoupDocument(mainUrl + urlToProductPage);
-        Element productPageElement = productDoc.selectFirst(".main-content");
 
         Sparkling.SparklingBuilder builder = Sparkling.builder();
 
         if (sparklingRepositoryService.getByUrl(urlToProductPage) == null) {
+            Document productDoc = documentService.getJsoupDocument(mainUrl + urlToProductPage);
+            Element productPageElement = productDoc.selectFirst(".main-content");
             parseMainPageInfo(productElement, builder);
             parseProductPageInfo(productPageElement, builder);
             sparklingRepositoryService.add(builder.url(urlToProductPage).build());

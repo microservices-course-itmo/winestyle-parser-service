@@ -10,7 +10,7 @@ public class ProductPageParser implements com.wine.to.up.winestyle.parser.servic
     /**
      * Парсер картинки.
      * @param el Контейнер, в котором лежит ссылка на картинку.
-     * @return Ссылка на картинку, которую мы достали, ИЛИ Null, если картинки нет.
+     * @return Ссылка на картинку, которую мы достали или Null, если картинки нет.
      */
     public String parseImageUrl(Element el) {
         try {

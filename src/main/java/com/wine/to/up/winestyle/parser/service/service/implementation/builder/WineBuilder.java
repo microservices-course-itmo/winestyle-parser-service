@@ -19,18 +19,17 @@ public class WineBuilder {
     private final WineRepositoryService wineRepositoryService;
     @Qualifier("wineMainPageParser")
     private final MainPageParser wineMainPageParser;
-    @Qualifier("wineProductPageParser")
     private final ProductPageParser wineProductPageParser;
 
     public void parseAndBuild(Element productElement) throws InterruptedException {
         String mainUrl = "https://spb.winestyle.ru";
         String urlToProductPage = productElement.selectFirst("a").attr("href");
-        Document productDoc = documentService.getJsoupDocument(mainUrl + urlToProductPage);
-        Element productPageElement = productDoc.selectFirst(".main-content");
 
         Wine.WineBuilder builder = Wine.builder();
 
         if (wineRepositoryService.getByUrl(urlToProductPage) == null) {
+            Document productDoc = documentService.getJsoupDocument(mainUrl + urlToProductPage);
+            Element productPageElement = productDoc.selectFirst(".main-content");
             parseMainPageInfo(productElement, builder);
             parseProductPageInfo(productPageElement, builder);
             wineRepositoryService.add(builder.url(urlToProductPage).build());
