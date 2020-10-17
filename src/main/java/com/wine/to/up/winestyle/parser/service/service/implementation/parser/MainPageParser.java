@@ -16,6 +16,24 @@ public abstract class MainPageParser implements com.wine.to.up.winestyle.parser.
     }
 
     /**
+     * Парсер винограда, свойство: год сбора.
+     *
+     * @param name Контейнер, в котором лежит год сбора винограда.
+     * @return Год сбора ИЛИ null, если его нет.
+     */
+    public Integer parseCropYear(String name) {
+        String[] titleInfo = name.split(", ");
+        // Checks each word in the name for year format matching
+        for (String word : titleInfo) {
+            if (word.matches("\\d{4}")) {
+                return Integer.parseInt(word);
+            }
+        }
+        log.warn("product's crop year is not specified");
+        return null;
+    }
+
+    /**
      * Парсер цены вина.
      * @param el Контейнер, в котором лежит стоимость вина.
      * @return Стоимость вина ИЛИ null, если её нет.

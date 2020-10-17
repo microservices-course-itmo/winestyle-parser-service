@@ -73,9 +73,10 @@ public class SparklingBuilder {
      */
     private void parseHeaderAndRightBlock(Element itemBlock, Sparkling.SparklingBuilder builder) {
         String name = sparklingMainPageParser.parseName(itemBlock);
+        Integer cropYear = sparklingMainPageParser.parseCropYear(name);
         Float price = sparklingMainPageParser.parsePrice(itemBlock);
 
-        builder.name(name).price(price);
+        builder.name(name).cropYear(cropYear).price(price);
     }
 
     /**

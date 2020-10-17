@@ -51,6 +51,9 @@ public class Sparkling {
     private String imageUrl;
 
     @Column
+    private Integer cropYear;
+
+    @Column
     private String manufacturer;
 
     @Column

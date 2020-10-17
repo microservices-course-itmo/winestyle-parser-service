@@ -72,13 +72,9 @@ public class WineBuilder {
      * @param builder Строитель сущности продукта.
      */
     private void parseHeaderAndRightBlock(Element itemBlock, Wine.WineBuilder builder) {
-        String name;
-        Integer cropYear;
-        Float price;
-
-        name = wineMainPageParser.parseName(itemBlock);
-        cropYear = wineMainPageParser.parseCropYear(name);
-        price = wineMainPageParser.parsePrice(itemBlock);
+        String name = wineMainPageParser.parseName(itemBlock);
+        Integer cropYear = wineMainPageParser.parseCropYear(name);
+        Float price = wineMainPageParser.parsePrice(itemBlock);
 
         builder.name(name).cropYear(cropYear).price(price);
     }
