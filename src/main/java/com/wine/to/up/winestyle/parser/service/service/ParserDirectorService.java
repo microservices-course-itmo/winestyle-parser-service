@@ -1,9 +1,7 @@
 package com.wine.to.up.winestyle.parser.service.service;
 
-import com.wine.to.up.winestyle.parser.service.domain.entity.Sparkling;
-import com.wine.to.up.winestyle.parser.service.domain.entity.Wine;
+import com.wine.to.up.winestyle.parser.service.domain.entity.Alcohol;
 
 public interface ParserDirectorService {
-    void makeWine(Wine.WineBuilder builder);
-    void makeSparkling(Sparkling.SparklingBuilder builder);
+    void makeAlcohol(Alcohol.AlcoholBuilder builder);
 }

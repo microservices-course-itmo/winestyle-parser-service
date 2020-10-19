@@ -4,42 +4,18 @@ import lombok.*;
 
 import javax.persistence.*;
 
-/**
- * <pre>
- * Класс - сущность вино, содержащий поля :
- * id - никальный номер, 
- * name - название вина, 
- * url - ссылка на страницу вина,
- * imageUrl - ссылка на изображение вина,
- * cropYear - год сбора,
- * manufacturer - производитель,
- * brand - бренд,
- * color - оттенок,
- * contry - страна,
- * region - регион винограда,
- * volume - обьем,
- * strength - крепость,
- * sugar - сладость/сухость, 
- * price - цена в рублях,
- * grape - сорт винограда,
- * taste - вкус,
- * aroma - аромат,
- * foodPairing - сочетания с блюдами,
- * rating - рейтинг,
- * description - описание вина.
- * </pre>
- */
-@Setter
-@Getter
 @ToString
 @Entity
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Wine {
+public class Alcohol {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
+
+    @Column
+    private String type;
 
     @Column
     private String name;
@@ -49,6 +25,9 @@ public class Wine {
 
     @Column
     private String imageUrl;
+
+    @OneToOne(mappedBy = "alcohol", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private Image image;
 
     @Column
     private Integer cropYear;
@@ -77,6 +56,7 @@ public class Wine {
     @Column
     private String sugar;
 
+    @Setter
     @Column
     private Float price;
 
@@ -95,6 +75,7 @@ public class Wine {
     @Column(columnDefinition="TEXT")
     private String description;
 
+    @Setter
     @Column
     private Double rating;
 }

@@ -1,11 +1,8 @@
 package com.wine.to.up.winestyle.parser.service.service;
 
 import org.jsoup.nodes.Element;
-import org.springframework.stereotype.Service;
 
-@Service
 public interface ParsingService {
-
     String parseName();
     String parseImageUrl();
     String parseUrl();
@@ -19,8 +16,7 @@ public interface ParsingService {
     String parseRegion();
     String parseStrength();
     String parseGrape();
-    String parseType();
-    String parseColor();
+    String[] parseTypeAndColor();
     String parseSugar();
     String parseTaste();
     String parseAroma();

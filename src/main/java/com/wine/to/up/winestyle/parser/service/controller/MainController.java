@@ -1,10 +1,8 @@
 package com.wine.to.up.winestyle.parser.service.controller;
 
 import com.wine.to.up.winestyle.parser.service.controller.exception.NoEntityException;
-import com.wine.to.up.winestyle.parser.service.domain.entity.Sparkling;
-import com.wine.to.up.winestyle.parser.service.domain.entity.Wine;
-import com.wine.to.up.winestyle.parser.service.service.implementation.repository.SparklingRepositoryService;
-import com.wine.to.up.winestyle.parser.service.service.implementation.repository.WineRepositoryService;
+import com.wine.to.up.winestyle.parser.service.domain.entity.Alcohol;
+import com.wine.to.up.winestyle.parser.service.service.implementation.repository.AlcoholRepositoryService;
 import com.wine.to.up.winestyle.parser.service.utility.CSVUtility;
 import lombok.RequiredArgsConstructor;
 
@@ -31,77 +29,53 @@ import javax.servlet.http.HttpServletResponse;
 @RequiredArgsConstructor
 @RequestMapping("/winestyle/api")
 public class MainController {
-    private final WineRepositoryService wineRepositoryService;
-    private final SparklingRepositoryService sparklingRepositoryService;
+    private final AlcoholRepositoryService alcoholRepositoryService;
 
-    // TODO: возвращать распаршенные записи по конкретной ссылке
-
-    @GetMapping("/wine")
-    public ResponseEntity<List<Wine>> getParsedWines() {
-        List<Wine> parsedWine = wineRepositoryService.getAll();
-        return ResponseEntity.status(HttpStatus.OK).body(parsedWine);
+    @GetMapping("/all")
+    public ResponseEntity<List<Alcohol>> getParsedAlcohol() {
+        List<Alcohol> parsedAlcohol = alcoholRepositoryService.getAll();
+        return ResponseEntity.status(HttpStatus.OK).body(parsedAlcohol);
     }
 
-    @GetMapping("/wine/{id}")
-    public ResponseEntity<Wine> getParsedWine(@PathVariable long id) throws NoEntityException {
-        Wine parsedWine = wineRepositoryService.getByID(id);
+    @GetMapping("/all/{id}")
+    public ResponseEntity<Alcohol> getParsedAlcoholById(@PathVariable long id) throws NoEntityException {
+        Alcohol parsedAlcohol = alcoholRepositoryService.getByID(id);
+        return ResponseEntity.status(HttpStatus.OK).body(parsedAlcohol);
+    }
+
+    @GetMapping("/wine")
+    public ResponseEntity<List<Alcohol>> getParsedWines() {
+        List<Alcohol> parsedWine = alcoholRepositoryService.getAllWines();
         return ResponseEntity.status(HttpStatus.OK).body(parsedWine);
     }
 
     @GetMapping("/sparkling")
-    public ResponseEntity<List<Sparkling>> getParsedSparkling() {
-        List<Sparkling> parsedSparkling = sparklingRepositoryService.getAll();
-        return ResponseEntity.status(HttpStatus.OK).body(parsedSparkling);
-    }
-
-    @GetMapping("/sparkling/{id}")
-    public ResponseEntity<Sparkling> getParsedSparkling(@PathVariable long id) throws NoEntityException {
-        Sparkling parsedSparkling = sparklingRepositoryService.getByID(id);
+    public ResponseEntity<List<Alcohol>> getParsedSparkling() {
+        List<Alcohol> parsedSparkling = alcoholRepositoryService.getAllSparklings();
         return ResponseEntity.status(HttpStatus.OK).body(parsedSparkling);
     }
 
     /**
-     * @param id id вина в базе данных.
+     * @param id id алкоголя в базе данных.
      * @param fieldsList список запрашиваемых полей.
-     * @return HTTP-статус 200(ОК) и вино с запрошенными полями в теле ответа.
-     * @throws NoEntityException если искомое вино не найдено.
+     * @return HTTP-статус 200(ОК) и алкоголь с запрошенными полями в теле ответа.
+     * @throws NoEntityException если искомая позиция не найдено.
      */
-    @GetMapping("/wine/with_fields/{id}")
+    @GetMapping("/all/with_fields/{id}")
     public ResponseEntity<Map<String, Object>> getParsedWineWithFields(@PathVariable long id,
             @RequestParam String fieldsList) throws NoEntityException {
         Set<String> requiredFields = new HashSet<>(Arrays.asList(fieldsList.split(",")));
         Map<String, Object> res = new HashMap<>();
-        Wine parsedWine = wineRepositoryService.getByID(id);
+        Alcohol parsedAlcohol = alcoholRepositoryService.getByID(id);
         String fieldName;
-        for (java.lang.reflect.Field field : Wine.class.getDeclaredFields()) {
+        for (java.lang.reflect.Field field : Alcohol.class.getDeclaredFields()) {
             field.setAccessible(true);
             fieldName = field.getName();
             if (requiredFields.contains(fieldName)) {
                 try {
-                    res.put(fieldName, field.get(parsedWine));
+                    res.put(fieldName, field.get(parsedAlcohol));
                 } catch (IllegalArgumentException | IllegalAccessException e) {
                     // TODO: обрабатывать исключения
-                }
-            }
-        }
-        return ResponseEntity.status(HttpStatus.OK).body(res);
-    }
-
-    @GetMapping("/sparkling/with_fields/{id}")
-    public ResponseEntity<Map<String, Object>> getParsedSparklingWithFields(@PathVariable long id,
-                                                                       @RequestParam String fieldsList) throws NoEntityException {
-        Set<String> requiredFields = new HashSet<>(Arrays.asList(fieldsList.split(",")));
-        Map<String, Object> res = new HashMap<>();
-        Sparkling parsedSparkling = sparklingRepositoryService.getByID(id);
-        String fieldName;
-        for (java.lang.reflect.Field field : Sparkling.class.getDeclaredFields()) {
-            field.setAccessible(true);
-            fieldName = field.getName();
-            if (requiredFields.contains(fieldName)) {
-                try {
-                    res.put(fieldName, field.get(parsedSparkling));
-                } catch (IllegalArgumentException | IllegalAccessException e) {
-                    e.printStackTrace();
                 }
             }
         }
@@ -113,25 +87,7 @@ public class MainController {
         File file = new File("data.csv");
         if (!file.exists()) {
             try {
-                CSVUtility.toCsvFile(wineRepositoryService);
-            } catch (IOException e) {
-                throw new RuntimeException("Cannot write database to file");
-            }
-        }
-        try (InputStream is = new FileInputStream(file)) {
-            org.apache.commons.io.IOUtils.copy(is, response.getOutputStream());
-            response.flushBuffer();
-        } catch (IOException ex) {
-            throw new RuntimeException("Error while feading file to outputStream");
-        }
-    }
-
-    @GetMapping(value = "/sparkling/csv")
-    public void getSparklingFile(HttpServletResponse response) {
-        File file = new File("data.csv");
-        if (!file.exists()) {
-            try {
-                CSVUtility.toCsvFile(wineRepositoryService);
+                CSVUtility.toCsvFile(alcoholRepositoryService);
             } catch (IOException e) {
                 throw new RuntimeException("Cannot write database to file");
             }

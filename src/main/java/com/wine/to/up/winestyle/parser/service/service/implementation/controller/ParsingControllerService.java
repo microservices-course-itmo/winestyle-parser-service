@@ -18,8 +18,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 @Slf4j
 public class ParsingControllerService {
-    private final WinestyleParserService wineParserService;
-    private final WinestyleParserService sparklingParserService;
+    private final WinestyleParserService alcoholParserService;
     private final StatusService statusService;
 
     private final ImmutableMap<String, String> SUPPORTED_ALCOHOL_URLS = ImmutableMap.<String, String>builder()
@@ -77,14 +76,7 @@ public class ParsingControllerService {
 
         String mainUrl = "https://spb.winestyle.ru";
 
-        switch (alcoholType) {
-            case "wine":
-                wineParserService.parseBuildSave(mainUrl, relativeUrl);
-                break;
-            case "sparkling":
-                sparklingParserService.parseBuildSave(mainUrl, relativeUrl);
-                break;
-        }
+        alcoholParserService.parseBuildSave(mainUrl, relativeUrl);
 
         statusService.statusChange(alcoholType);
     }

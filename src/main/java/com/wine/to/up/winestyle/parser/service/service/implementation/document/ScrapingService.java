@@ -34,7 +34,6 @@ public class ScrapingService {
             }
         }
         Thread.sleep(630);
-
         return doc;
     }
 }

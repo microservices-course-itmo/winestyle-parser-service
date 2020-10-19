@@ -44,7 +44,11 @@ public class DocumentService {
      * @return количество страниц данного документа.
      */
     private int pagesNumber(Document mainDoc) {
-        String pagesNumber = mainDoc.selectFirst("#CatalogPagingBottom li:last-of-type").text();
-        return Integer.parseInt(pagesNumber);
+        try {
+            String pagesNumber = mainDoc.selectFirst("#CatalogPagingBottom li:last-of-type").text();
+            return Integer.parseInt(pagesNumber);
+        } catch (NullPointerException ex) {
+            return 1;
+        }
     }
 }

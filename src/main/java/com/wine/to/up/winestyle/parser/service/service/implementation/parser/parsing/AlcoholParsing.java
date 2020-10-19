@@ -8,11 +8,11 @@ import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
-public class WineParsing implements ParsingService {
+public class AlcoholParsing implements ParsingService {
     @Setter
     private Element productBlock;
     @Setter
-    Element infoContainer;
+    private Element infoContainer;
     @Setter
     private Element leftBlock;
     @Setter
@@ -21,8 +21,8 @@ public class WineParsing implements ParsingService {
     private Element descriptionBlock;
 
     private String name;
-    private Element colorElement;
     private Element countryElement;
+    private Element typeAndColorElement;
 
     /**
      * Парсер названия вина.
@@ -226,25 +226,24 @@ public class WineParsing implements ParsingService {
         }
     }
 
-    @Override
-    public String parseType() {
-        throw new UnsupportedOperationException(
-                "Operation is not supported for wine."
-        );
-    }
-
     /**
-     * Парсер оттенка.
-     * @return Оттенок ИЛИ Null, если свойства нет.
+     * Парсер свойств: Тип и отеннок вина/игристого.
+     * @return Тип напитка ИЛИ массив из двух Null, если свойств нет.
      */
     @Override
-    public String parseColor() {
+    public String[] parseTypeAndColor() {
         try {
-            colorElement = infoContainer.selectFirst("span:contains(Вино:)").nextElementSibling();
-            return colorElement.text();
+            typeAndColorElement = infoContainer.selectFirst("span:matches(([Вв]ино)[:/].*)").nextElementSibling();
+            //String h = infoContainer.selectFirst("ul").child(5).ownText();
+            String[] typeAndColor = typeAndColorElement.text().split("-");
+            try {
+                return new String[]{typeAndColor[0], typeAndColor[1]};
+            } catch (ArrayIndexOutOfBoundsException ex) {
+                return new String[]{"Вино", typeAndColor[0]};
+            }
         } catch (NullPointerException ex) {
-            log.warn("product's color is not specified");
-            return null;
+            log.warn("product's type and color are not specified");
+            return new String[]{null, null};
         }
     }
 
@@ -254,12 +253,11 @@ public class WineParsing implements ParsingService {
      */
     @Override
     public String parseSugar() {
-        try {
-            return colorElement.nextElementSibling().text();
-        } catch (NullPointerException ex) {
+        String sugar = parseFieldsSequence(typeAndColorElement.nextElementSibling());
+        if(sugar == null) {
             log.warn("product's sugar is not specified");
-            return null;
         }
+        return sugar;
     }
 
     /**
@@ -330,12 +328,12 @@ public class WineParsing implements ParsingService {
         String allFields = firstSequenceElement.text();
 
         // Add fields to the resulting string as long as there are elements containing them
-        String nextRegion;
+        String nextField;
         Element nextElement;
         while (firstSequenceElement.nextElementSibling() != null) {
             nextElement = firstSequenceElement.nextElementSibling();
-            nextRegion = nextElement.text();
-            allFields = String.join(", ", new String[]{allFields, nextRegion});
+            nextField = nextElement.text();
+            allFields = String.join(", ", new String[]{allFields, nextField});
             firstSequenceElement = nextElement;
         }
 
