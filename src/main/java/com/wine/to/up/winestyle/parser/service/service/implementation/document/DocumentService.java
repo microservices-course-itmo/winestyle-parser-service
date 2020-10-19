@@ -1,42 +1,50 @@
 package com.wine.to.up.winestyle.parser.service.service.implementation.document;
 
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
-import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
-/**
- * 
- * Класс, который парсит страницы сайта. Скачивает html и возвращает Document.
- */
-@Service
+@Component
 @Slf4j
+@RequiredArgsConstructor
 public class DocumentService {
-    public Document getJsoupDocument(String url) throws InterruptedException {
-        Document doc = null;
+    private final ScrapingService scrapingService;
+    private int pagesNumber;
+    private int nextPageNumber = 1;
 
-        log.info("parsing url: {}", url);
+    @Accessors(chain = true)
+    @Setter
+    private String alcoholUrl;
 
-        while (doc == null) {
-            try {
-                doc = Jsoup
-                        .connect(url)
-                        .userAgent("Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.121 Safari/537.36")
-                        .get(); // Берем страничку html
+    public Document getAlcoholPage() throws InterruptedException {
+        Document mainDoc = scrapingService.getJsoupDocument(alcoholUrl);
+        pagesNumber = pagesNumber(mainDoc);
+        log.info("Parsing: {}", alcoholUrl);
+        return mainDoc;
+    }
 
-            } catch (Exception ex) {
-                log.error("Couldn't get a connection to website! ", ex);
-            } // Берем страничку html
+    public Document getNext() throws InterruptedException {
+        nextPageNumber++;
+        if(nextPageNumber <= pagesNumber) {
+            log.info("Parsing: {}?page={}", alcoholUrl, nextPageNumber);
+            return scrapingService.getJsoupDocument(alcoholUrl + "?page=" + nextPageNumber);
+        } else {
+            return null;
         }
-        Thread.sleep(650);
-        return doc;
+    }
+
+    public Document getProduct(String productUrl) throws InterruptedException {
+        return scrapingService.getJsoupDocument(productUrl);
     }
 
     /**
-     * @return количество страниц с выбранным продуктом.
+     * @return количество страниц данного документа.
      */
-    public Integer pagesNumber(Document doc) {
-        String pagesNumber = doc.selectFirst("#CatalogPagingBottom li:last-of-type").text();
+    private int pagesNumber(Document mainDoc) {
+        String pagesNumber = mainDoc.selectFirst("#CatalogPagingBottom li:last-of-type").text();
         return Integer.parseInt(pagesNumber);
     }
 }
