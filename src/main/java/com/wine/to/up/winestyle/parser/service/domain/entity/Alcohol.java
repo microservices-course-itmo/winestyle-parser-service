@@ -4,6 +4,31 @@ import lombok.*;
 
 import javax.persistence.*;
 
+/**
+ * <pre>
+ * Класс - сущность вино, содержащий поля :
+ * id - никальный номер,
+ * name - название вина,
+ * type - тип (Вино/Шампанское/Игристое),
+ * url - ссылка на страницу вина,
+ * imageUrl - ссылка на изображение вина,
+ * manufacturer - производитель,
+ * brand - бренд,
+ * color - оттенок,
+ * country - страна происхождения винограда,
+ * region - регион винограда,
+ * volume - обьем,
+ * strength - крепость,
+ * sugar - сладость/сухость,
+ * price - цена в рублях,
+ * grape - сорт винограда,
+ * taste - вкус,
+ * aroma - аромат,
+ * foodPairing - сочетания с блюдами,
+ * rating - рейтинг,
+ * description - описание вина.
+ * </pre>
+ */
 @ToString
 @Entity
 @Builder
