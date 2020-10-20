@@ -31,27 +31,27 @@ import javax.servlet.http.HttpServletResponse;
 public class MainController {
     private final AlcoholRepositoryService alcoholRepositoryService;
 
-    @GetMapping("/all")
+    @GetMapping("/alcohol")
     public ResponseEntity<List<Alcohol>> getParsedAlcohol() {
         List<Alcohol> parsedAlcohol = alcoholRepositoryService.getAll();
         return ResponseEntity.status(HttpStatus.OK).body(parsedAlcohol);
     }
 
-    @GetMapping("/all/{id}")
+    @GetMapping("/alcohol/{id}")
     public ResponseEntity<Alcohol> getParsedAlcoholById(@PathVariable long id) throws NoEntityException {
         Alcohol parsedAlcohol = alcoholRepositoryService.getByID(id);
         return ResponseEntity.status(HttpStatus.OK).body(parsedAlcohol);
     }
 
-    @GetMapping("/wine")
+    @GetMapping("/wines")
     public ResponseEntity<List<Alcohol>> getParsedWines() {
-        List<Alcohol> parsedWine = alcoholRepositoryService.getAllWines();
-        return ResponseEntity.status(HttpStatus.OK).body(parsedWine);
+        List<Alcohol> parsedWines = alcoholRepositoryService.getAllWines();
+        return ResponseEntity.status(HttpStatus.OK).body(parsedWines);
     }
 
     @GetMapping("/sparkling")
     public ResponseEntity<List<Alcohol>> getParsedSparkling() {
-        List<Alcohol> parsedSparkling = alcoholRepositoryService.getAllSparklings();
+        List<Alcohol> parsedSparkling = alcoholRepositoryService.getAllSparkling();
         return ResponseEntity.status(HttpStatus.OK).body(parsedSparkling);
     }
 

@@ -49,7 +49,7 @@ public class AlcoholRepositoryService {
         return alcoholRepository.findAllByType("Вино");
     }
 
-    public List<Alcohol> getAllSparklings() {
+    public List<Alcohol> getAllSparkling() {
         return alcoholRepository.findAllByTypeIn(Arrays.asList("Игристое", "Шампанское"));
     }
 
