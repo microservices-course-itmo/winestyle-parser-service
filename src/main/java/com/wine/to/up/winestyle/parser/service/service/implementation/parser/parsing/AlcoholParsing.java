@@ -294,9 +294,12 @@ public class AlcoholParsing implements ParsingService {
                     return typeColorSugar;
                 }
             } else {
-                log.warn("sparkling's type is not specified");
                 isColorPresented = false;
-                return null;
+                if (region.equals("Шампань")) {
+                    return "Шампанское";
+                } else {
+                    return "Игристое";
+                }
             }
         } catch (NullPointerException ex) {
             isColorPresented = false;
