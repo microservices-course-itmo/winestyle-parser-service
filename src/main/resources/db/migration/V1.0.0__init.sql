@@ -20,5 +20,5 @@ CREATE TABLE alcohol
     aroma        TEXT,
     taste        TEXT,
     food_pairing TEXT,
-    description  TEXT,
+    description  TEXT
 );
