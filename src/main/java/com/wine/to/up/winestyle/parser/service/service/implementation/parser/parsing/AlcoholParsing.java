@@ -24,6 +24,7 @@ public class AlcoholParsing implements ParsingService {
 
     private String name;
     private String region;
+    private String strength;
     private boolean isRegionPresented = true;
     private boolean isColorPresented = true;
     private boolean isSugarPresented = true;
@@ -232,7 +233,7 @@ public class AlcoholParsing implements ParsingService {
             Element strengthElement = listDescription.selectFirst("span:contains(Крепость:)");
             Element strengthParent = strengthElement.parent();
             strengthElement.remove();
-            String strength = strengthParent.text();
+            strength = strengthParent.text();
             strengthParent.remove();
             return strength;
         } catch (NullPointerException ex) {
@@ -294,13 +295,18 @@ public class AlcoholParsing implements ParsingService {
                 }
             } else {
                 log.warn("sparkling's type is not specified");
+                isColorPresented = false;
                 return null;
             }
         } catch (NullPointerException ex) {
-            log.warn("sparkling's type, color and sugar are not specified");
             isColorPresented = false;
             isSugarPresented = false;
-            return null;
+            if(strength.charAt(0) == 'Б') {
+                return "Детское шампанское";
+            } else {
+                log.warn("sparkling's type, color and sugar are not specified");
+                return null;
+            }
         }
     }
 

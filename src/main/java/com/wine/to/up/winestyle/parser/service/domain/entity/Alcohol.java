@@ -42,7 +42,7 @@ public class Alcohol {
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long id;
 
-    @Column(columnDefinition = "varchar(10)")
+    @Column(columnDefinition = "varchar(20)")
     private String type;
 
     @Column(columnDefinition = "varchar(115)")

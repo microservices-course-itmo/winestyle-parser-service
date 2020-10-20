@@ -2,7 +2,7 @@ CREATE TABLE alcohol
 (
     id           BIGINT NOT NULL CONSTRAINT alcohol_pkey PRIMARY KEY,
     name         VARCHAR(115),
-    type         VARCHAR(10),
+    type         VARCHAR(20),
     url          VARCHAR(125),
     image_url    VARCHAR(65),
     crop_year    INTEGER,
