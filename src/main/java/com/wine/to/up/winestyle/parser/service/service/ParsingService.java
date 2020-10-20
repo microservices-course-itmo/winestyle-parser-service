@@ -8,7 +8,7 @@ public interface ParsingService {
     String parseUrl();
     Integer parseCropYear();
     Float parsePrice();
-    Double parseWinestyleRating();
+    Float parseWinestyleRating();
     Float parseVolume();
     String parseManufacturer();
     String parseBrand();
@@ -16,7 +16,8 @@ public interface ParsingService {
     String parseRegion();
     String parseStrength();
     String parseGrape();
-    String[] parseTypeAndColor();
+    String parseType();
+    String parseColor(Boolean isSparkling);
     String parseSugar();
     String parseTaste();
     String parseAroma();
@@ -25,6 +26,7 @@ public interface ParsingService {
 
     void setProductBlock(Element productBlock);
     void setInfoContainer(Element infoContainer);
+    void setListDescription(Element listDescription);
     void setLeftBlock(Element leftBlock);
     void setArticlesBlock(Element articlesBlock);
     void setDescriptionBlock(Element descriptionBlock);

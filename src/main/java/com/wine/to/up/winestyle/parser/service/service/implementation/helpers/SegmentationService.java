@@ -22,6 +22,7 @@ public class SegmentationService {
     private Element productBlock;
     private Element mainMainContent;
     private Element productMainContent;
+    private Element infoContainer;
 
     public SegmentationService setMainMainContent() {
         mainMainContent = mainDocument.selectFirst(".main-content"); // Product's block inner element
@@ -37,7 +38,12 @@ public class SegmentationService {
     }
 
     public Element getInfoContainer() {
-        return productBlock.selectFirst(".info-container"); // Product's rest part of information block
+        infoContainer = productBlock.selectFirst(".info-container"); // Product's rest part of information block
+        return infoContainer;
+    }
+
+    public Element getListDescription() {
+        return infoContainer.selectFirst(".list-description");
     }
 
     public Element getLeftBlock() {

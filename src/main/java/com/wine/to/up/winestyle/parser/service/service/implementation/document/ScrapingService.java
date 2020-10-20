@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import javax.net.ssl.SSLException;
 import java.io.IOException;
+import java.net.ConnectException;
 import java.net.SocketTimeoutException;
 
 /**
@@ -26,14 +27,14 @@ public class ScrapingService {
                                 "Chrome/85.0.4183.121 " +
                                 "Safari/537.36")
                         .get();
-            } catch (SocketTimeoutException | SSLException ex) {
+            } catch (SocketTimeoutException | SSLException | ConnectException ex) {
                 log.error("Couldn't get a connection to website!", ex);
             } // Берем страничку html
             catch (IOException e) {
                 e.printStackTrace();
             }
         }
-        Thread.sleep(630);
+        Thread.sleep(600);
         return doc;
     }
 }

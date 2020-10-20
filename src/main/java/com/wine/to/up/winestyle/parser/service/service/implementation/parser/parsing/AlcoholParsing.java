@@ -14,6 +14,8 @@ public class AlcoholParsing implements ParsingService {
     @Setter
     private Element infoContainer;
     @Setter
+    private Element listDescription;
+    @Setter
     private Element leftBlock;
     @Setter
     private Element articlesBlock;
@@ -21,8 +23,11 @@ public class AlcoholParsing implements ParsingService {
     private Element descriptionBlock;
 
     private String name;
-    private Element countryElement;
-    private Element typeAndColorElement;
+    private String region;
+    private boolean isRegionPresented = true;
+    private boolean isColorPresented = true;
+    private boolean isSugarPresented = true;
+    private String colorAndSugar;
 
     /**
      * Парсер названия вина.
@@ -98,10 +103,12 @@ public class AlcoholParsing implements ParsingService {
      * @return Рейтинг вина ИЛИ null, если его нет.
      */
     @Override
-    public Double parseWinestyleRating() {
+    public Float parseWinestyleRating() {
         try {
-            String rating = infoContainer.selectFirst(".info-container meta[itemprop=ratingValue]").attr("content");
-            return Double.parseDouble(rating) / 2.;
+            String rating = infoContainer
+                    .selectFirst(".info-container meta[itemprop=ratingValue]")
+                    .attr("content");
+            return Float.parseFloat(rating) / 2.f;
         } catch (Exception ex) {
             log.warn("product's winestyle's rating is not specified");
             return null;
@@ -138,8 +145,12 @@ public class AlcoholParsing implements ParsingService {
     @Override
     public String parseManufacturer() {
         try {
-            Element manufacturerElement = infoContainer.selectFirst("span:contains(Производитель:)").nextElementSibling();
-            return manufacturerElement.text();
+            Element manufacturerElement = listDescription.selectFirst("span:contains(Производитель:)");
+            Element manufacturerParent = manufacturerElement.parent();
+            manufacturerElement.remove();
+            String manufacturer = manufacturerParent.text();
+            manufacturerParent.remove();
+            return manufacturer;
         } catch (NullPointerException ex) {
             log.warn("product's manufacturer is not specified");
             return null;
@@ -154,8 +165,12 @@ public class AlcoholParsing implements ParsingService {
     @Override
     public String parseBrand() {
         try {
-            Element brandElement = infoContainer.selectFirst("span:contains(Брен)").nextElementSibling();
-            return brandElement.text();
+            Element brandElement = listDescription.selectFirst("span:contains(Бренд:)");
+            Element brandParent = brandElement.parent();
+            brandElement.remove();
+            String brand = brandParent.text();
+            brandParent.remove();
+            return brand;
         } catch (NullPointerException ex) {
             log.warn("product's brand is not specified");
             return null;
@@ -170,10 +185,22 @@ public class AlcoholParsing implements ParsingService {
     @Override
     public String parseCountry() {
         try {
-            countryElement = infoContainer.selectFirst("span:contains(Рег)").nextElementSibling();
-            return countryElement.text();
+            Element countryElement = listDescription.selectFirst("span:contains(Регион:)");
+            Element countryParent = countryElement.parent();
+            countryElement.remove();
+            String countryAndRegion = countryParent.text();
+            countryParent.remove();
+            int indexOfDelim = countryAndRegion.indexOf(", ");
+            if (indexOfDelim >= 0) {
+                String country = countryAndRegion.substring(0, indexOfDelim);
+                region = countryAndRegion.substring(indexOfDelim + 2);
+                return country;
+            } else {
+                isRegionPresented = false;
+                return countryAndRegion;
+            }
         } catch (NullPointerException ex) {
-            log.warn("product's country is not specified");
+            log.warn("product's country and region are not specified");
             return null;
         }
     }
@@ -185,11 +212,11 @@ public class AlcoholParsing implements ParsingService {
      */
     @Override
     public String parseRegion() {
-        try {
-            Element regionElement = countryElement.nextElementSibling();
-            return parseFieldsSequence(regionElement);
-        } catch (NullPointerException ex) {
+        if (isRegionPresented) {
+            return region;
+        } else {
             log.warn("product's region is not specified");
+            isRegionPresented = true;
             return null;
         }
     }
@@ -202,8 +229,12 @@ public class AlcoholParsing implements ParsingService {
     @Override
     public String parseStrength() {
         try {
-            Element strengthElement = infoContainer.selectFirst("span:contains(Креп)").nextElementSibling();
-            return strengthElement.text();
+            Element strengthElement = listDescription.selectFirst("span:contains(Крепость:)");
+            Element strengthParent = strengthElement.parent();
+            strengthElement.remove();
+            String strength = strengthParent.text();
+            strengthParent.remove();
+            return strength;
         } catch (NullPointerException ex) {
             log.warn("product's strength is not specified");
             return null;
@@ -218,8 +249,12 @@ public class AlcoholParsing implements ParsingService {
     @Override
     public String parseGrape() {
         try {
-            Element grapeElement = infoContainer.selectFirst("span:contains(Сорт)").nextElementSibling();
-            return parseFieldsSequence(grapeElement);
+            Element grapeElement = listDescription.selectFirst("span:contains(Сорт винограда:)");
+            Element grapeParent = grapeElement.parent();
+            grapeElement.remove();
+            String grape = grapeParent.text();
+            grapeParent.remove();
+            return grape;
         } catch (NullPointerException ex) {
             log.warn("product's grape sort is not specified");
             return null;
@@ -228,36 +263,102 @@ public class AlcoholParsing implements ParsingService {
 
     /**
      * Парсер свойств: Тип и отеннок вина/игристого.
+     *
      * @return Тип напитка ИЛИ массив из двух Null, если свойств нет.
      */
     @Override
-    public String[] parseTypeAndColor() {
+    public String parseType() {
+        String type;
         try {
-            typeAndColorElement = infoContainer.selectFirst("span:matches(([Вв]ино)[:/].*)").nextElementSibling();
-            //String h = infoContainer.selectFirst("ul").child(5).ownText();
-            String[] typeAndColor = typeAndColorElement.text().split("-");
-            try {
-                return new String[]{typeAndColor[0], typeAndColor[1]};
-            } catch (ArrayIndexOutOfBoundsException ex) {
-                return new String[]{"Вино", typeAndColor[0]};
+            Element typeAndColorElement = listDescription.selectFirst("span:matches(([Вв]ино)[:/].*)");
+            Element typeAndColorParent = typeAndColorElement.parent();
+            typeAndColorElement.remove();
+            String typeColorSugar = typeAndColorParent.text();
+            typeAndColorParent.remove();
+            int indexOfDelim = typeColorSugar.indexOf("-");
+            if (indexOfDelim >= 0) {
+                type = typeColorSugar.substring(0, indexOfDelim);
+                colorAndSugar = typeColorSugar.substring(indexOfDelim + 1);
+                return type;
+            } else if (typeColorSugar.matches("^Ш.+|^И.+")) {
+                isColorPresented = false;
+                indexOfDelim = typeColorSugar.indexOf(", ");
+                if(indexOfDelim >= 0) {
+                    type = typeColorSugar.substring(0, indexOfDelim);
+                    colorAndSugar = typeColorSugar.substring(indexOfDelim + 2);
+                    return type;
+                } else {
+                    isColorPresented = false;
+                    isSugarPresented = false;
+                    return typeColorSugar;
+                }
+            } else {
+                log.warn("sparkling's type is not specified");
+                return null;
             }
         } catch (NullPointerException ex) {
-            log.warn("product's type and color are not specified");
-            return new String[]{null, null};
+            log.warn("sparkling's type, color and sugar are not specified");
+            isColorPresented = false;
+            isSugarPresented = false;
+            return null;
+        }
+    }
+
+    @Override
+    public String parseColor(Boolean isSparkling) {
+        if(isSparkling) {
+            if (isColorPresented) {
+                int indexOfDelim = colorAndSugar.indexOf(", ");
+                if(indexOfDelim >= 0) {
+                    String color = colorAndSugar.substring(0, indexOfDelim);
+                    colorAndSugar = colorAndSugar.substring(indexOfDelim + 2);
+                    return color.substring(0, 1).toUpperCase() + color.substring(1);
+                } else {
+                    isSugarPresented = false;
+                    return colorAndSugar;
+                }
+            } else {
+                log.warn("sparkling's color is not specified");
+                isColorPresented = true;
+                return null;
+            }
+        } else {
+            try {
+                Element colorElement = listDescription.selectFirst("span:contains(Вино:)");
+                Element colorParent = colorElement.parent();
+                colorElement.remove();
+                colorAndSugar = colorParent.text();
+                colorParent.remove();
+                int indexOfDelim = colorAndSugar.indexOf(", ");
+                if (indexOfDelim >= 0) {
+                    String color = colorAndSugar.substring(0, indexOfDelim);
+                    colorAndSugar = colorAndSugar.substring(indexOfDelim + 2);
+                    return color;
+                } else {
+                    isSugarPresented = false;
+                    return colorAndSugar;
+                }
+            } catch (NullPointerException ex) {
+                log.warn("product's color is not specified");
+                return null;
+            }
         }
     }
 
     /**
      * Парсер сладости/сухости.
+     *
      * @return Сладость/сухость ИЛИ Null, если свойства нет.
      */
     @Override
     public String parseSugar() {
-        String sugar = parseFieldsSequence(typeAndColorElement.nextElementSibling());
-        if(sugar == null) {
+        if(isSugarPresented) {
+            return colorAndSugar;
+        } else {
             log.warn("product's sugar is not specified");
+            isSugarPresented = true;
+            return null;
         }
-        return sugar;
     }
 
     /**
@@ -322,21 +423,5 @@ public class AlcoholParsing implements ParsingService {
             log.warn("product's description is not specified");
             return null;
         }
-    }
-
-    private String parseFieldsSequence(Element firstSequenceElement) {
-        String allFields = firstSequenceElement.text();
-
-        // Add fields to the resulting string as long as there are elements containing them
-        String nextField;
-        Element nextElement;
-        while (firstSequenceElement.nextElementSibling() != null) {
-            nextElement = firstSequenceElement.nextElementSibling();
-            nextField = nextElement.text();
-            allFields = String.join(", ", new String[]{allFields, nextField});
-            firstSequenceElement = nextElement;
-        }
-
-        return allFields;
     }
 }

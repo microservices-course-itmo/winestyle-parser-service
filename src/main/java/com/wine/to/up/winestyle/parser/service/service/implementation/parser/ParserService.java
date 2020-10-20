@@ -26,16 +26,16 @@ public class ParserService implements WinestyleParserService {
     private final Alcohol.AlcoholBuilder builder = Alcohol.builder();
 
     @Override
-    public void parseBuildSave(String mainUrl, String relativeUrl) throws InterruptedException {
+    public void parseBuildSave(String mainUrl, String relativeUrl, String alcoholType) throws InterruptedException {
         Document currentDoc = documentService.setAlcoholUrl(mainUrl + relativeUrl).getAlcoholPage();
 
         while (currentDoc != null) {
-            productBlocksRunner(mainUrl, currentDoc);
+            productBlocksRunner(mainUrl, currentDoc, alcoholType);
             currentDoc = documentService.getNext();
         }
     }
 
-    private void productBlocksRunner(String mainUrl, Document currentDoc) throws InterruptedException {
+    private void productBlocksRunner(String mainUrl, Document currentDoc, String alcoholType) throws InterruptedException {
         String productUrl;
         Elements alcohol = segmentationService
                 .setMainDocument(currentDoc)
@@ -53,7 +53,7 @@ public class ParserService implements WinestyleParserService {
                 Document product = documentService.getProduct(mainUrl + productUrl);
                 segmentationService.setProductDocument(product).setProductMainContent();
                 prepareParsingService();
-                parserDirectorService.makeAlcohol(builder);
+                parserDirectorService.makeAlcohol(builder, alcoholType);
                 alcoholRepositoryService.add(builder.url(productUrl).build());
             } else {
                 alcoholRepositoryService.updatePrice(parsingService.parsePrice(), productUrl);
@@ -63,6 +63,7 @@ public class ParserService implements WinestyleParserService {
     }
 
     private void prepareParsingService() {
+        parsingService.setListDescription(segmentationService.getListDescription());
         parsingService.setLeftBlock(segmentationService.getLeftBlock());
         parsingService.setArticlesBlock(segmentationService.getArticlesBlock());
         parsingService.setDescriptionBlock(segmentationService.getDescriptionBlock());

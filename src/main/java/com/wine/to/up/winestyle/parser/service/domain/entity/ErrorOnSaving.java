@@ -1,9 +1,10 @@
 package com.wine.to.up.winestyle.parser.service.domain.entity;
 
 import lombok.*;
-import lombok.experimental.Accessors;
 
 import javax.persistence.*;
+import java.sql.Date;
+import java.sql.Timestamp;
 
 /**
  * <pre>
@@ -30,80 +31,111 @@ import javax.persistence.*;
  * description - описание вина.
  * </pre>
  */
-@Accessors(fluent = true)
-@Getter
 @ToString
 @Entity
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Alcohol {
+public class ErrorOnSaving {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(columnDefinition = "varchar(10)")
+    @Column
     private String type;
 
-    @Column(columnDefinition = "varchar(115)")
+    @Column
     private String name;
 
-    @Column(columnDefinition = "varchar(125)")
+    @Column
     private String url;
 
-    @Column(columnDefinition = "varchar(65)")
+    @Column
     private String imageUrl;
-
-    @OneToOne(mappedBy = "alcohol", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private Image image;
 
     @Column
     private Integer cropYear;
 
-    @Column(columnDefinition = "varchar(50)")
+    @Column
     private String manufacturer;
 
-    @Column(columnDefinition = "varchar(50)")
+    @Column
     private String brand;
 
-    @Column(columnDefinition = "varchar(15)")
+    @Column
     private String color;
 
-    @Column(columnDefinition = "varchar(15)")
+    @Column
     private String country;
 
-    @Column(columnDefinition = "varchar(55)")
+    @Column
     private String region;
 
     @Column
     private Float volume;
 
-    @Column(columnDefinition = "varchar(30)")
+    @Column
     private String strength;
 
-    @Column(columnDefinition = "varchar(50)")
+    @Column
     private String sugar;
 
     @Setter
     @Column
     private Float price;
 
-    @Column(columnDefinition = "varchar(100)")
+    @Column
     private String grape;
 
-    @Column(columnDefinition="TEXT")
+    @Column(columnDefinition = "TEXT")
     private String taste;
 
-    @Column(columnDefinition="TEXT")
+    @Column(columnDefinition = "TEXT")
     private String aroma;
 
-    @Column(columnDefinition="TEXT")
+    @Column(columnDefinition = "TEXT")
     private String foodPairing;
 
-    @Column(columnDefinition="TEXT")
+    @Column(columnDefinition = "TEXT")
     private String description;
 
-    @Setter
     @Column
     private Float rating;
+
+    @Column
+    private Long unsavedId;
+
+    @Column
+    private Timestamp timestamp;
+
+    @Column(columnDefinition = "TEXT")
+    private Exception error;
+
+    public static ErrorOnSaving of(Alcohol alcohol, Timestamp timestamp, Exception error) {
+        return ErrorOnSaving.builder()
+                .name(alcohol.name())
+                .type(alcohol.type())
+                .url(alcohol.url())
+                .imageUrl(alcohol.imageUrl())
+                .cropYear(alcohol.cropYear())
+                .manufacturer(alcohol.manufacturer())
+                .brand(alcohol.brand())
+                .color(alcohol.color())
+                .country(alcohol.country())
+                .region(alcohol.region())
+                .volume(alcohol.volume())
+                .strength(alcohol.strength())
+                .sugar(alcohol.sugar())
+                .price(alcohol.price())
+                .grape(alcohol.grape())
+                .taste(alcohol.taste())
+                .aroma(alcohol.aroma())
+                .foodPairing(alcohol.foodPairing())
+                .description(alcohol.description())
+                .rating(alcohol.rating())
+                .unsavedId(alcohol.id())
+                .error(error)
+                .timestamp(timestamp)
+                .build();
+    }
 }

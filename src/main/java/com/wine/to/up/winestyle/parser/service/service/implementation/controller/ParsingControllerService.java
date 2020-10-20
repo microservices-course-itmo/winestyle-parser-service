@@ -22,7 +22,7 @@ public class ParsingControllerService {
     private final StatusService statusService;
 
     private final ImmutableMap<String, String> SUPPORTED_ALCOHOL_URLS = ImmutableMap.<String, String>builder()
-            .put("wine", "/wine/wines_ll/")
+            .put("wine", "/wine/all/")
             .put("sparkling", "/champagnes-and-sparkling/all/")
             .build();
 
@@ -53,9 +53,7 @@ public class ParsingControllerService {
         if (statusService.statusCheck("wine")) {
             try {
                 parse(SUPPORTED_ALCOHOL_URLS.get("wine"), "wine");
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+            } catch (InterruptedException ignore) { }
         }
     }
 
@@ -65,9 +63,7 @@ public class ParsingControllerService {
         if (statusService.statusCheck("sparkling")) {
             try {
                 parse(SUPPORTED_ALCOHOL_URLS.get("sparkling"), "sparkling");
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+            } catch (InterruptedException ignore) { }
         }
     }
 
@@ -76,7 +72,7 @@ public class ParsingControllerService {
 
         String mainUrl = "https://spb.winestyle.ru";
 
-        alcoholParserService.parseBuildSave(mainUrl, relativeUrl);
+        alcoholParserService.parseBuildSave(mainUrl, relativeUrl, alcoholType);
 
         statusService.statusChange(alcoholType);
     }

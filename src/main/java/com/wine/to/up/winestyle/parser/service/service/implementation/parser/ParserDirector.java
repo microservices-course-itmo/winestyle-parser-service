@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 public class ParserDirector implements ParserDirectorService {
     private final ParsingService alcoholParsing;
 
-    public void makeAlcohol(Alcohol.AlcoholBuilder builder) {
+    public void makeAlcohol(Alcohol.AlcoholBuilder builder, String alcoholType) {
         builder.name(alcoholParsing.parseName());
         builder.cropYear(alcoholParsing.parseCropYear());
         builder.price(alcoholParsing.parsePrice());
@@ -24,9 +24,13 @@ public class ParserDirector implements ParserDirectorService {
         builder.grape(alcoholParsing.parseGrape());
         builder.country(alcoholParsing.parseCountry());
         builder.region(alcoholParsing.parseRegion());
-        String[] typeAndColor = alcoholParsing.parseTypeAndColor();
-        builder.type(typeAndColor[0]);
-        builder.color(typeAndColor[1]);
+        if(alcoholType.equals("wine")) {
+            builder.type("Вино");
+            builder.color(alcoholParsing.parseColor(false));
+        } else {
+            builder.type(alcoholParsing.parseType());
+            builder.color(alcoholParsing.parseColor(true));
+        }
         builder.sugar(alcoholParsing.parseSugar());
         builder.imageUrl(alcoholParsing.parseImageUrl());
         builder.taste(alcoholParsing.parseTaste());
