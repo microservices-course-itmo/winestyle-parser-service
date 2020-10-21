@@ -2,12 +2,12 @@ package com.wine.to.up.winestyle.parser.service.controller;
 
 import com.wine.to.up.winestyle.parser.service.controller.exception.NoEntityException;
 import com.wine.to.up.winestyle.parser.service.domain.entity.Alcohol;
+import com.wine.to.up.winestyle.parser.service.dto.AlcoholDto;
 import com.wine.to.up.winestyle.parser.service.service.implementation.repository.AlcoholRepositoryService;
 import com.wine.to.up.winestyle.parser.service.utility.CSVUtility;
 import lombok.RequiredArgsConstructor;
 
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.modelmapper.ModelMapper;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,6 +19,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -30,10 +31,14 @@ import javax.servlet.http.HttpServletResponse;
 @RequestMapping("/winestyle/api")
 public class MainController {
     private final AlcoholRepositoryService alcoholRepositoryService;
+    private final ModelMapper modelMapper;
 
     @GetMapping("/alcohol")
-    public List<Alcohol> getParsedAlcohol() {
-        return alcoholRepositoryService.getAll();
+    public List<AlcoholDto> getParsedAlcohol() {
+        List<Alcohol> alcohol = alcoholRepositoryService.getAll();
+        return alcohol.stream()
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
     }
 
     @GetMapping("/alcohol/{id}")
@@ -70,9 +75,7 @@ public class MainController {
             if (requiredFields.contains(fieldName)) {
                 try {
                     res.put(fieldName, field.get(parsedAlcohol));
-                } catch (IllegalArgumentException | IllegalAccessException e) {
-                    // TODO: обрабатывать исключения
-                }
+                } catch (IllegalArgumentException | IllegalAccessException ignore) { }
             }
         }
         return res;
@@ -94,5 +97,9 @@ public class MainController {
         } catch (IOException ex) {
             throw new RuntimeException("Error while feading file to outputStream");
         }
+    }
+
+    private AlcoholDto convertToDto(Alcohol alcohol) {
+        return modelMapper.map(alcohol, AlcoholDto.class);
     }
 }

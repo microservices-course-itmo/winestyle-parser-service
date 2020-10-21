@@ -30,7 +30,6 @@ import javax.persistence.*;
  * description - описание вина.
  * </pre>
  */
-@Accessors(fluent = true)
 @Getter
 @ToString
 @Entity
@@ -45,10 +44,10 @@ public class Alcohol {
     @Column(columnDefinition = "varchar(20)")
     private String type;
 
-    @Column(columnDefinition = "varchar(115)")
+    @Column(columnDefinition = "varchar(130)")
     private String name;
 
-    @Column(columnDefinition = "varchar(125)")
+    @Column(columnDefinition = "varchar(135)")
     private String url;
 
     @Column(columnDefinition = "varchar(65)")
@@ -60,7 +59,7 @@ public class Alcohol {
     @Column
     private Integer cropYear;
 
-    @Column(columnDefinition = "varchar(50)")
+    @Column(columnDefinition = "varchar(65)")
     private String manufacturer;
 
     @Column(columnDefinition = "varchar(50)")
@@ -72,7 +71,7 @@ public class Alcohol {
     @Column(columnDefinition = "varchar(15)")
     private String country;
 
-    @Column(columnDefinition = "varchar(55)")
+    @Column(columnDefinition = "varchar(70)")
     private String region;
 
     @Column
@@ -88,7 +87,7 @@ public class Alcohol {
     @Column
     private Float price;
 
-    @Column(columnDefinition = "varchar(100)")
+    @Column(columnDefinition = "varchar(110)")
     private String grape;
 
     @Column(columnDefinition="TEXT")

@@ -9,22 +9,25 @@ import java.math.BigDecimal;
  * Передаваемый объект сущности вино. 
  */
 @Data
-public class WineDto implements Serializable {
+public class AlcoholDto implements Serializable {
+    private String name;
+    private String type;
     private String url;
     private String imageUrl;
-    private String name;
     private Integer cropYear;
     private String manufacturer;
     private String brand;
-    private String color;
+    private Float price;
+    private Float volume;
+    private Float rating;
     private String country;
     private String region;
-    private Float volume;
-    private String strength;
-    private String sugar;
-    private Float price;
+    private String color;
     private String grape;
-    private String tastingNotes;
-    private Double rating;
+    private String sugar;
+    private String strength;
+    private String aroma;
+    private String taste;
+    private String foodPairing;
     private String description;
 }
