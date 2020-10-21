@@ -24,6 +24,6 @@ public class ServiceIsBusyException extends Exception {
     }
 
     public String getMessage() {
-        return "The server reported: " + alcoholType + cause;
+        return String.format("The server reported: alcohol type: %s, error: %s.", alcoholType, cause);
     }
 }

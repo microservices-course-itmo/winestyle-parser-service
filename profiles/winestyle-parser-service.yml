@@ -2,7 +2,7 @@ version: '3'
 
 services:
   service:
-    image: winestyle-parser-service:0.2.0-SNAPSHOT
+    image: winestyle-parser-service:0.5.0-SNAPSHOT
     ports:
       - 8080:8080
     environment:

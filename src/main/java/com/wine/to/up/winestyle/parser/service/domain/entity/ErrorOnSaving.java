@@ -7,7 +7,7 @@ import java.sql.Timestamp;
 
 /**
  * <pre>
- * Класс - сущность ошибки при сохранении алкоголя в базу:
+ * Класс - сущность ошибки при сохранении алкоголя, содержащий поля:
  * id - никальный номер,
  * name - название напитка,
  * type - тип (Вино/Шампанское/Игристое),
@@ -28,9 +28,9 @@ import java.sql.Timestamp;
  * foodPairing - сочетания с блюдами,
  * rating - рейтинг,
  * description - описание напитка,
- * unsavedID - id при попытке сохранения
- * timestamp - время попытки сохранения
- * error - строковое представление ошибки
+ * unsavedId - id при попытки сохранения,
+ * timestamp - время попытки сохранения,
+ * error - текст ошибки при сохранении.
  * </pre>
  */
 @ToString
@@ -111,31 +111,31 @@ public class ErrorOnSaving {
     private Timestamp timestamp;
 
     @Column(columnDefinition = "TEXT")
-    private Exception error;
+    private String error;
 
-    public static ErrorOnSaving of(Alcohol alcohol, Timestamp timestamp, Exception error) {
+    public static ErrorOnSaving of(Alcohol alcohol, Timestamp timestamp, String error) {
         return ErrorOnSaving.builder()
-                .name(alcohol.name())
-                .type(alcohol.type())
-                .url(alcohol.url())
-                .imageUrl(alcohol.imageUrl())
-                .cropYear(alcohol.cropYear())
-                .manufacturer(alcohol.manufacturer())
-                .brand(alcohol.brand())
-                .color(alcohol.color())
-                .country(alcohol.country())
-                .region(alcohol.region())
-                .volume(alcohol.volume())
-                .strength(alcohol.strength())
-                .sugar(alcohol.sugar())
-                .price(alcohol.price())
-                .grape(alcohol.grape())
-                .taste(alcohol.taste())
-                .aroma(alcohol.aroma())
-                .foodPairing(alcohol.foodPairing())
-                .description(alcohol.description())
-                .rating(alcohol.rating())
-                .unsavedId(alcohol.id())
+                .name(alcohol.getName())
+                .type(alcohol.getType())
+                .url(alcohol.getUrl())
+                .imageUrl(alcohol.getImageUrl())
+                .cropYear(alcohol.getCropYear())
+                .manufacturer(alcohol.getManufacturer())
+                .brand(alcohol.getBrand())
+                .color(alcohol.getColor())
+                .country(alcohol.getCountry())
+                .region(alcohol.getRegion())
+                .volume(alcohol.getVolume())
+                .strength(alcohol.getStrength())
+                .sugar(alcohol.getSugar())
+                .price(alcohol.getPrice())
+                .grape(alcohol.getGrape())
+                .taste(alcohol.getTaste())
+                .aroma(alcohol.getAroma())
+                .foodPairing(alcohol.getFoodPairing())
+                .description(alcohol.getDescription())
+                .rating(alcohol.getRating())
+                .unsavedId(alcohol.getId())
                 .error(error)
                 .timestamp(timestamp)
                 .build();

@@ -1,7 +1,6 @@
 package com.wine.to.up.winestyle.parser.service.domain.entity;
 
 import lombok.*;
-import lombok.experimental.Accessors;
 
 import javax.persistence.*;
 
@@ -11,7 +10,7 @@ import com.wine.to.up.parser.common.api.schema.UpdateProducts.Product.Sugar;
 
 /**
  * <pre>
- * Класс - сущность "алкоголь", содержащий поля :
+ * Класс - сущность "алкоголь", содержащая поля:
  * id - никальный номер,
  * name - название напитка,
  * type - тип (Вино/Шампанское/Игристое),
@@ -35,7 +34,6 @@ import com.wine.to.up.parser.common.api.schema.UpdateProducts.Product.Sugar;
  * description - описание напитка.
  * </pre>
  */
-@Accessors(fluent = true)
 @Getter
 @ToString
 @Entity
@@ -50,10 +48,10 @@ public class Alcohol {
     @Column(columnDefinition = "varchar(20)")
     private String type;
 
-    @Column(columnDefinition = "varchar(115)")
+    @Column(columnDefinition = "varchar(130)")
     private String name;
 
-    @Column(columnDefinition = "varchar(125)")
+    @Column(columnDefinition = "varchar(135)")
     private String url;
 
     @Column(columnDefinition = "varchar(65)")
@@ -65,7 +63,7 @@ public class Alcohol {
     @Column
     private Integer cropYear;
 
-    @Column(columnDefinition = "varchar(50)")
+    @Column(columnDefinition = "varchar(65)")
     private String manufacturer;
 
     @Column(columnDefinition = "varchar(50)")
@@ -77,7 +75,7 @@ public class Alcohol {
     @Column(columnDefinition = "varchar(15)")
     private String country;
 
-    @Column(columnDefinition = "varchar(55)")
+    @Column(columnDefinition = "varchar(70)")
     private String region;
 
     @Column
@@ -93,7 +91,7 @@ public class Alcohol {
     @Column
     private Float price;
 
-    @Column(columnDefinition = "varchar(100)")
+    @Column(columnDefinition = "varchar(110)")
     private String grape;
 
     @Column(columnDefinition="TEXT")
