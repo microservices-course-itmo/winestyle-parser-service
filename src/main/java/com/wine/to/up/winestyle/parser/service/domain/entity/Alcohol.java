@@ -1,6 +1,7 @@
 package com.wine.to.up.winestyle.parser.service.domain.entity;
 
 import lombok.*;
+import lombok.experimental.Accessors;
 
 import javax.persistence.*;
 
@@ -8,85 +9,91 @@ import com.wine.to.up.parser.common.api.schema.UpdateProducts;
 import com.wine.to.up.parser.common.api.schema.UpdateProducts.Product.Color;
 import com.wine.to.up.parser.common.api.schema.UpdateProducts.Product.Sugar;
 
-import java.math.BigDecimal;
-
 /**
  * <pre>
- * Класс - сущность вино, содержащий поля :
- * id - никальный номер, 
- * name - название вина, 
- * url - ссылка на страницу вина,
- * imageUrl - ссылка на изображение вина,
- * cropYear - год сбора,
+ * Класс - сущность "алкоголь", содержащий поля :
+ * id - никальный номер,
+ * name - название напитка,
+ * type - тип (Вино/Шампанское/Игристое),
+ * url - ссылка на страницу напитка,
+ * imageUrl - ссылка на изображение напитка,
+ * image - изображение напитка,
  * manufacturer - производитель,
  * brand - бренд,
  * color - оттенок,
- * contry - страна,
+ * country - страна происхождения винограда,
  * region - регион винограда,
  * volume - обьем,
  * strength - крепость,
- * sugar - сладость/сухость, 
+ * sugar - сладость/сухость,
  * price - цена в рублях,
  * grape - сорт винограда,
  * taste - вкус,
  * aroma - аромат,
  * foodPairing - сочетания с блюдами,
  * rating - рейтинг,
- * description - описание вина.
+ * description - описание напитка.
  * </pre>
  */
-@Setter
+@Accessors(fluent = true)
 @Getter
 @ToString
 @Entity
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Wine {
+public class Alcohol {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long id;
 
-    @Column
+    @Column(columnDefinition = "varchar(20)")
+    private String type;
+
+    @Column(columnDefinition = "varchar(115)")
     private String name;
 
-    @Column
+    @Column(columnDefinition = "varchar(125)")
     private String url;
 
-    @Column
+    @Column(columnDefinition = "varchar(65)")
     private String imageUrl;
+
+    @OneToOne(mappedBy = "alcohol", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private Image image;
 
     @Column
     private Integer cropYear;
 
-    @Column
+    @Column(columnDefinition = "varchar(50)")
     private String manufacturer;
 
-    @Column
+    @Column(columnDefinition = "varchar(50)")
     private String brand;
 
-    @Column
+    @Column(columnDefinition = "varchar(15)")
     private String color;
 
-    @Column
+    @Column(columnDefinition = "varchar(15)")
     private String country;
 
-    @Column
+    @Column(columnDefinition = "varchar(55)")
     private String region;
 
     @Column
-    private Double volume;
+    private Float volume;
 
-    @Column
+    @Column(columnDefinition = "varchar(30)")
     private String strength;
 
-    @Column
+    @Column(columnDefinition = "varchar(50)")
     private String sugar;
 
+    @Setter
     @Column
-    private BigDecimal price;
+    private Float price;
 
-    @Column
+    @Column(columnDefinition = "varchar(100)")
     private String grape;
 
     @Column(columnDefinition="TEXT")
@@ -101,8 +108,9 @@ public class Wine {
     @Column(columnDefinition="TEXT")
     private String description;
 
+    @Setter
     @Column
-    private Double rating;
+    private Float rating;
 
     /**
      * Преобразование нашего класса Wine в общий для парсеров класс Product
@@ -115,8 +123,8 @@ public class Wine {
         if (url != null)
             builder.setLink(url);
         // TODO set image
-        // if (imageUrl != null)
-        //     builder.setImage(imageUrl);
+        // if (image != null)
+        //     builder.setImage(image);
         if (cropYear != null)
             builder.setYear(cropYear);
         if (manufacturer != null)

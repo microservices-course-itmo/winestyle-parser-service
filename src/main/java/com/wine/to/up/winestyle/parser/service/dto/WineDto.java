@@ -3,7 +3,6 @@ package com.wine.to.up.winestyle.parser.service.dto;
 import lombok.Data;
 
 import java.io.Serializable;
-import java.math.BigDecimal;
 
 /**
  * Передаваемый объект сущности вино. 
@@ -21,10 +20,10 @@ public class WineDto implements Serializable {
     private String color;
     private String country;
     private String region;
-    private Double volume;
+    private Float volume;
     private String strength;
     private String sugar;
-    private BigDecimal price;
+    private Float price;
     private String grape;
     private String tastingNotes;
     private Double rating;

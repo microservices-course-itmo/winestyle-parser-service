@@ -1,8 +1,8 @@
 package com.wine.to.up.winestyle.parser.service.controller;
 
 import com.wine.to.up.winestyle.parser.service.controller.exception.NoEntityException;
-import com.wine.to.up.winestyle.parser.service.domain.entity.Wine;
-import com.wine.to.up.winestyle.parser.service.service.WineService;
+import com.wine.to.up.winestyle.parser.service.domain.entity.Alcohol;
+import com.wine.to.up.winestyle.parser.service.service.implementation.repository.AlcoholRepositoryService;
 import com.wine.to.up.winestyle.parser.service.utility.CSVUtility;
 import lombok.RequiredArgsConstructor;
 
@@ -29,63 +29,72 @@ import javax.servlet.http.HttpServletResponse;
 @RequiredArgsConstructor
 @RequestMapping("/winestyle/api")
 public class MainController {
-    private final WineService wineService;
+    private final AlcoholRepositoryService alcoholRepositoryService;
 
-    @GetMapping("/wine")
-    public ResponseEntity<List<Wine>> getParsedWines() {
-        List<Wine> parsedWine = wineService.getAllWines();
-        return ResponseEntity.status(HttpStatus.OK).body(parsedWine);
+    @GetMapping("/alcohol")
+    public List<Alcohol> getParsedAlcohol() {
+        return alcoholRepositoryService.getAll();
     }
 
-    @GetMapping("/wine/{id}")
-    public ResponseEntity<Wine> getParsedWine(@PathVariable long id) throws NoEntityException {
-        Wine parsedWine = wineService.getWineByID(id);
-        return ResponseEntity.status(HttpStatus.OK).body(parsedWine);
+    @GetMapping("/alcohol/{id}")
+    public Alcohol getParsedAlcoholById(@PathVariable long id) throws NoEntityException {
+        return alcoholRepositoryService.getByID(id);
     }
 
-    @GetMapping("/wine/by-url/{url}")
-    public ResponseEntity<Wine> getParsedWineByURL(@PathVariable String url) throws NoEntityException {
-        Wine parsedWine = wineService.getWineByUrl(url);
-        return ResponseEntity.status(HttpStatus.OK).body(parsedWine);
+    @GetMapping("/wines")
+    public List<Alcohol> getParsedWines() {
+        return alcoholRepositoryService.getAllWines();
+    }
+
+    @GetMapping("/sparkling")
+    public List<Alcohol> getParsedSparkling() {
+        return alcoholRepositoryService.getAllSparkling();
+    }
+
+    @GetMapping("/alcohol/by-url/{url}")
+    public ResponseEntity<Alcohol> getParsedWineByURL(@PathVariable String url) throws NoEntityException {
+        Alcohol parsedAlcohol = alcoholRepositoryService.getByUrl(url);
+        return ResponseEntity.status(HttpStatus.OK).body(parsedAlcohol);
     }
 
     /**
-     * @param id id вина в базе данных.
+     * @param id id алкоголя в базе данных.
      * @param fieldsList список запрашиваемых полей.
-     * @return HTTP-статус 200(ОК) и вино с запрошенными полями в теле ответа.
-     * @throws NoEntityException если искомое вино не найдено.
+     * @return HTTP-статус 200(ОК) и алкоголь с запрошенными полями в теле ответа.
+     * @throws NoEntityException если искомая позиция не найдено.
      */
-    @GetMapping("/wine/with_fields/{id}")
-    public ResponseEntity<Map<String, Object>> getParsedWineWithFields(@PathVariable long id,
+    @GetMapping("/alcohol/with_fields/{id}")
+    public Map<String, Object> getParsedWineWithFields(@PathVariable long id,
             @RequestParam String fieldsList) throws NoEntityException {
         Set<String> requiredFields = new HashSet<>(Arrays.asList(fieldsList.split(",")));
         Map<String, Object> res = new HashMap<>();
-        Wine parsedWine = wineService.getWineByID(id);
+        Alcohol parsedAlcohol = alcoholRepositoryService.getByID(id);
         String fieldName;
-        for (java.lang.reflect.Field field : Wine.class.getDeclaredFields()) {
+        for (java.lang.reflect.Field field : Alcohol.class.getDeclaredFields()) {
             field.setAccessible(true);
             fieldName = field.getName();
             if (requiredFields.contains(fieldName)) {
                 try {
-                    res.put(fieldName, field.get(parsedWine));
+                    res.put(fieldName, field.get(parsedAlcohol));
                 } catch (IllegalArgumentException | IllegalAccessException e) {
                 }
             }
         }
-        return ResponseEntity.status(HttpStatus.OK).body(res);
+        return res;
     }
 
-    @GetMapping(value = "/getCSVFile")
-    public void getFile(HttpServletResponse response) {
+    @GetMapping(value = "/alcohol/csv")
+    public void getWineFile(HttpServletResponse response) {
         File file = new File("data.csv");
         if (!file.exists()) {
             try {
-                CSVUtility.toCsvFile(wineService);
+                CSVUtility.toCsvFile(alcoholRepositoryService);
             } catch (IOException e) {
                 throw new RuntimeException("Cannot write database to file");
             }
         }
         try (InputStream is = new FileInputStream(file)) {
+            response.setContentType("Content-Disposition: attachment;filename=\"alcohols.csv\"");
             org.apache.commons.io.IOUtils.copy(is, response.getOutputStream());
             response.flushBuffer();
         } catch (IOException ex) {

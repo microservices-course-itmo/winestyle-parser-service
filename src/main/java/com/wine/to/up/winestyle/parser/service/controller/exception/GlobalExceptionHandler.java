@@ -22,7 +22,7 @@ public class GlobalExceptionHandler {
      * @param ex      Целевое исключение
      * @param request Текущий запрос
      */
-    @ExceptionHandler({ServiceIsBusyException.class, NoEntityException.class})
+    @ExceptionHandler({ServiceIsBusyException.class, NoEntityException.class, UnsupportedAlcoholTypeException.class})
     public final ResponseEntity<ApiError> handleException(Exception ex, WebRequest request) {
         HttpHeaders headers = new HttpHeaders();
 
@@ -38,6 +38,13 @@ public class GlobalExceptionHandler {
             NoEntityException noEntityException = (NoEntityException) ex;
 
             return handleNoEntityException(noEntityException, headers, status, request);
+        }
+
+        if (ex instanceof UnsupportedAlcoholTypeException) {
+            HttpStatus status = HttpStatus.BAD_REQUEST;
+            UnsupportedAlcoholTypeException unsupportedAlcoholTypeException = (UnsupportedAlcoholTypeException) ex;
+
+            return handleUnsupportedAlcoholTypeException(unsupportedAlcoholTypeException, headers, status, request);
         }
         return handleExceptionInternal(ex, null, new HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR, request);
     }
@@ -68,6 +75,22 @@ public class GlobalExceptionHandler {
     protected ResponseEntity<ApiError> handleNoEntityException(NoEntityException ex,
                                                                     HttpHeaders headers, HttpStatus status,
                                                                     WebRequest request) {
+        List<String> errors = Collections.singletonList(ex.getMessage());
+        return handleExceptionInternal(ex, new ApiError(errors), headers, status, request);
+    }
+
+    /**
+     * Обработчик ошибки о неподдерживаемом типе алкоголя
+     * @param ex Исключение о неподдерживаемом типе алкоголя
+     * @param body Список ошибок
+     * @param headers HTTP заголовки
+     * @param status HTTP статус
+     * @param request Запрос
+     * @return
+     */
+    protected ResponseEntity<ApiError> handleUnsupportedAlcoholTypeException(UnsupportedAlcoholTypeException ex,
+                                                               HttpHeaders headers, HttpStatus status,
+                                                               WebRequest request) {
         List<String> errors = Collections.singletonList(ex.getMessage());
         return handleExceptionInternal(ex, new ApiError(errors), headers, status, request);
     }

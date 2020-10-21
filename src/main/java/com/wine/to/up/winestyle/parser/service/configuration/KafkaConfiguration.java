@@ -1,16 +1,11 @@
 package com.wine.to.up.winestyle.parser.service.configuration;
 
-import com.wine.to.up.commonlib.messaging.BaseKafkaHandler;
-import com.wine.to.up.commonlib.messaging.KafkaMessageHandler;
 import com.wine.to.up.commonlib.messaging.KafkaMessageSender;
 import com.wine.to.up.parser.common.api.ParserCommonApiProperties;
 import com.wine.to.up.parser.common.api.schema.UpdateProducts;
 import com.wine.to.up.winestyle.parser.service.components.WinestyleParserServiceMetricsCollector;
-import com.wine.to.up.winestyle.parser.service.messaging.WineStyleKafkaMessageHandler;
-import com.wine.to.up.winestyle.parser.service.messaging.serialization.EventDeserializer;
 import com.wine.to.up.winestyle.parser.service.messaging.serialization.EventSerializer;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
-import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.clients.consumer.OffsetResetStrategy;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
@@ -64,33 +59,6 @@ public class KafkaConfiguration {
         properties.setProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, OffsetResetStrategy.EARLIEST.name().toLowerCase());
         properties.setProperty(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
         return properties;
-    }
-
-
-    /**
-     * Creates consumer based on general properties.
-     * <p>
-     * Uses custom deserializer as the messages within single topic should be the same type. And
-     * the messages in different topics can have different types and require different deserializers
-     * <p>
-     * Binds the consumer of the topic with the object which is responsible for handling messages from
-     * this topic
-     * <p>
-     * From now on all the messages consumed from given topic will be delegate
-     * to {@link KafkaMessageHandler#handle(Object)} of the given handler
-     *
-     * @param consumerProperties is the general consumer properties. {@link #consumerProperties()}
-     * @param handler            which is responsible for handling messages from this topic
-     */
-    @Bean
-    BaseKafkaHandler<UpdateProducts.UpdateProductsMessage> wineStyleMessagesHandler(Properties consumerProperties,
-            ParserCommonApiProperties parserApiProperties, WineStyleKafkaMessageHandler handler) {
-        // set appropriate deserializer for value
-        consumerProperties.setProperty(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, EventDeserializer.class.getName());
-
-        // bind consumer with topic name and with appropriate handler
-        return new BaseKafkaHandler<>(parserApiProperties.getParserWinePositionParsedEvents(),
-                new KafkaConsumer<>(consumerProperties), handler);
     }
 
     /**
