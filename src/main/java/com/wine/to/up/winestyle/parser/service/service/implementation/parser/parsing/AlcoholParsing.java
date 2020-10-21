@@ -32,7 +32,6 @@ public class AlcoholParsing implements ParsingService {
 
     /**
      * Парсер названия вина.
-     *
      * @return Название вина.
      */
     @Override
@@ -49,7 +48,6 @@ public class AlcoholParsing implements ParsingService {
 
     /**
      * Парсер картинки.
-     *
      * @return Ссылка на картинку, которую мы достали или Null, если картинки нет.
      */
     @Override
@@ -65,7 +63,6 @@ public class AlcoholParsing implements ParsingService {
 
     /**
      * Парсер винограда, свойство: год сбора.
-     *
      * @return Год сбора ИЛИ null, если его нет.
      */
     @Override
@@ -83,7 +80,6 @@ public class AlcoholParsing implements ParsingService {
 
     /**
      * Парсер цены вина.
-     *
      * @return Стоимость вина ИЛИ null, если её нет.
      */
     @Override
@@ -100,15 +96,12 @@ public class AlcoholParsing implements ParsingService {
 
     /**
      * Парсер рейтинга вина.
-     *
      * @return Рейтинг вина ИЛИ null, если его нет.
      */
     @Override
     public Float parseWinestyleRating() {
         try {
-            String rating = infoContainer
-                    .selectFirst(".info-container meta[itemprop=ratingValue]")
-                    .attr("content");
+            String rating = infoContainer.selectFirst(".info-container meta[itemprop=ratingValue]").attr("content");
             return Float.parseFloat(rating) / 2.f;
         } catch (Exception ex) {
             log.warn("product's winestyle's rating is not specified");
@@ -118,7 +111,6 @@ public class AlcoholParsing implements ParsingService {
 
     /**
      * Парсер объема.
-     *
      * @return Объем в мл ИЛИ null, если его нет.
      */
     @Override
@@ -140,7 +132,6 @@ public class AlcoholParsing implements ParsingService {
 
     /**
      * Парсер производителя вина.
-     *
      * @return Производитель ИЛИ null, если его нет.
      */
     @Override
@@ -160,7 +151,6 @@ public class AlcoholParsing implements ParsingService {
 
     /**
      * Парсер бренда вина.
-     *
      * @return Бренд ИЛИ null, если его нет.
      */
     @Override
@@ -180,7 +170,6 @@ public class AlcoholParsing implements ParsingService {
 
     /**
      * Парсер страны происхождения винограда.
-     *
      * @return Страна ИЛИ Null, если свойства нет.
      */
     @Override
@@ -208,7 +197,6 @@ public class AlcoholParsing implements ParsingService {
 
     /**
      * Парсер регионов происхождения винограда.
-     *
      * @return Регионы ИЛИ Null, если свойства нет.
      */
     @Override
@@ -224,7 +212,6 @@ public class AlcoholParsing implements ParsingService {
 
     /**
      * Парсер крепости вина.
-     *
      * @return Крепость ИЛИ null, если свойства нет.
      */
     @Override
@@ -244,7 +231,6 @@ public class AlcoholParsing implements ParsingService {
 
     /**
      * Парсер сорта винограда.
-     *
      * @return Объединенная строка сортов винограда ИЛИ null, если их нет.
      */
     @Override
@@ -264,7 +250,6 @@ public class AlcoholParsing implements ParsingService {
 
     /**
      * Парсер свойств: Тип и отеннок вина/игристого.
-     *
      * @return Тип напитка ИЛИ массив из двух Null, если свойств нет.
      */
     @Override
@@ -284,7 +269,7 @@ public class AlcoholParsing implements ParsingService {
             } else if (typeColorSugar.matches("^Ш.+|^И.+")) {
                 isColorPresented = false;
                 indexOfDelim = typeColorSugar.indexOf(", ");
-                if(indexOfDelim >= 0) {
+                if (indexOfDelim >= 0) {
                     type = typeColorSugar.substring(0, indexOfDelim);
                     colorAndSugar = typeColorSugar.substring(indexOfDelim + 2);
                     return type;
@@ -304,7 +289,7 @@ public class AlcoholParsing implements ParsingService {
         } catch (NullPointerException ex) {
             isColorPresented = false;
             isSugarPresented = false;
-            if(strength.charAt(0) == 'Б') {
+            if (strength.charAt(0) == 'Б') {
                 return "Детское шампанское";
             } else {
                 log.warn("sparkling's type, color and sugar are not specified");
@@ -315,10 +300,10 @@ public class AlcoholParsing implements ParsingService {
 
     @Override
     public String parseColor(Boolean isSparkling) {
-        if(isSparkling) {
+        if (isSparkling) {
             if (isColorPresented) {
                 int indexOfDelim = colorAndSugar.indexOf(", ");
-                if(indexOfDelim >= 0) {
+                if (indexOfDelim >= 0) {
                     String color = colorAndSugar.substring(0, indexOfDelim);
                     colorAndSugar = colorAndSugar.substring(indexOfDelim + 2);
                     return color.substring(0, 1).toUpperCase() + color.substring(1);
@@ -356,12 +341,11 @@ public class AlcoholParsing implements ParsingService {
 
     /**
      * Парсер сладости/сухости.
-     *
      * @return Сладость/сухость ИЛИ Null, если свойства нет.
      */
     @Override
     public String parseSugar() {
-        if(isSugarPresented) {
+        if (isSugarPresented) {
             return colorAndSugar;
         } else {
             log.warn("product's sugar is not specified");
@@ -372,7 +356,6 @@ public class AlcoholParsing implements ParsingService {
 
     /**
      * Парсер вкуса вина.
-     *
      * @return Вкус вина ИЛИ null, если нет его описания.
      */
     @Override
@@ -388,7 +371,6 @@ public class AlcoholParsing implements ParsingService {
 
     /**
      * Парсер аромата вина.
-     *
      * @return Аромат ИЛИ null, если нет его описания.
      */
     @Override
@@ -404,7 +386,6 @@ public class AlcoholParsing implements ParsingService {
 
     /**
      * Парсер сочетания вина с блюдами.
-     *
      * @return Строку сочетаний ИЛИ null, если их нет.
      */
     @Override
@@ -420,7 +401,6 @@ public class AlcoholParsing implements ParsingService {
 
     /**
      * Парсер описания.
-     *
      * @return Описание, которое мы достали, ИЛИ Null, если описания нет.
      */
     @Override
