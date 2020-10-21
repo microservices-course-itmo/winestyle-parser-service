@@ -32,27 +32,23 @@ public class MainController {
     private final AlcoholRepositoryService alcoholRepositoryService;
 
     @GetMapping("/alcohol")
-    public ResponseEntity<List<Alcohol>> getParsedAlcohol() {
-        List<Alcohol> parsedAlcohol = alcoholRepositoryService.getAll();
-        return ResponseEntity.status(HttpStatus.OK).body(parsedAlcohol);
+    public List<Alcohol> getParsedAlcohol() {
+        return alcoholRepositoryService.getAll();
     }
 
     @GetMapping("/alcohol/{id}")
-    public ResponseEntity<Alcohol> getParsedAlcoholById(@PathVariable long id) throws NoEntityException {
-        Alcohol parsedAlcohol = alcoholRepositoryService.getByID(id);
-        return ResponseEntity.status(HttpStatus.OK).body(parsedAlcohol);
+    public Alcohol getParsedAlcoholById(@PathVariable long id) throws NoEntityException {
+        return alcoholRepositoryService.getByID(id);
     }
 
     @GetMapping("/wines")
-    public ResponseEntity<List<Alcohol>> getParsedWines() {
-        List<Alcohol> parsedWines = alcoholRepositoryService.getAllWines();
-        return ResponseEntity.status(HttpStatus.OK).body(parsedWines);
+    public List<Alcohol> getParsedWines() {
+        return alcoholRepositoryService.getAllWines();
     }
 
     @GetMapping("/sparkling")
-    public ResponseEntity<List<Alcohol>> getParsedSparkling() {
-        List<Alcohol> parsedSparkling = alcoholRepositoryService.getAllSparkling();
-        return ResponseEntity.status(HttpStatus.OK).body(parsedSparkling);
+    public List<Alcohol> getParsedSparkling() {
+        return alcoholRepositoryService.getAllSparkling();
     }
 
     /**
@@ -62,7 +58,7 @@ public class MainController {
      * @throws NoEntityException если искомая позиция не найдено.
      */
     @GetMapping("/all/with_fields/{id}")
-    public ResponseEntity<Map<String, Object>> getParsedWineWithFields(@PathVariable long id,
+    public Map<String, Object> getParsedWineWithFields(@PathVariable long id,
             @RequestParam String fieldsList) throws NoEntityException {
         Set<String> requiredFields = new HashSet<>(Arrays.asList(fieldsList.split(",")));
         Map<String, Object> res = new HashMap<>();
@@ -79,7 +75,7 @@ public class MainController {
                 }
             }
         }
-        return ResponseEntity.status(HttpStatus.OK).body(res);
+        return res;
     }
 
     @GetMapping(value = "/wine/csv")
