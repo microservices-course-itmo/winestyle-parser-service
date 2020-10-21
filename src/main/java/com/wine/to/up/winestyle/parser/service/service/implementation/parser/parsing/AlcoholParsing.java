@@ -31,9 +31,9 @@ public class AlcoholParsing implements ParsingService {
     private String colorAndSugar;
 
     /**
-     * Парсер названия вина.
+     * Парсер названия алкоголя.
      *
-     * @return Название вина.
+     * @return Название алкоголя.
      */
     @Override
     public String parseName() {
@@ -42,6 +42,11 @@ public class AlcoholParsing implements ParsingService {
         return name;
     }
 
+    /**
+     * Парсер адреса страницы алкоголя.
+     *
+     * @return Адрес страницы алкоголя.
+     */
     @Override
     public String parseUrl() {
         return productBlock.selectFirst("a").attr("href");

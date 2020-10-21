@@ -40,10 +40,10 @@ public class ParsingControllerService {
                 });
                 newThread.start();
             } else {
-                throw ServiceIsBusyException.createWith(" parsing job is already running.", alcoholType);
+                throw ServiceIsBusyException.createWith("parsing job is already running", alcoholType);
             }
         } else {
-            throw UnsupportedAlcoholTypeException.createWith("is not supported.", alcoholType);
+            throw UnsupportedAlcoholTypeException.createWith("is not supported", alcoholType);
         }
     }
 
@@ -53,7 +53,8 @@ public class ParsingControllerService {
         if (statusService.statusCheck("wine")) {
             try {
                 parse(SUPPORTED_ALCOHOL_URLS.get("wine"), "wine");
-            } catch (InterruptedException ignore) { }
+            } catch (InterruptedException ignore) {
+            }
         }
     }
 

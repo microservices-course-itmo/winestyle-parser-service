@@ -1,6 +1,8 @@
+-- CREATE DATABASE winestyle;
+
 CREATE TABLE alcohol
 (
-    id           BIGINT NOT NULL CONSTRAINT alcohol_pkey PRIMARY KEY,
+    id           Serial,
     name         VARCHAR(130),
     type         VARCHAR(20),
     url          VARCHAR(135),

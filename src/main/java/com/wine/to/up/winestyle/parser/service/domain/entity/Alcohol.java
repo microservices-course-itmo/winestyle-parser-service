@@ -1,18 +1,22 @@
 package com.wine.to.up.winestyle.parser.service.domain.entity;
 
 import lombok.*;
-import lombok.experimental.Accessors;
 
 import javax.persistence.*;
 
+import com.wine.to.up.parser.common.api.schema.UpdateProducts;
+import com.wine.to.up.parser.common.api.schema.UpdateProducts.Product.Color;
+import com.wine.to.up.parser.common.api.schema.UpdateProducts.Product.Sugar;
+
 /**
  * <pre>
- * Класс - сущность вино, содержащий поля :
+ * Класс - сущность "алкоголь", содержащая поля:
  * id - никальный номер,
- * name - название вина,
+ * name - название напитка,
  * type - тип (Вино/Шампанское/Игристое),
- * url - ссылка на страницу вина,
- * imageUrl - ссылка на изображение вина,
+ * url - ссылка на страницу напитка,
+ * imageUrl - ссылка на изображение напитка,
+ * image - изображение напитка,
  * manufacturer - производитель,
  * brand - бренд,
  * color - оттенок,
@@ -27,7 +31,7 @@ import javax.persistence.*;
  * aroma - аромат,
  * foodPairing - сочетания с блюдами,
  * rating - рейтинг,
- * description - описание вина.
+ * description - описание напитка.
  * </pre>
  */
 @Getter
@@ -105,4 +109,60 @@ public class Alcohol {
     @Setter
     @Column
     private Float rating;
+
+    /**
+     * Преобразование нашего класса Wine в общий для парсеров класс Product
+     * @return Product
+     */
+    public UpdateProducts.Product asProduct() {
+        UpdateProducts.Product.Builder builder = UpdateProducts.Product.newBuilder();
+        if (name != null)
+            builder.setName(name);
+        if (url != null)
+            builder.setLink(url);
+        // TODO set image
+        // if (image != null)
+        //     builder.setImage(image);
+        if (cropYear != null)
+            builder.setYear(cropYear);
+        if (manufacturer != null)
+            builder.setManufacturer(manufacturer);
+        if (brand != null)
+            builder.setBrand(brand);
+        if (color != null)
+            builder.setColor(color.equals("Красное") ? Color.RED : 
+                    color.equals("Белое") ? Color.WHITE :
+                    color.equals("Розовое") ? Color.ROSE :
+                    color.equals("Оранжевое") ? Color.ORANGE :
+                    Color.UNRECOGNIZED);
+        if (country != null)
+            builder.setCountry(country);
+        if (region != null)
+            builder.addRegion(region); // FIXME addRegion ?
+        if (volume != null)
+            builder.setCapacity((float) (double) volume);
+        if (strength != null)
+            builder.setStrength(Float.parseFloat(strength.substring(0, strength.length() - 1)));
+        if (sugar != null)
+            builder.setSugar(sugar.equals("Сухое") ? Sugar.DRY :
+                    sugar.equals("Полусухое") ? Sugar.MEDIUM_DRY :
+                    sugar.equals("Полусладкое") ? Sugar.MEDIUM :
+                    sugar.equals("Сладкое") ? Sugar.SWEET :
+                    Sugar.UNRECOGNIZED);
+        if (price != null)
+            builder.setNewPrice((float) price.doubleValue());
+        if (grape != null)
+            builder.addGrapeSort(grape); // FIXME addGrapeSort ?
+        if (taste != null)
+            builder.setTaste(taste);
+        if (aroma != null)
+            builder.setFlavor(aroma);
+        if (foodPairing != null)
+            builder.setGastronomy(foodPairing);
+        if (description != null)
+            builder.setDescription(description);
+        if (rating != null)
+            builder.setRating((float) (double) rating);
+        return builder.build();
+    }
 }

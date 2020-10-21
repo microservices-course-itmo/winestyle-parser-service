@@ -24,9 +24,8 @@ public class ParserDirector implements ParserDirectorService {
         builder.grape(alcoholParsing.parseGrape());
         builder.country(alcoholParsing.parseCountry());
         builder.region(alcoholParsing.parseRegion());
-        if(alcoholType.equals("wine")) {
+        if (alcoholType.equals("wine")) {
             builder.type(alcoholParsing.parseType(false));
-
         } else {
             builder.type(alcoholParsing.parseType(true));
         }
