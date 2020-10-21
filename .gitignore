@@ -17,4 +17,5 @@ gradlew*
 *.db
 .DS_Store
 .classpath
+.factorypath
 bin
