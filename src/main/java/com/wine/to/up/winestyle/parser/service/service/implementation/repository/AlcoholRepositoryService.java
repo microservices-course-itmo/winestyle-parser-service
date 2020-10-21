@@ -27,13 +27,13 @@ public class AlcoholRepositoryService {
 
     public void updatePrice(Float price, String url) {
         Alcohol alcohol = getByUrl(url);
-        alcohol.price(price);
+        alcohol.setPrice(price);
         alcoholRepository.save(alcohol);
     }
 
     public void updateRating(Float rating, String url) {
         Alcohol alcohol = getByUrl(url);
-        alcohol.rating(rating);
+        alcohol.setRating(rating);
         alcoholRepository.save(alcohol);
     }
 
@@ -65,7 +65,7 @@ public class AlcoholRepositoryService {
         try{
             alcoholRepository.save(alcohol);
         } catch(Exception ex){
-            ErrorOnSaving errorOnSaving = ErrorOnSaving.of(alcohol, new Timestamp(System.currentTimeMillis()), ex);
+            ErrorOnSaving errorOnSaving = ErrorOnSaving.of(alcohol, new Timestamp(System.currentTimeMillis()), ex.getMessage());
             errorOnSavingRepository.save(errorOnSaving);
             log.error("Error on saving alcohol: {}", alcohol.toString(), ex);
         }
