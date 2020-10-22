@@ -68,7 +68,7 @@ public class MainController {
      * @return HTTP-статус 200(ОК) и алкоголь с запрошенными полями в теле ответа.
      * @throws NoEntityException если искомая позиция не найдена.
      */
-    @GetMapping("/alcohol/with_fields/{id}")
+    @GetMapping("/alcohol/with-fields/{id}")
     public Map<String, Object> getParsedWineWithFields(@PathVariable long id,
             @RequestParam String fieldsList) throws NoEntityException {
         Set<String> requiredFields = new HashSet<>(Arrays.asList(fieldsList.split(",")));
@@ -84,7 +84,7 @@ public class MainController {
                 } catch (IllegalArgumentException | IllegalAccessException ignore) { }
             }
         }
-        log.info("Returned alchohol with id={} with requested fields ({}) via GET /winestyle/api/alcohol/with_fields/{}", id, fieldsList, id);
+        log.info("Returned alchohol with id={} with requested fields ({}) via GET /winestyle/api/alcohol/with-fields/{}", id, fieldsList, id);
         return res;
     }
 
