@@ -142,7 +142,8 @@ public class Alcohol {
         if (volume != null)
             builder.setCapacity((float) (double) volume);
         if (strength != null)
-            builder.setStrength(Float.parseFloat(strength.substring(0, strength.length() - 1)));
+            builder.setStrength(strength.matches("^Б.+") ? 0.f :
+                    Float.parseFloat(strength.substring(0, strength.length() - 1)));
         if (sugar != null)
             builder.setSugar(sugar.equals("Сухое") ? Sugar.DRY :
                     sugar.equals("Полусухое") ? Sugar.MEDIUM_DRY :

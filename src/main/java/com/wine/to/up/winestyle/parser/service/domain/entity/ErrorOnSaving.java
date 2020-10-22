@@ -43,50 +43,49 @@ public class ErrorOnSaving {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column
+    @Column(columnDefinition = "TEXT")
     private String type;
 
-    @Column
+    @Column(columnDefinition = "TEXT")
     private String name;
 
-    @Column
+    @Column(columnDefinition = "TEXT")
     private String url;
 
-    @Column
+    @Column(columnDefinition = "TEXT")
     private String imageUrl;
 
-    @Column
-    private Integer cropYear;
+    @Column(columnDefinition = "TEXT")
+    private String cropYear;
 
-    @Column
+    @Column(columnDefinition = "TEXT")
     private String manufacturer;
 
-    @Column
+    @Column(columnDefinition = "TEXT")
     private String brand;
 
-    @Column
+    @Column(columnDefinition = "TEXT")
     private String color;
 
-    @Column
+    @Column(columnDefinition = "TEXT")
     private String country;
 
-    @Column
+    @Column(columnDefinition = "TEXT")
     private String region;
 
-    @Column
-    private Float volume;
+    @Column(columnDefinition = "TEXT")
+    private String volume;
 
-    @Column
+    @Column(columnDefinition = "TEXT")
     private String strength;
 
-    @Column
+    @Column(columnDefinition = "TEXT")
     private String sugar;
 
-    @Setter
-    @Column
-    private Float price;
+    @Column(columnDefinition = "TEXT")
+    private String price;
 
-    @Column
+    @Column(columnDefinition = "TEXT")
     private String grape;
 
     @Column(columnDefinition = "TEXT")
@@ -101,8 +100,8 @@ public class ErrorOnSaving {
     @Column(columnDefinition = "TEXT")
     private String description;
 
-    @Column
-    private Float rating;
+    @Column(columnDefinition = "TEXT")
+    private String rating;
 
     @Column
     private Long unsavedId;
@@ -119,22 +118,22 @@ public class ErrorOnSaving {
                 .type(alcohol.getType())
                 .url(alcohol.getUrl())
                 .imageUrl(alcohol.getImageUrl())
-                .cropYear(alcohol.getCropYear())
+                .cropYear(alcohol.getCropYear().toString())
                 .manufacturer(alcohol.getManufacturer())
                 .brand(alcohol.getBrand())
                 .color(alcohol.getColor())
                 .country(alcohol.getCountry())
                 .region(alcohol.getRegion())
-                .volume(alcohol.getVolume())
+                .volume(alcohol.getVolume().toString())
                 .strength(alcohol.getStrength())
                 .sugar(alcohol.getSugar())
-                .price(alcohol.getPrice())
+                .price(alcohol.getPrice().toString())
                 .grape(alcohol.getGrape())
                 .taste(alcohol.getTaste())
                 .aroma(alcohol.getAroma())
                 .foodPairing(alcohol.getFoodPairing())
                 .description(alcohol.getDescription())
-                .rating(alcohol.getRating())
+                .rating(alcohol.getRating().toString())
                 .unsavedId(alcohol.getId())
                 .error(error)
                 .timestamp(timestamp)
