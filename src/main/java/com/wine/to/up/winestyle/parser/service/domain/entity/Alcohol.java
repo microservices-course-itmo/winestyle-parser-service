@@ -45,7 +45,7 @@ public class Alcohol {
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long id;
 
-    @Column(columnDefinition = "varchar(20)")
+    @Column(columnDefinition = "varchar(25)")
     private String type;
 
     @Column(columnDefinition = "varchar(130)")
@@ -84,7 +84,7 @@ public class Alcohol {
     @Column(columnDefinition = "varchar(30)")
     private String strength;
 
-    @Column(columnDefinition = "varchar(50)")
+    @Column(columnDefinition = "varchar(15)")
     private String sugar;
 
     @Setter
