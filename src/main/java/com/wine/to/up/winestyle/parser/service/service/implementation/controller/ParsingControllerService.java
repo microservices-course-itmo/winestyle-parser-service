@@ -37,7 +37,7 @@ public class ParsingControllerService {
                         parse(alcoholUrl, alcoholType);
                     } catch (InterruptedException e) {
                         log.error("Thread is sleeping!", e);
-                    } catch (NoEntityException ignore) { }
+                    }
                 });
                 newThread.start();
             } else {
@@ -54,7 +54,7 @@ public class ParsingControllerService {
         if (statusService.statusCheck("wine")) {
             try {
                 parse(SUPPORTED_ALCOHOL_URLS.get("wine"), "wine");
-            } catch (InterruptedException | NoEntityException ignore) { }
+            } catch (InterruptedException ignore) { }
         }
     }
 
@@ -64,11 +64,11 @@ public class ParsingControllerService {
         if (statusService.statusCheck("sparkling")) {
             try {
                 parse(SUPPORTED_ALCOHOL_URLS.get("sparkling"), "sparkling");
-            } catch (InterruptedException | NoEntityException ignore) { }
+            } catch (InterruptedException ignore) { }
         }
     }
 
-    private void parse(String relativeUrl, String alcoholType) throws InterruptedException, NoEntityException {
+    private void parse(String relativeUrl, String alcoholType) throws InterruptedException {
         statusService.statusChange(alcoholType);
 
         String mainUrl = "https://spb.winestyle.ru";

@@ -330,7 +330,7 @@ public class AlcoholParsing implements ParsingService {
                 isSugarPresented = false;
                 type = typeColorSugar;
             }
-            if (type.matches("^Ве.+|^Ви.+")) {
+            if (type.matches("^В.+|^Кре.+|^Д.+|^Ко.+|^П.+|^Х.+")) {
                 colorAndSugar = typeColorSugar.substring(indexOfDelim + 2);
                 isColorPresented = false;
                 return type;

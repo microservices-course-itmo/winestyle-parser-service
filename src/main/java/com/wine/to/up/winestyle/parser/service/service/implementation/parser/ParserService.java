@@ -33,7 +33,7 @@ public class ParserService implements WinestyleParserService {
     private final Alcohol.AlcoholBuilder builder = Alcohol.builder();
 
     @Override
-    public void parseBuildSave(String mainUrl, String relativeUrl, String alcoholType) throws InterruptedException, NoEntityException {
+    public void parseBuildSave(String mainUrl, String relativeUrl, String alcoholType) throws InterruptedException {
         Document currentDoc = documentService.setAlcoholUrl(mainUrl + relativeUrl).getAlcoholPage();
         LocalDateTime start = LocalDateTime.now();
         int parsed = 0;
@@ -41,24 +41,27 @@ public class ParserService implements WinestyleParserService {
         log.warn("Starting parsing of {}", alcoholType);
 
         while (currentDoc != null) {
-            parsed += productBlocksRunner(mainUrl, currentDoc, alcoholType);
-            Duration timePassed = java.time.Duration.between(LocalDateTime.now(), (start));
-            log.info("Parsing of {}: {} in {} minutes ({} entities per second)", alcoholType, parsed, timePassed.toMinutes(), parsed / (double) timePassed.toSeconds());
+            parsed += runAcrossProducts(mainUrl, currentDoc, alcoholType);
+            Duration timePassed = java.time.Duration.between((start), LocalDateTime.now());
+            int minutesPart = timePassed.toMinutesPart();
+            int secondsPart = (int) (timePassed.toSeconds() - minutesPart * 60);
+            log.info("Parsing of {}: {} in {} minutes {} seconds ({} entities per second)",
+                    alcoholType, parsed, minutesPart, secondsPart, parsed / (double) timePassed.toSeconds());
             currentDoc = documentService.getNext();
         }
 
-        log.warn("Finished parsing of {} in {}", alcoholType, java.time.Duration.between(LocalDateTime.now(), (start)));
+        log.warn("Finished parsing of {} in {}", alcoholType, java.time.Duration.between((start), LocalDateTime.now()));
     }
 
     /**
      * Парсер страницы с позициями
-     * @param mainUrl адрес главной страницы сайта
-     * @param currentDoc текущая страница с позициями
+     * @param mainUrl     адрес главной страницы сайта
+     * @param currentDoc  текущая страница с позициями
      * @param alcoholType тип алкоголя
      * @return количество распаршенных позиций
      * @throws InterruptedException в случае прерывания со стороны пользователя
      */
-    private int productBlocksRunner(String mainUrl, Document currentDoc, String alcoholType) throws InterruptedException, NoEntityException {
+    private int runAcrossProducts(String mainUrl, Document currentDoc, String alcoholType) throws InterruptedException {
         String productUrl;
         int parsedNow = 0;
         Elements alcohol = segmentationService
@@ -73,20 +76,29 @@ public class ParserService implements WinestyleParserService {
             productUrl = parsingService.parseUrl();
             log.debug("Now parsing url: {}", productUrl);
 
-            Alcohol result;
-            if (alcoholRepositoryService.getByUrl(productUrl) == null) {
+            Alcohol result = null;
+            try {
+                alcoholRepositoryService.getByUrl(productUrl);
+                try {
+                    alcoholRepositoryService.updatePrice(parsingService.parsePrice(), productUrl);
+                    alcoholRepositoryService.updateRating(parsingService.parseWinestyleRating(), productUrl);
+                    result = alcoholRepositoryService.getByUrl(productUrl);
+                } catch (NoEntityException ignore) { }
+            } catch (NoEntityException ex) {
                 Document product = documentService.getProduct(mainUrl + productUrl);
                 segmentationService.setProductDocument(product).setProductMainContent();
                 prepareParsingService();
                 parserDirectorService.makeAlcohol(builder, alcoholType);
                 result = builder.url(productUrl).build();
                 alcoholRepositoryService.add(result);
-            } else {
-                alcoholRepositoryService.updatePrice(parsingService.parsePrice(), productUrl);
-                alcoholRepositoryService.updateRating(parsingService.parseWinestyleRating(), productUrl);
-                result = alcoholRepositoryService.getByUrl(productUrl);
             }
-            kafkaSendMessageService.sendMessage(UpdateProducts.UpdateProductsMessage.newBuilder().setShopLink(mainUrl).addProducts(result.asProduct()).build());
+            assert result != null;
+            kafkaSendMessageService.sendMessage(
+                    UpdateProducts.UpdateProductsMessage.newBuilder()
+                            .setShopLink(mainUrl)
+                            .addProducts(result.asProduct())
+                            .build()
+            );
             parsedNow++;
         }
         return parsedNow;
