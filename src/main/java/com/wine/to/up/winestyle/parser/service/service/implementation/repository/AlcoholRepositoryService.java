@@ -8,7 +8,6 @@ import com.wine.to.up.winestyle.parser.service.repository.AlcoholRepository;
 import com.wine.to.up.winestyle.parser.service.repository.ErrorOnSavingRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.dao.InvalidDataAccessResourceUsageException;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
@@ -64,8 +63,8 @@ public class AlcoholRepositoryService {
             alcoholRepository.save(alcohol);
         } catch(Exception ex){
             ErrorOnSaving errorOnSaving = ErrorOnSaving.of(alcohol, new Timestamp(System.currentTimeMillis()), ex.getMessage());
-            errorOnSavingRepository.save(errorOnSaving);
             log.error("Error on saving alcohol: {}", alcohol.toString(), ex);
+            errorOnSavingRepository.save(errorOnSaving);
         }
     }
 
