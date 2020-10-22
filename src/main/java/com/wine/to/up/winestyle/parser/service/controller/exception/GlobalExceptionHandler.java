@@ -82,7 +82,6 @@ public class GlobalExceptionHandler {
     /**
      * Обработчик ошибки о неподдерживаемом типе алкоголя
      * @param ex Исключение о неподдерживаемом типе алкоголя
-     * @param body Список ошибок
      * @param headers HTTP заголовки
      * @param status HTTP статус
      * @param request Запрос

@@ -6,11 +6,12 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface AlcoholRepository extends JpaRepository<Alcohol, Long>, JpaSpecificationExecutor<Alcohol> {
     Alcohol findByName(String name);
     List<Alcohol> findAllByType(String type);
     List<Alcohol> findAllByTypeIn(List<String> types);
-    Alcohol findByUrl(String url);
+    Optional<Alcohol> findByUrl(String url);
 }

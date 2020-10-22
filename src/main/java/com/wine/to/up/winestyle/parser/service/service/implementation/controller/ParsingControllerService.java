@@ -1,5 +1,6 @@
 package com.wine.to.up.winestyle.parser.service.service.implementation.controller;
 
+import com.wine.to.up.winestyle.parser.service.controller.exception.NoEntityException;
 import com.wine.to.up.winestyle.parser.service.controller.exception.UnsupportedAlcoholTypeException;
 import com.wine.to.up.winestyle.parser.service.controller.exception.ServiceIsBusyException;
 import com.wine.to.up.winestyle.parser.service.service.WinestyleParserService;
@@ -36,7 +37,7 @@ public class ParsingControllerService {
                         parse(alcoholUrl, alcoholType);
                     } catch (InterruptedException e) {
                         log.error("Thread is sleeping!", e);
-                    }
+                    } catch (NoEntityException ignore) { }
                 });
                 newThread.start();
             } else {
@@ -53,8 +54,7 @@ public class ParsingControllerService {
         if (statusService.statusCheck("wine")) {
             try {
                 parse(SUPPORTED_ALCOHOL_URLS.get("wine"), "wine");
-            } catch (InterruptedException ignore) {
-            }
+            } catch (InterruptedException | NoEntityException ignore) { }
         }
     }
 
@@ -64,11 +64,11 @@ public class ParsingControllerService {
         if (statusService.statusCheck("sparkling")) {
             try {
                 parse(SUPPORTED_ALCOHOL_URLS.get("sparkling"), "sparkling");
-            } catch (InterruptedException ignore) { }
+            } catch (InterruptedException | NoEntityException ignore) { }
         }
     }
 
-    private void parse(String relativeUrl, String alcoholType) throws InterruptedException {
+    private void parse(String relativeUrl, String alcoholType) throws InterruptedException, NoEntityException {
         statusService.statusChange(alcoholType);
 
         String mainUrl = "https://spb.winestyle.ru";

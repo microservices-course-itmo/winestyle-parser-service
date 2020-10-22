@@ -25,13 +25,13 @@ public class AlcoholRepositoryService {
     private final AlcoholRepository alcoholRepository;
     private final ErrorOnSavingRepository errorOnSavingRepository;
 
-    public void updatePrice(Float price, String url) {
+    public void updatePrice(Float price, String url) throws NoEntityException {
         Alcohol alcohol = getByUrl(url);
         alcohol.setPrice(price);
         alcoholRepository.save(alcohol);
     }
 
-    public void updateRating(Float rating, String url) {
+    public void updateRating(Float rating, String url) throws NoEntityException {
         Alcohol alcohol = getByUrl(url);
         alcohol.setRating(rating);
         alcoholRepository.save(alcohol);
@@ -53,12 +53,10 @@ public class AlcoholRepositoryService {
         return alcoholRepository.findAllByTypeIn(Arrays.asList("Игристое", "Шампанское"));
     }
 
-    public Alcohol getByUrl(String url) {
-        try {
-            return alcoholRepository.findByUrl(url);
-        } catch (InvalidDataAccessResourceUsageException ex) {
-            return null;
-        }
+    public Alcohol getByUrl(String url) throws NoEntityException {
+        return alcoholRepository.findByUrl(url).orElseThrow(() ->
+                NoEntityException.createWith(Alcohol.class.getSimpleName().toLowerCase(), null, url)
+        );
     }
 
     public void add(Alcohol alcohol) {
@@ -73,7 +71,7 @@ public class AlcoholRepositoryService {
 
     public Alcohol getByID(long id) throws NoEntityException {
         return alcoholRepository.findById(id).orElseThrow(() ->
-                NoEntityException.createWith(Alcohol.class.getSimpleName().toLowerCase(), id)
+                NoEntityException.createWith(Alcohol.class.getSimpleName().toLowerCase(), id, null)
         );
     }
 }

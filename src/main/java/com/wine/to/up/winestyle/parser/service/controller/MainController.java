@@ -81,8 +81,7 @@ public class MainController {
             if (requiredFields.contains(fieldName)) {
                 try {
                     res.put(fieldName, field.get(parsedAlcohol));
-                } catch (IllegalArgumentException | IllegalAccessException e) {
-                }
+                } catch (IllegalArgumentException | IllegalAccessException ignore) { }
             }
         }
         log.info("Returned alchohol with id={} with requested fields ({}) via GET /winestyle/api/alcohol/with_fields/{}", id, fieldsList, id);

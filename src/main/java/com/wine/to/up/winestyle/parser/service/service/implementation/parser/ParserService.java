@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 
 import com.wine.to.up.commonlib.messaging.KafkaMessageSender;
 import com.wine.to.up.parser.common.api.schema.UpdateProducts;
+import com.wine.to.up.winestyle.parser.service.controller.exception.NoEntityException;
 import com.wine.to.up.winestyle.parser.service.domain.entity.Alcohol;
 import com.wine.to.up.winestyle.parser.service.service.ParserDirectorService;
 import com.wine.to.up.winestyle.parser.service.service.ParsingService;
@@ -32,7 +33,7 @@ public class ParserService implements WinestyleParserService {
     private final Alcohol.AlcoholBuilder builder = Alcohol.builder();
 
     @Override
-    public void parseBuildSave(String mainUrl, String relativeUrl, String alcoholType) throws InterruptedException {
+    public void parseBuildSave(String mainUrl, String relativeUrl, String alcoholType) throws InterruptedException, NoEntityException {
         Document currentDoc = documentService.setAlcoholUrl(mainUrl + relativeUrl).getAlcoholPage();
         LocalDateTime start = LocalDateTime.now();
         int parsed = 0;
@@ -57,7 +58,7 @@ public class ParserService implements WinestyleParserService {
      * @return количество распаршенных позиций
      * @throws InterruptedException в случае прерывания со стороны пользователя
      */
-    private int productBlocksRunner(String mainUrl, Document currentDoc, String alcoholType) throws InterruptedException {
+    private int productBlocksRunner(String mainUrl, Document currentDoc, String alcoholType) throws InterruptedException, NoEntityException {
         String productUrl;
         int parsedNow = 0;
         Elements alcohol = segmentationService
