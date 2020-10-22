@@ -8,7 +8,7 @@ CREATE TABLE alcohol
     url          VARCHAR(135),
     image_url    VARCHAR(65),
     crop_year    INTEGER,
-    manufacturer varchar(65),
+    manufacturer VARCHAR(65),
     brand        VARCHAR(50),
     price        REAL,
     volume       REAL,
@@ -27,7 +27,7 @@ CREATE TABLE alcohol
 
 CREATE TABLE error_on_saving
 (
-    id           SERIAL primary key,
+    id           SERIAL PRIMARY KEY,
     name         TEXT,
     type         TEXT,
     url          TEXT,
@@ -48,7 +48,7 @@ CREATE TABLE error_on_saving
     taste        TEXT,
     food_pairing TEXT,
     description  TEXT,
-    unsaved_id   bigint,
+    unsaved_id   BIGINT,
     error        TEXT,
-    timestamp    timestamp,
+    timestamp    TIMESTAMP
 );
