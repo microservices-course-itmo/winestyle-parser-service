@@ -78,7 +78,7 @@ public class AlcoholParsing implements ParsingService {
         String[] titleInfo = name.split(",? ");
         // Checks each word in the name for year format matching
         for (String word : titleInfo) {
-            if (word.matches("\\d{4}")) {
+            if (word.matches("^\\d{4}$")) {
                 return Integer.parseInt(word);
             }
         }
@@ -287,7 +287,7 @@ public class AlcoholParsing implements ParsingService {
                     type = typeColorSugar.substring(0, indexOfDelim);
                     colorAndSugar = typeColorSugar.substring(indexOfDelim + 1);
                     return type;
-                } else if (typeColorSugar.matches("^Ш.+|^И.+")) {
+                } else if (typeColorSugar.matches("^[ШИ].+")) {
                     isColorPresented = false;
                     indexOfDelim = typeColorSugar.indexOf(", ");
                     if (indexOfDelim >= 0) {
@@ -330,7 +330,7 @@ public class AlcoholParsing implements ParsingService {
                 isSugarPresented = false;
                 type = typeColorSugar;
             }
-            if (type.matches("^В.+|^Кре.+|^Д.+|^Ко.+|^П.+|^Х.+")) {
+            if (type.matches("^(?!Р|Б|О|Кра).+")) {
                 colorAndSugar = typeColorSugar.substring(indexOfDelim + 2);
                 isColorPresented = false;
                 return type;
