@@ -97,6 +97,14 @@
             <version>${commons.io.version}</version>
         </dependency>
 
+        <!-- Selenium -->
+
+        <dependency>
+            <groupId>org.seleniumhq.selenium</groupId>
+            <artifactId>selenium-java</artifactId>
+            <version>3.141.59</version>
+        </dependency>
+
 
         <!--Our custom artifacts-->
         <dependency>
