@@ -318,25 +318,32 @@ public class AlcoholParsing implements ParsingService {
                 }
             }
         } else {
-            Element typeElement = listDescription.selectFirst("span:contains(Вино:)");
-            Element typeParent = typeElement.parent();
-            typeElement.remove();
-            String typeColorSugar = typeParent.text();
-            typeParent.remove();
-            int indexOfDelim = typeColorSugar.indexOf(", ");
-            if (indexOfDelim >= 0) {
-                type = typeColorSugar.substring(0, indexOfDelim);
-            } else {
-                isSugarPresented = false;
-                type = typeColorSugar;
-            }
-            if (type.matches("^(?!Р|Б|О|Кра).+")) {
-                colorAndSugar = typeColorSugar.substring(indexOfDelim + 2);
+            try {
+                Element typeElement = listDescription.selectFirst("span:contains(Вино:)");
+                Element typeParent = typeElement.parent();
+                typeElement.remove();
+                String typeColorSugar = typeParent.text();
+                typeParent.remove();
+                int indexOfDelim = typeColorSugar.indexOf(", ");
+                if (indexOfDelim >= 0) {
+                    type = typeColorSugar.substring(0, indexOfDelim);
+                } else {
+                    isSugarPresented = false;
+                    type = typeColorSugar;
+                }
+                if (type.matches("^(?!Р|Б|О|Г|Кра).+")) {
+                    colorAndSugar = typeColorSugar.substring(indexOfDelim + 2);
+                    isColorPresented = false;
+                    return type;
+                } else {
+                    colorAndSugar = typeColorSugar;
+                    return "Вино";
+                }
+            } catch (NullPointerException e) {
                 isColorPresented = false;
-                return type;
-            } else {
-                colorAndSugar = typeColorSugar;
-                return "Вино";
+                isSugarPresented = false;
+                log.warn("wine's type, color and sugar are not specified");
+                return null;
             }
         }
     }
@@ -348,7 +355,7 @@ public class AlcoholParsing implements ParsingService {
             if (indexOfDelim >= 0) {
                 String color = colorAndSugar.substring(0, indexOfDelim);
                 colorAndSugar = colorAndSugar.substring(indexOfDelim + 2);
-                return color.substring(0,1).toUpperCase() + color.substring(1);
+                return color.substring(0, 1).toUpperCase() + color.substring(1);
             } else {
                 isSugarPresented = false;
                 return colorAndSugar;
