@@ -33,9 +33,8 @@ public class MainController {
 
     @GetMapping("/alcohol")
     public List<Alcohol> getParsedAlcohol() {
-        List<Alcohol> alcohol = alcoholRepositoryService.getAll();
         log.info("Returned all alcohol via GET /winestyle/api/alcohol");
-        return alcohol;
+        return alcoholRepositoryService.getAll();
     }
 
     @GetMapping("/wines")
@@ -84,7 +83,7 @@ public class MainController {
                 } catch (IllegalArgumentException | IllegalAccessException ignore) { }
             }
         }
-        log.info("Returned alchohol with id={} with requested fields ({}) via GET /winestyle/api/alcohol/with-fields/{}", id, fieldsList, id);
+        log.info("Returned alcohol with id={} with requested fields ({}) via GET /winestyle/api/alcohol/with-fields/{}", id, fieldsList, id);
         return res;
     }
 
@@ -105,8 +104,8 @@ public class MainController {
             response.flushBuffer();
             log.info("Successfully dumped the database and returned csv (GET /winestyle/api/wine/csv)");
         } catch (IOException ex) {
-            log.error("Cannot write feading database csv to outputStream (GET /winestyle/api/wine/csv)");
-            throw new RuntimeException("Error while feading file to outputStream");
+            log.error("Cannot write feeding database csv to outputStream (GET /winestyle/api/wine/csv)");
+            throw new RuntimeException("Error while feeding file to outputStream");
         }
     }
 }
