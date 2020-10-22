@@ -19,6 +19,10 @@
 
         <service.commonlib.version>0.2.1-SNAPSHOT</service.commonlib.version>
         <parser.common.api.version>0.2.1-SNAPSHOT</parser.common.api.version>
+
+        <jsoup.version>1.13.1</jsoup.version>
+        <opencsv.version>5.2</opencsv.version>
+        <commons.io.version>1.3.2</commons.io.version>
     </properties>
 
     <dependencies>
@@ -75,14 +79,14 @@
         <dependency>
             <groupId>org.jsoup</groupId>
             <artifactId>jsoup</artifactId>
-            <version>1.13.1</version>
+            <version>${jsoup.version}</version>
         </dependency>
 
         <!-- csv-file support for ml-team -->
         <dependency>
             <groupId>com.opencsv</groupId>
             <artifactId>opencsv</artifactId>
-            <version>5.2</version>
+            <version>${opencsv.version}</version>
         </dependency>
 
         <!-- Apache commons -->
@@ -90,7 +94,7 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-io</artifactId>
-            <version>1.3.2</version>
+            <version>${commons.io.version}</version>
         </dependency>
 
 
