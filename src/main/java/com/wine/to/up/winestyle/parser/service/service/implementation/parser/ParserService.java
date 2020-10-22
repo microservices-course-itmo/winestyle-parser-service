@@ -37,16 +37,20 @@ public class ParserService implements WinestyleParserService {
         Document currentDoc = documentService.setAlcoholUrl(mainUrl + relativeUrl).getAlcoholPage();
         LocalDateTime start = LocalDateTime.now();
         int parsed = 0;
+        long hoursPassed;
+        long minutesPart;
+        long secondsPart;
 
-        log.warn("Starting parsing of {}", alcoholType);
+                log.warn("Starting parsing of {}", alcoholType);
 
         while (currentDoc != null) {
             parsed += runAcrossProducts(mainUrl, currentDoc, alcoholType);
             Duration timePassed = java.time.Duration.between((start), LocalDateTime.now());
-            int minutesPart = timePassed.toMinutesPart();
-            int secondsPart = (int) (timePassed.toSeconds() - minutesPart * 60);
-            log.info("Parsing of {}: {} in {} minutes {} seconds ({} entities per second)",
-                    alcoholType, parsed, minutesPart, secondsPart, parsed / (double) timePassed.toSeconds());
+            hoursPassed = timePassed.toHours();
+            minutesPart = (timePassed.toMinutes() - hoursPassed * 60);
+            secondsPart = (timePassed.toSeconds() - minutesPart * 60);
+            log.info("Parsing of {}: {} in {} hours {} minutes {} seconds ({} entities per second)",
+                    alcoholType, parsed, hoursPassed, minutesPart, secondsPart, parsed / (double) timePassed.toSeconds());
             currentDoc = documentService.getNext();
         }
 
