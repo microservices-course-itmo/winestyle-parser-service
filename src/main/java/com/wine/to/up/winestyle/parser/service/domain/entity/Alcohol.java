@@ -91,7 +91,7 @@ public class Alcohol {
     @Column
     private Float price;
 
-    @Column(columnDefinition = "varchar(110)")
+    @Column(columnDefinition = "varchar(125)")
     private String grape;
 
     @Column(columnDefinition="TEXT")
