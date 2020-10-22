@@ -51,7 +51,7 @@ public class Alcohol {
     @Column(columnDefinition = "varchar(130)")
     private String name;
 
-    @Column(columnDefinition = "varchar(135)")
+    @Column(columnDefinition = "varchar(140)")
     private String url;
 
     @Column(columnDefinition = "varchar(65)")

@@ -5,7 +5,7 @@ CREATE TABLE alcohol
     id           SERIAL PRIMARY KEY,
     name         VARCHAR(130),
     type         VARCHAR(20),
-    url          VARCHAR(135),
+    url          VARCHAR(140),
     image_url    VARCHAR(65),
     crop_year    INTEGER,
     manufacturer VARCHAR(65),
