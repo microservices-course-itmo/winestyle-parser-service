@@ -69,7 +69,7 @@ public class Alcohol {
     @Column(columnDefinition = "varchar(50)")
     private String brand;
 
-    @Column(columnDefinition = "varchar(15)")
+    @Column(columnDefinition = "varchar(10)")
     private String color;
 
     @Column(columnDefinition = "varchar(15)")
@@ -81,10 +81,10 @@ public class Alcohol {
     @Column
     private Float volume;
 
-    @Column(columnDefinition = "varchar(30)")
+    @Column(columnDefinition = "varchar(25)")
     private String strength;
 
-    @Column(columnDefinition = "varchar(15)")
+    @Column(columnDefinition = "varchar(20)")
     private String sugar;
 
     @Setter
@@ -130,10 +130,10 @@ public class Alcohol {
         if (brand != null)
             builder.setBrand(brand);
         if (color != null)
-            builder.setColor(color.equals("Красное") ? Color.RED : 
-                    color.equals("Белое") ? Color.WHITE :
-                    color.equals("Розовое") ? Color.ROSE :
-                    color.equals("Оранжевое") ? Color.ORANGE :
+            builder.setColor(color.startsWith("Красное") ? Color.RED :
+                    color.matches("^(Белое|Голубое)") ? Color.WHITE :
+                    color.startsWith("Розовое") ? Color.ROSE :
+                    color.startsWith("Оранжевое") ? Color.ORANGE :
                     Color.UNRECOGNIZED);
         if (country != null)
             builder.setCountry(country);
@@ -145,10 +145,10 @@ public class Alcohol {
             builder.setStrength(strength.matches("^Б.+") ? 0.f :
                     Float.parseFloat(strength.substring(0, strength.length() - 1)));
         if (sugar != null)
-            builder.setSugar(sugar.equals("Сухое") ? Sugar.DRY :
-                    sugar.equals("Полусухое") ? Sugar.MEDIUM_DRY :
-                    sugar.equals("Полусладкое") ? Sugar.MEDIUM :
-                    sugar.equals("Сладкое") ? Sugar.SWEET :
+            builder.setSugar(sugar.matches("^(Сухое|Брют).*") ? Sugar.DRY :
+                    sugar.startsWith("Полусухое") ? Sugar.MEDIUM_DRY :
+                    sugar.startsWith("Полусладкое") ? Sugar.MEDIUM :
+                    sugar.startsWith("Сладкое") ? Sugar.SWEET :
                     Sugar.UNRECOGNIZED);
         if (price != null)
             builder.setNewPrice((float) price.doubleValue());
