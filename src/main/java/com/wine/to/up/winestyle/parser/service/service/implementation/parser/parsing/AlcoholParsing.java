@@ -24,7 +24,6 @@ public class AlcoholParsing implements ParsingService {
 
     private String name;
     private String region;
-    private String strength;
     private boolean isRegionPresented = true;
     private boolean isColorPresented = true;
     private boolean isSugarPresented = true;
@@ -238,7 +237,7 @@ public class AlcoholParsing implements ParsingService {
             Element strengthElement = listDescription.selectFirst("span:contains(Крепость:)");
             Element strengthParent = strengthElement.parent();
             strengthElement.remove();
-            strength = strengthParent.text();
+            String strength = strengthParent.text();
             strengthParent.remove();
             return strength;
         } catch (NullPointerException ex) {
@@ -315,7 +314,7 @@ public class AlcoholParsing implements ParsingService {
                     isSugarPresented = false;
                     type = typeColorSugar;
                 }
-                if (type.matches("^(?!Р|Б|О|Г|Кра).+")) {
+                if (type.matches("^(?!C|Пол|Р|Б|О|Г|Кра).+")) {
                     colorAndSugar = typeColorSugar.substring(indexOfDelim + 2);
                     isColorPresented = false;
                     return type;
@@ -327,12 +326,8 @@ public class AlcoholParsing implements ParsingService {
         } catch (NullPointerException e) {
             isColorPresented = false;
             isSugarPresented = false;
-            if (strength.charAt(0) == 'Б') {
-                return "Детское шампанское";
-            } else {
-                log.warn("product's type, color and sugar are not specified");
-                return null;
-            }
+            log.warn("product's type, color and sugar are not specified");
+            return null;
         }
     }
 

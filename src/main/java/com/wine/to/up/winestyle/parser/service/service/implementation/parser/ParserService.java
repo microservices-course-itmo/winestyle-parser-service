@@ -41,7 +41,7 @@ public class ParserService implements WinestyleParserService {
         long minutesPart;
         long secondsPart;
 
-                log.warn("Starting parsing of {}", alcoholType);
+        log.warn("Starting parsing of {}", alcoholType);
 
         while (currentDoc != null) {
             parsed += runAcrossProducts(mainUrl, currentDoc, alcoholType);
