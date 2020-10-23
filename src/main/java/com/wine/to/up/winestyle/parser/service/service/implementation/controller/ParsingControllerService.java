@@ -24,7 +24,7 @@ public class ParsingControllerService {
 
     private final ImmutableMap<String, String> SUPPORTED_ALCOHOL_URLS = ImmutableMap.<String, String>builder()
             .put("wine", "/wine/all/")
-            .put("sparkling", "/champagnes-and-sparkling/all/")
+            .put("sparkling", "https://spb.winestyle.ru/champagnes-and-sparkling/champagnes/sparkling/sparkling-blue_ll/")
             .build();
 
     // Start parsing job in a separate thread
