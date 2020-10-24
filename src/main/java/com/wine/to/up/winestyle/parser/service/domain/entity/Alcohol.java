@@ -140,7 +140,7 @@ public class Alcohol {
         if (region != null)
             builder.addRegion(region); // FIXME addRegion ?
         if (volume != null)
-            builder.setCapacity((float) (double) volume);
+            builder.setCapacity(volume);
         if (strength != null)
             builder.setStrength(strength.matches("^Б.+") ? 0.f :
                     Float.parseFloat(strength.substring(0, strength.length() - 1)));
@@ -151,7 +151,7 @@ public class Alcohol {
                     sugar.startsWith("Сладкое") ? Sugar.SWEET :
                     Sugar.UNRECOGNIZED);
         if (price != null)
-            builder.setNewPrice((float) price.doubleValue());
+            builder.setNewPrice(price);
         if (grape != null)
             builder.addGrapeSort(grape); // FIXME addGrapeSort ?
         if (taste != null)
@@ -163,7 +163,7 @@ public class Alcohol {
         if (description != null)
             builder.setDescription(description);
         if (rating != null)
-            builder.setRating((float) (double) rating);
+            builder.setRating(rating);
         return builder.build();
     }
 }
