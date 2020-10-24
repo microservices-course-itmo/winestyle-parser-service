@@ -12,7 +12,7 @@ public class GeneralPurposesBeansConfig {
      * Model mapper bean
      */
     @Bean
-    public ModelMapper getModelMapper() {
+    public ModelMapper modelMapper() {
         return new ModelMapper();
     }
 
@@ -20,7 +20,7 @@ public class GeneralPurposesBeansConfig {
      * Object mapper bean
      */
     @Bean
-    public ObjectMapper getObjectMapper() {
+    public ObjectMapper objectMapper() {
         return new ObjectMapper();
     }
 }

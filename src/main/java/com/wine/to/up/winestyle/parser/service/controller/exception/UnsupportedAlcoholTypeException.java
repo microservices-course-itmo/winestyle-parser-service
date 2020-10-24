@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 @RequiredArgsConstructor
 @ResponseStatus(code = HttpStatus.BAD_REQUEST, reason = "Service is not supporting such alcohol type.")
 public class UnsupportedAlcoholTypeException extends Exception {
+    private static final long serialVersionUID = 210512838564413311L;
+    
     private final String cause;
     private final String alcoholType;
 

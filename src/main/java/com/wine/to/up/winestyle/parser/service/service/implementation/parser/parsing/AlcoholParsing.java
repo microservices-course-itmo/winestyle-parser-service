@@ -31,8 +31,9 @@ public class AlcoholParsing implements ParsingService {
     private String colorAndSugar;
 
     /**
-     * Парсер названия вина.
-     * @return Название вина.
+     * Парсер названия алкоголя.
+     *
+     * @return Название алкоголя.
      */
     @Override
     public String parseName() {
@@ -41,6 +42,11 @@ public class AlcoholParsing implements ParsingService {
         return name;
     }
 
+    /**
+     * Парсер адреса страницы алкоголя.
+     *
+     * @return Адрес страницы алкоголя.
+     */
     @Override
     public String parseUrl() {
         return productBlock.selectFirst("a").attr("href");
@@ -253,89 +259,90 @@ public class AlcoholParsing implements ParsingService {
      * @return Тип напитка ИЛИ массив из двух Null, если свойств нет.
      */
     @Override
-    public String parseType() {
+    public String parseType(Boolean isSpakrling) {
         String type;
-        try {
-            Element typeAndColorElement = listDescription.selectFirst("span:matches(([Вв]ино)[:/].*)");
-            Element typeAndColorParent = typeAndColorElement.parent();
-            typeAndColorElement.remove();
-            String typeColorSugar = typeAndColorParent.text();
-            typeAndColorParent.remove();
-            int indexOfDelim = typeColorSugar.indexOf("-");
-            if (indexOfDelim >= 0) {
-                type = typeColorSugar.substring(0, indexOfDelim);
-                colorAndSugar = typeColorSugar.substring(indexOfDelim + 1);
-                return type;
-            } else if (typeColorSugar.matches("^Ш.+|^И.+")) {
-                isColorPresented = false;
-                indexOfDelim = typeColorSugar.indexOf(", ");
+        if (isSpakrling) {
+            try {
+                Element typeAndColorElement = listDescription.selectFirst("span:matches(([Вв]ино)[:/].*)");
+                Element typeAndColorParent = typeAndColorElement.parent();
+                typeAndColorElement.remove();
+                String typeColorSugar = typeAndColorParent.text();
+                typeAndColorParent.remove();
+                int indexOfDelim = typeColorSugar.indexOf("-");
                 if (indexOfDelim >= 0) {
                     type = typeColorSugar.substring(0, indexOfDelim);
-                    colorAndSugar = typeColorSugar.substring(indexOfDelim + 2);
+                    colorAndSugar = typeColorSugar.substring(indexOfDelim + 1);
                     return type;
+                } else if (typeColorSugar.matches("^Ш.+|^И.+")) {
+                    isColorPresented = false;
+                    indexOfDelim = typeColorSugar.indexOf(", ");
+                    if (indexOfDelim >= 0) {
+                        type = typeColorSugar.substring(0, indexOfDelim);
+                        colorAndSugar = typeColorSugar.substring(indexOfDelim + 2);
+                        return type;
+                    } else {
+                        isColorPresented = false;
+                        isSugarPresented = false;
+                        return typeColorSugar;
+                    }
                 } else {
                     isColorPresented = false;
-                    isSugarPresented = false;
-                    return typeColorSugar;
+                    if (region.equals("Шампань")) {
+                        return "Шампанское";
+                    } else {
+                        return "Игристое";
+                    }
                 }
-            } else {
+            } catch (NullPointerException ex) {
                 isColorPresented = false;
-                if (region.equals("Шампань")) {
-                    return "Шампанское";
+                isSugarPresented = false;
+                if (strength.charAt(0) == 'Б') {
+                    return "Детское шампанское";
                 } else {
-                    return "Игристое";
+                    log.warn("sparkling's type, color and sugar are not specified");
+                    return null;
                 }
             }
-        } catch (NullPointerException ex) {
-            isColorPresented = false;
-            isSugarPresented = false;
-            if (strength.charAt(0) == 'Б') {
-                return "Детское шампанское";
+        } else {
+            Element typeElement = listDescription.selectFirst("span:contains(Вино:)");
+            Element typeParent = typeElement.parent();
+            typeElement.remove();
+            String typeColorSugar = typeParent.text();
+            typeParent.remove();
+            int indexOfDelim = typeColorSugar.indexOf(", ");
+            if (indexOfDelim >= 0) {
+                type = typeColorSugar.substring(0, indexOfDelim);
             } else {
-                log.warn("sparkling's type, color and sugar are not specified");
-                return null;
+                isSugarPresented = false;
+                type = typeColorSugar;
+            }
+            if (type.matches("^Ве.+|^Ви.+")) {
+                colorAndSugar = typeColorSugar.substring(indexOfDelim + 2);
+                isColorPresented = false;
+                return type;
+            } else {
+                colorAndSugar = typeColorSugar;
+                return "Вино";
             }
         }
     }
 
     @Override
-    public String parseColor(Boolean isSparkling) {
-        if (isSparkling) {
-            if (isColorPresented) {
-                int indexOfDelim = colorAndSugar.indexOf(", ");
-                if (indexOfDelim >= 0) {
-                    String color = colorAndSugar.substring(0, indexOfDelim);
-                    colorAndSugar = colorAndSugar.substring(indexOfDelim + 2);
-                    return color.substring(0, 1).toUpperCase() + color.substring(1);
-                } else {
-                    isSugarPresented = false;
-                    return colorAndSugar;
-                }
+    public String parseColor() {
+        if (isColorPresented) {
+            int indexOfDelim = colorAndSugar.indexOf(", ");
+            if (indexOfDelim >= 0) {
+                String color = colorAndSugar.substring(0, indexOfDelim);
+                colorAndSugar = colorAndSugar.substring(indexOfDelim + 2);
+                return color.substring(0,1).toUpperCase() + color.substring(1);
             } else {
-                log.warn("sparkling's color is not specified");
-                isColorPresented = true;
-                return null;
+                isSugarPresented = false;
+                return colorAndSugar;
             }
         } else {
-            try {
-                Element colorElement = listDescription.selectFirst("span:contains(Вино:)");
-                Element colorParent = colorElement.parent();
-                colorElement.remove();
-                colorAndSugar = colorParent.text();
-                colorParent.remove();
-                int indexOfDelim = colorAndSugar.indexOf(", ");
-                if (indexOfDelim >= 0) {
-                    String color = colorAndSugar.substring(0, indexOfDelim);
-                    colorAndSugar = colorAndSugar.substring(indexOfDelim + 2);
-                    return color;
-                } else {
-                    isSugarPresented = false;
-                    return colorAndSugar;
-                }
-            } catch (NullPointerException ex) {
-                log.warn("product's color is not specified");
-                return null;
-            }
+            log.warn("sparkling's color is not specified");
+            isColorPresented = true;
+            return null;
         }
     }
 

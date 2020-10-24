@@ -16,8 +16,8 @@ public interface ParsingService {
     String parseRegion();
     String parseStrength();
     String parseGrape();
-    String parseType();
-    String parseColor(Boolean isSparkling);
+    String parseType(Boolean isSparkling);
+    String parseColor();
     String parseSugar();
     String parseTaste();
     String parseAroma();
