@@ -6,9 +6,9 @@ import com.wine.to.up.winestyle.parser.service.domain.entity.ErrorOnSaving;
 import com.wine.to.up.winestyle.parser.service.repository.AlcoholRepository;
 
 import com.wine.to.up.winestyle.parser.service.repository.ErrorOnSavingRepository;
+import com.wine.to.up.winestyle.parser.service.service.RepositoryService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.dao.InvalidDataAccessResourceUsageException;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
@@ -21,11 +21,11 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class AlcoholRepositoryService {
+public class AlcoholRepositoryService implements RepositoryService {
     private final AlcoholRepository alcoholRepository;
     private final ErrorOnSavingRepository errorOnSavingRepository;
 
-    public void updatePrice(Float price, String url) {
+    public void updatePrice(Float price, String url) throws NoEntityException {
         Alcohol alcohol = getByUrl(url);
         alcohol.setPrice(price);
         alcoholRepository.save(alcohol);
@@ -35,21 +35,14 @@ public class AlcoholRepositoryService {
      * Обновление рейтинга 
      * @param rating новый рейтинг
      * @param url ссылка на напиток, у которого будем обновлять рейтинг
+     * @throws NoEntityException при отсутствии сущности
      */
-    public void updateRating(Float rating, String url) {
+    public void updateRating(Float rating, String url) throws NoEntityException {
         Alcohol alcohol = getByUrl(url);
         alcohol.setRating(rating);
         alcoholRepository.save(alcohol);
     }
 
-    /**
-     * Получение по названию
-     * @param name название
-     * @return напиток
-     */
-    public Alcohol getByName(String name) {
-        return alcoholRepository.findByName(name);
-    }
 
     /**
      * Получение списка напитков
@@ -64,7 +57,7 @@ public class AlcoholRepositoryService {
      * @return список вин
      */
     public List<Alcohol> getAllWines() {
-        return alcoholRepository.findAllByType("Вино");
+        return alcoholRepository.findAllWines();
     }
 
     /**
@@ -72,20 +65,19 @@ public class AlcoholRepositoryService {
      * @return список шампанского
      */
     public List<Alcohol> getAllSparkling() {
-        return alcoholRepository.findAllByTypeIn(Arrays.asList("Игристое", "Шампанское"));
+        return alcoholRepository.findAllSparkling();
     }
 
     /**
      * Получение напитка по ссылке
      * @param url ссылка на напиток
      * @return напиток или NULL, если
+     * @throws NoEntityException при отсутствии сущности
      */
-    public Alcohol getByUrl(String url) {
-        try {
-            return alcoholRepository.findByUrl(url);
-        } catch (InvalidDataAccessResourceUsageException ex) {
-            return null;
-        }
+    public Alcohol getByUrl(String url) throws NoEntityException {
+        return alcoholRepository.findByUrl(url).orElseThrow(() ->
+                NoEntityException.createWith(Alcohol.class.getSimpleName().toLowerCase(), null, url)
+        );
     }
 
     /**
@@ -96,9 +88,13 @@ public class AlcoholRepositoryService {
         try {
             alcoholRepository.save(alcohol);
         } catch(Exception ex){
-            ErrorOnSaving errorOnSaving = ErrorOnSaving.of(alcohol, new Timestamp(System.currentTimeMillis()), ex.getMessage());
-            errorOnSavingRepository.save(errorOnSaving);
+            ErrorOnSaving errorOnSaving = ErrorOnSaving.of(
+                    alcohol,
+                    new Timestamp(System.currentTimeMillis()),
+                    Arrays.toString(ex.getStackTrace())
+            );
             log.error("Error on saving alcohol: {}", alcohol.toString(), ex);
+            errorOnSavingRepository.save(errorOnSaving);
         }
     }
 
@@ -109,7 +105,8 @@ public class AlcoholRepositoryService {
      * @throws NoEntityException Если нет такого, кидаем эксепшен
      */
     public Alcohol getByID(long id) throws NoEntityException {
-        return alcoholRepository.findById(id)
-                .orElseThrow(() -> NoEntityException.createWith(Alcohol.class.getSimpleName().toLowerCase(), id));
+        return alcoholRepository.findById(id).orElseThrow(() ->
+                NoEntityException.createWith(Alcohol.class.getSimpleName().toLowerCase(), id, null)
+        );
     }
 }

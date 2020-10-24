@@ -45,13 +45,13 @@ public class Alcohol {
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long id;
 
-    @Column(columnDefinition = "varchar(20)")
+    @Column(columnDefinition = "varchar(25)")
     private String type;
 
     @Column(columnDefinition = "varchar(130)")
     private String name;
 
-    @Column(columnDefinition = "varchar(135)")
+    @Column(columnDefinition = "varchar(140)")
     private String url;
 
     @Column(columnDefinition = "varchar(65)")
@@ -69,7 +69,7 @@ public class Alcohol {
     @Column(columnDefinition = "varchar(50)")
     private String brand;
 
-    @Column(columnDefinition = "varchar(15)")
+    @Column(columnDefinition = "varchar(10)")
     private String color;
 
     @Column(columnDefinition = "varchar(15)")
@@ -81,17 +81,17 @@ public class Alcohol {
     @Column
     private Float volume;
 
-    @Column(columnDefinition = "varchar(30)")
+    @Column(columnDefinition = "varchar(25)")
     private String strength;
 
-    @Column(columnDefinition = "varchar(50)")
+    @Column(columnDefinition = "varchar(20)")
     private String sugar;
 
     @Setter
     @Column
     private Float price;
 
-    @Column(columnDefinition = "varchar(110)")
+    @Column(columnDefinition = "varchar(125)")
     private String grape;
 
     @Column(columnDefinition="TEXT")
@@ -121,8 +121,8 @@ public class Alcohol {
         if (url != null)
             builder.setLink(url);
         // TODO set image
-        // if (image != null)
-        //     builder.setImage(image);
+        if (image != null)
+             builder.setImage(String.valueOf(image));
         if (cropYear != null)
             builder.setYear(cropYear);
         if (manufacturer != null)
@@ -130,27 +130,28 @@ public class Alcohol {
         if (brand != null)
             builder.setBrand(brand);
         if (color != null)
-            builder.setColor(color.equals("Красное") ? Color.RED : 
-                    color.equals("Белое") ? Color.WHITE :
-                    color.equals("Розовое") ? Color.ROSE :
-                    color.equals("Оранжевое") ? Color.ORANGE :
+            builder.setColor(color.startsWith("Красное") ? Color.RED :
+                    color.matches("^(Белое|Голубое)") ? Color.WHITE :
+                    color.startsWith("Розовое") ? Color.ROSE :
+                    color.startsWith("Оранжевое") ? Color.ORANGE :
                     Color.UNRECOGNIZED);
         if (country != null)
             builder.setCountry(country);
         if (region != null)
             builder.addRegion(region); // FIXME addRegion ?
         if (volume != null)
-            builder.setCapacity((float) (double) volume);
+            builder.setCapacity(volume);
         if (strength != null)
-            builder.setStrength(Float.parseFloat(strength.substring(0, strength.length() - 1)));
+            builder.setStrength(strength.matches("^Б.+") ? 0.f :
+                    Float.parseFloat(strength.substring(0, strength.length() - 1)));
         if (sugar != null)
-            builder.setSugar(sugar.equals("Сухое") ? Sugar.DRY :
-                    sugar.equals("Полусухое") ? Sugar.MEDIUM_DRY :
-                    sugar.equals("Полусладкое") ? Sugar.MEDIUM :
-                    sugar.equals("Сладкое") ? Sugar.SWEET :
+            builder.setSugar(sugar.matches("^(Сухое|Брют).*") ? Sugar.DRY :
+                    sugar.startsWith("Полусухое") ? Sugar.MEDIUM_DRY :
+                    sugar.startsWith("Полусладкое") ? Sugar.MEDIUM :
+                    sugar.startsWith("Сладкое") ? Sugar.SWEET :
                     Sugar.UNRECOGNIZED);
         if (price != null)
-            builder.setNewPrice((float) price.doubleValue());
+            builder.setNewPrice(price);
         if (grape != null)
             builder.addGrapeSort(grape); // FIXME addGrapeSort ?
         if (taste != null)
@@ -162,7 +163,7 @@ public class Alcohol {
         if (description != null)
             builder.setDescription(description);
         if (rating != null)
-            builder.setRating((float) (double) rating);
+            builder.setRating(rating);
         return builder.build();
     }
 }

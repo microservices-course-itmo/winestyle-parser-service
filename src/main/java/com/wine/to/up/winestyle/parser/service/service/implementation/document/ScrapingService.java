@@ -40,7 +40,7 @@ public class ScrapingService {
                 e.printStackTrace();
             }
         }
-        Thread.sleep(600);
+        Thread.sleep(625);
         return doc;
     }
 }

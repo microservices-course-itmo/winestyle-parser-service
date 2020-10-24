@@ -23,14 +23,14 @@ public class ParsingControllerService {
 
     private final ImmutableMap<String, String> SUPPORTED_ALCOHOL_URLS = ImmutableMap.<String, String>builder()
             .put("wine", "/wine/all/")
-            .put("sparkling", "/champagnes-and-sparkling/all/")
+            .put("sparkling", "/champagnes-and-sparkling/champagnes/sparkling/sparkling-blue_ll/")
             .build();
 
     // Start parsing job in a separate thread
     public void startParsingJob(String alcoholType) throws ServiceIsBusyException, UnsupportedAlcoholTypeException {
         String alcoholUrl = SUPPORTED_ALCOHOL_URLS.get(alcoholType);
         if (alcoholUrl != null) {
-            if (statusService.statusCheck(alcoholType)) {
+            if (statusService.isBusy(alcoholType)) {
                 Thread newThread = new Thread(() -> {
                     try {
                         parse(alcoholUrl, alcoholType);
@@ -50,18 +50,17 @@ public class ParsingControllerService {
     // At 00:00; every day
     @Scheduled(cron = "${scheduler.cron.expression}")
     public void onScheduleParseWinePages() {
-        if (statusService.statusCheck("wine")) {
+        if (statusService.isBusy("wine")) {
             try {
                 parse(SUPPORTED_ALCOHOL_URLS.get("wine"), "wine");
-            } catch (InterruptedException ignore) {
-            }
+            } catch (InterruptedException ignore) { }
         }
     }
 
     // At 00:00; every day
     @Scheduled(cron = "${scheduler.cron.expression}")
     public void onScheduleParseSparklingPages() {
-        if (statusService.statusCheck("sparkling")) {
+        if (statusService.isBusy("sparkling")) {
             try {
                 parse(SUPPORTED_ALCOHOL_URLS.get("sparkling"), "sparkling");
             } catch (InterruptedException ignore) { }
@@ -69,12 +68,12 @@ public class ParsingControllerService {
     }
 
     private void parse(String relativeUrl, String alcoholType) throws InterruptedException {
-        statusService.statusChange(alcoholType);
+        statusService.busy(alcoholType);
 
         String mainUrl = "https://spb.winestyle.ru";
 
         alcoholParserService.parseBuildSave(mainUrl, relativeUrl, alcoholType);
 
-        statusService.statusChange(alcoholType);
+        statusService.busy(alcoholType);
     }
 }

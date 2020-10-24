@@ -24,7 +24,6 @@ public class AlcoholParsing implements ParsingService {
 
     private String name;
     private String region;
-    private String strength;
     private boolean isRegionPresented = true;
     private boolean isColorPresented = true;
     private boolean isSugarPresented = true;
@@ -76,7 +75,7 @@ public class AlcoholParsing implements ParsingService {
         String[] titleInfo = name.split(",? ");
         // Checks each word in the name for year format matching
         for (String word : titleInfo) {
-            if (word.matches("\\d{4}")) {
+            if (word.matches("^\\d{4}$")) {
                 return Integer.parseInt(word);
             }
         }
@@ -226,7 +225,7 @@ public class AlcoholParsing implements ParsingService {
             Element strengthElement = listDescription.selectFirst("span:contains(Крепость:)");
             Element strengthParent = strengthElement.parent();
             strengthElement.remove();
-            strength = strengthParent.text();
+            String strength = strengthParent.text();
             strengthParent.remove();
             return strength;
         } catch (NullPointerException ex) {
@@ -261,19 +260,19 @@ public class AlcoholParsing implements ParsingService {
     @Override
     public String parseType(Boolean isSpakrling) {
         String type;
-        if (isSpakrling) {
-            try {
-                Element typeAndColorElement = listDescription.selectFirst("span:matches(([Вв]ино)[:/].*)");
-                Element typeAndColorParent = typeAndColorElement.parent();
-                typeAndColorElement.remove();
-                String typeColorSugar = typeAndColorParent.text();
-                typeAndColorParent.remove();
+        try {
+            Element typeAndColorElement = listDescription.selectFirst("span:matches(([Вв]ино)[:/].*)");
+            Element typeAndColorParent = typeAndColorElement.parent();
+            typeAndColorElement.remove();
+            String typeColorSugar = typeAndColorParent.text();
+            typeAndColorParent.remove();
+            if (isSpakrling) {
                 int indexOfDelim = typeColorSugar.indexOf("-");
                 if (indexOfDelim >= 0) {
                     type = typeColorSugar.substring(0, indexOfDelim);
                     colorAndSugar = typeColorSugar.substring(indexOfDelim + 1);
                     return type;
-                } else if (typeColorSugar.matches("^Ш.+|^И.+")) {
+                } else if (typeColorSugar.matches("^[ШИ].+")) {
                     isColorPresented = false;
                     indexOfDelim = typeColorSugar.indexOf(", ");
                     if (indexOfDelim >= 0) {
@@ -293,37 +292,28 @@ public class AlcoholParsing implements ParsingService {
                         return "Игристое";
                     }
                 }
-            } catch (NullPointerException ex) {
-                isColorPresented = false;
-                isSugarPresented = false;
-                if (strength.charAt(0) == 'Б') {
-                    return "Детское шампанское";
+            } else {
+                int indexOfDelim = typeColorSugar.indexOf(", ");
+                if (indexOfDelim >= 0) {
+                    type = typeColorSugar.substring(0, indexOfDelim);
                 } else {
-                    log.warn("sparkling's type, color and sugar are not specified");
-                    return null;
+                    isSugarPresented = false;
+                    type = typeColorSugar;
+                }
+                if (type.matches("^(?!C|Пол|Р|Б|О|Г|Кра).+")) {
+                    colorAndSugar = typeColorSugar.substring(indexOfDelim + 2);
+                    isColorPresented = false;
+                    return type;
+                } else {
+                    colorAndSugar = typeColorSugar;
+                    return "Вино";
                 }
             }
-        } else {
-            Element typeElement = listDescription.selectFirst("span:contains(Вино:)");
-            Element typeParent = typeElement.parent();
-            typeElement.remove();
-            String typeColorSugar = typeParent.text();
-            typeParent.remove();
-            int indexOfDelim = typeColorSugar.indexOf(", ");
-            if (indexOfDelim >= 0) {
-                type = typeColorSugar.substring(0, indexOfDelim);
-            } else {
-                isSugarPresented = false;
-                type = typeColorSugar;
-            }
-            if (type.matches("^Ве.+|^Ви.+")) {
-                colorAndSugar = typeColorSugar.substring(indexOfDelim + 2);
-                isColorPresented = false;
-                return type;
-            } else {
-                colorAndSugar = typeColorSugar;
-                return "Вино";
-            }
+        } catch (NullPointerException e) {
+            isColorPresented = false;
+            isSugarPresented = false;
+            log.warn("product's type, color and sugar are not specified");
+            return null;
         }
     }
 
@@ -334,10 +324,10 @@ public class AlcoholParsing implements ParsingService {
             if (indexOfDelim >= 0) {
                 String color = colorAndSugar.substring(0, indexOfDelim);
                 colorAndSugar = colorAndSugar.substring(indexOfDelim + 2);
-                return color.substring(0,1).toUpperCase() + color.substring(1);
+                return color.substring(0, 1).toUpperCase() + color.substring(1);
             } else {
                 isSugarPresented = false;
-                return colorAndSugar;
+                return colorAndSugar.substring(0, 1).toUpperCase() + colorAndSugar.substring(1);
             }
         } else {
             log.warn("sparkling's color is not specified");

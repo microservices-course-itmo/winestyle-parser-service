@@ -13,17 +13,17 @@ public class StatusService {
     private final HashMap<String, Boolean> SERVICE_BUSY_STATUS = new HashMap<>(
             Map.of("wine", false, "sparkling", false));
 
+
     /**
      * Проверка парсинга
-     * 
      * @param alcoholType Тип напитка
      * @return Идет ли парсинг заданной категории
      */
-    public boolean statusCheck(String alcoholType) {
+    public boolean isBusy(String alcoholType) {
         return !SERVICE_BUSY_STATUS.get(alcoholType);
     }
 
-    public void statusChange(String alcoholType) {
+    public void busy(String alcoholType) {
         SERVICE_BUSY_STATUS.replace(alcoholType, !SERVICE_BUSY_STATUS.get(alcoholType));
     }
 }

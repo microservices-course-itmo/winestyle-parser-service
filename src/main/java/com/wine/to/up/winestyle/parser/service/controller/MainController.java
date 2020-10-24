@@ -2,7 +2,7 @@ package com.wine.to.up.winestyle.parser.service.controller;
 
 import com.wine.to.up.winestyle.parser.service.controller.exception.NoEntityException;
 import com.wine.to.up.winestyle.parser.service.domain.entity.Alcohol;
-import com.wine.to.up.winestyle.parser.service.service.implementation.repository.AlcoholRepositoryService;
+import com.wine.to.up.winestyle.parser.service.service.RepositoryService;
 import com.wine.to.up.winestyle.parser.service.utility.CSVUtility;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,35 +29,34 @@ import javax.servlet.http.HttpServletResponse;
 @RequestMapping("/winestyle/api")
 @Slf4j
 public class MainController {
-    private final AlcoholRepositoryService alcoholRepositoryService;
+    private final RepositoryService alcoholRepositoryService;
 
     @GetMapping("/alcohol")
-    public List<Alcohol> getParsedAlcohol() {
-        List<Alcohol> alcohol = alcoholRepositoryService.getAll();
+    public List<Alcohol> getAlcohol() {
         log.info("Returned all alcohol via GET /winestyle/api/alcohol");
-        return alcohol;
+        return alcoholRepositoryService.getAll();
     }
 
     @GetMapping("/wines")
-    public List<Alcohol> getParsedWines() {
+    public List<Alcohol> getWines() {
         log.info("Returned all wines via GET /winestyle/api/wines");
         return alcoholRepositoryService.getAllWines();
     }
 
     @GetMapping("/sparkling")
-    public List<Alcohol> getParsedSparkling() {
+    public List<Alcohol> getSparkling() {
         log.info("Returned all sparkling via GET /winestyle/api/sparkling");
         return alcoholRepositoryService.getAllSparkling();
     }
 
     @GetMapping("/alcohol/by-url/{url}")
-    public Alcohol getParsedAlcoholByURL(@PathVariable String url) throws NoEntityException {
+    public Alcohol getAlcoholByUrl(@PathVariable String url) throws NoEntityException {
         log.info("Returned alcohol with url={} via GET /winestyle/api/alcohol/by-url/{}", url, url);
-        return alcoholRepositoryService.getByUrl(url);
+        return alcoholRepositoryService.getByUrl("/products/" + url);
     }
 
     @GetMapping("/alcohol/{id}")
-    public Alcohol getParsedAlcoholById(@PathVariable long id) throws NoEntityException {
+    public Alcohol getAlcoholById(@PathVariable long id) throws NoEntityException {
         log.info("Returned alcohol with id={} via GET /winestyle/api/alcohol/{}", id, id);
         return alcoholRepositoryService.getByID(id);
     }
@@ -68,29 +67,28 @@ public class MainController {
      * @return HTTP-статус 200(ОК) и алкоголь с запрошенными полями в теле ответа.
      * @throws NoEntityException если искомая позиция не найдена.
      */
-    @GetMapping("/alcohol/with_fields/{id}")
-    public Map<String, Object> getParsedWineWithFields(@PathVariable long id,
+    @GetMapping("/alcohol/with-fields/{id}")
+    public Map<String, Object> getAlcoholWithFields(@PathVariable long id,
             @RequestParam String fieldsList) throws NoEntityException {
         Set<String> requiredFields = new HashSet<>(Arrays.asList(fieldsList.split(",")));
         Map<String, Object> res = new HashMap<>();
-        Alcohol parsedAlcohol = alcoholRepositoryService.getByID(id);
+        Alcohol alcohol = alcoholRepositoryService.getByID(id);
         String fieldName;
         for (java.lang.reflect.Field field : Alcohol.class.getDeclaredFields()) {
             field.setAccessible(true);
             fieldName = field.getName();
             if (requiredFields.contains(fieldName)) {
                 try {
-                    res.put(fieldName, field.get(parsedAlcohol));
-                } catch (IllegalArgumentException | IllegalAccessException e) {
-                }
+                    res.put(fieldName, field.get(alcohol));
+                } catch (IllegalArgumentException | IllegalAccessException ignore) { }
             }
         }
-        log.info("Returned alchohol with id={} with requested fields ({}) via GET /winestyle/api/alcohol/with_fields/{}", id, fieldsList, id);
+        log.info("Returned alcohol with id={} with requested fields ({}) via GET /winestyle/api/alcohol/with-fields/{}", id, fieldsList, id);
         return res;
     }
 
     @GetMapping(value = "/alcohol/csv")
-    public void getWineFile(HttpServletResponse response) {
+    public void getAlcoholFile(HttpServletResponse response) {
         File file = new File("data.csv");
         if (!file.exists()) {
             try {
@@ -106,8 +104,8 @@ public class MainController {
             response.flushBuffer();
             log.info("Successfully dumped the database and returned csv (GET /winestyle/api/wine/csv)");
         } catch (IOException ex) {
-            log.error("Cannot write feading database csv to outputStream (GET /winestyle/api/wine/csv)");
-            throw new RuntimeException("Error while feading file to outputStream");
+            log.error("Cannot write feeding database csv to outputStream (GET /winestyle/api/wine/csv)");
+            throw new RuntimeException("Error while feeding file to outputStream");
         }
     }
 }
