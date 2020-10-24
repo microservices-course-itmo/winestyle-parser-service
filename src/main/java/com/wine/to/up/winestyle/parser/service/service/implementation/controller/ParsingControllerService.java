@@ -1,6 +1,5 @@
 package com.wine.to.up.winestyle.parser.service.service.implementation.controller;
 
-import com.wine.to.up.winestyle.parser.service.controller.exception.NoEntityException;
 import com.wine.to.up.winestyle.parser.service.controller.exception.UnsupportedAlcoholTypeException;
 import com.wine.to.up.winestyle.parser.service.controller.exception.ServiceIsBusyException;
 import com.wine.to.up.winestyle.parser.service.service.WinestyleParserService;

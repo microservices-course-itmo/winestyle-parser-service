@@ -6,6 +6,7 @@ import com.wine.to.up.winestyle.parser.service.domain.entity.ErrorOnSaving;
 import com.wine.to.up.winestyle.parser.service.repository.AlcoholRepository;
 
 import com.wine.to.up.winestyle.parser.service.repository.ErrorOnSavingRepository;
+import com.wine.to.up.winestyle.parser.service.service.RepositoryService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -20,7 +21,7 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class AlcoholRepositoryService {
+public class AlcoholRepositoryService implements RepositoryService {
     private final AlcoholRepository alcoholRepository;
     private final ErrorOnSavingRepository errorOnSavingRepository;
 
@@ -36,20 +37,16 @@ public class AlcoholRepositoryService {
         alcoholRepository.save(alcohol);
     }
 
-    public Alcohol getByName(String name) {
-        return alcoholRepository.findByName(name);
-    }
-
     public List<Alcohol> getAll() {
         return alcoholRepository.findAll();
     }
 
     public List<Alcohol> getAllWines() {
-        return alcoholRepository.findAllByType("Вино");
+        return alcoholRepository.findAllWines();
     }
 
     public List<Alcohol> getAllSparkling() {
-        return alcoholRepository.findAllByTypeIn(Arrays.asList("Игристое", "Шампанское"));
+        return alcoholRepository.findAllSparkling();
     }
 
     public Alcohol getByUrl(String url) throws NoEntityException {
@@ -62,7 +59,11 @@ public class AlcoholRepositoryService {
         try{
             alcoholRepository.save(alcohol);
         } catch(Exception ex){
-            ErrorOnSaving errorOnSaving = ErrorOnSaving.of(alcohol, new Timestamp(System.currentTimeMillis()), ex.getMessage());
+            ErrorOnSaving errorOnSaving = ErrorOnSaving.of(
+                    alcohol,
+                    new Timestamp(System.currentTimeMillis()),
+                    Arrays.toString(ex.getStackTrace())
+            );
             log.error("Error on saving alcohol: {}", alcohol.toString(), ex);
             errorOnSavingRepository.save(errorOnSaving);
         }

@@ -9,10 +9,10 @@ import com.wine.to.up.winestyle.parser.service.controller.exception.NoEntityExce
 import com.wine.to.up.winestyle.parser.service.domain.entity.Alcohol;
 import com.wine.to.up.winestyle.parser.service.service.ParserDirectorService;
 import com.wine.to.up.winestyle.parser.service.service.ParsingService;
+import com.wine.to.up.winestyle.parser.service.service.RepositoryService;
 import com.wine.to.up.winestyle.parser.service.service.WinestyleParserService;
 import com.wine.to.up.winestyle.parser.service.service.implementation.document.DocumentService;
 import com.wine.to.up.winestyle.parser.service.service.implementation.helpers.SegmentationService;
-import com.wine.to.up.winestyle.parser.service.service.implementation.repository.AlcoholRepositoryService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.nodes.Document;
@@ -27,7 +27,7 @@ public class ParserService implements WinestyleParserService {
     private final ParsingService parsingService;
     private final SegmentationService segmentationService;
     private final DocumentService documentService;
-    private final AlcoholRepositoryService alcoholRepositoryService;
+    private final RepositoryService alcoholRepositoryService;
     private final ParserDirectorService parserDirectorService;
     private final KafkaMessageSender<UpdateProducts.UpdateProductsMessage> kafkaSendMessageService;
     private final Alcohol.AlcoholBuilder builder = Alcohol.builder();
