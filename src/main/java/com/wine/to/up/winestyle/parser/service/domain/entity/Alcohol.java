@@ -121,8 +121,8 @@ public class Alcohol {
         if (url != null)
             builder.setLink(url);
         // TODO set image
-        // if (image != null)
-        //     builder.setImage(image);
+        if (image != null)
+             builder.setImage(String.valueOf(image));
         if (cropYear != null)
             builder.setYear(cropYear);
         if (manufacturer != null)
