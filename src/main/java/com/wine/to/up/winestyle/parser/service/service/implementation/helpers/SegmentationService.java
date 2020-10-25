@@ -9,6 +9,10 @@ import org.jsoup.select.Elements;
 import org.springframework.stereotype.Service;
 
 @Service
+
+/**
+ * Класс, отвечающий за разделение данных со страницы
+ */
 public class SegmentationService {
     @Accessors(chain = true)
     @Setter
@@ -24,37 +28,72 @@ public class SegmentationService {
     private Element productMainContent;
     private Element infoContainer;
 
+    /**
+     * Добавление данных
+     * 
+     * @return
+     */
     public SegmentationService setMainMainContent() {
-        mainMainContent = mainDocument.selectFirst(".main-content"); // Product's block inner element
+        mainMainContent = mainDocument.selectFirst(".main-content");
         return this;
     }
 
     public void setProductMainContent() {
-        productMainContent = productDocument.selectFirst(".main-content"); // Product's page inner element
+        productMainContent = productDocument.selectFirst(".main-content");
     }
 
+    /**
+     * Разделение на элементы
+     * 
+     * @return
+     */
     public Elements breakDocumentIntoProductElements() {
         return mainMainContent.getElementsByClass("item-block");
     }
 
+    /**
+     * Получить остальную информацию
+     * 
+     * @return контейнер с информацией
+     */
     public Element getInfoContainer() {
-        infoContainer = productBlock.selectFirst(".info-container"); // Product's rest part of information block
+        infoContainer = productBlock.selectFirst(".info-container");
         return infoContainer;
     }
 
+    /**
+     * Описания
+     * 
+     * @return из контейнера берется список описаний
+     */
     public Element getListDescription() {
         return infoContainer.selectFirst(".list-description");
     }
 
+    /**
+     * Взятие блока с картинкой
+     * 
+     * @return блок с картинкой
+     */
     public Element getLeftBlock() {
-        return productMainContent.selectFirst(".left-aside"); // Product's image block
+        return productMainContent.selectFirst(".left-aside");
     }
 
+    /**
+     * Описание вкуса
+     * 
+     * @return блок с описанием
+     */
     public Element getArticlesBlock() {
-        return productMainContent.selectFirst(".articles-col"); // Product's tasting notes block
+        return productMainContent.selectFirst(".articles-col");
     }
 
+    /**
+     * Описание продукта
+     * 
+     * @return описание
+     */
     public Element getDescriptionBlock() {
-        return productMainContent.selectFirst(".articles-container.desc"); // Product's description block
+        return productMainContent.selectFirst(".articles-container.desc");
     }
 }

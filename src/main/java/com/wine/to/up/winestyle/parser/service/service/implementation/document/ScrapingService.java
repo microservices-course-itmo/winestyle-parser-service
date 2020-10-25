@@ -16,6 +16,12 @@ import java.net.SocketTimeoutException;
 @Service
 @Slf4j
 public class ScrapingService {
+    /**
+     * Достаем док из ссылки
+     * @param url Сыылка на страницу
+     * @return документ 
+     * @throws InterruptedException Кидаем эксепшен, при прерывании
+     */
     public Document getJsoupDocument(String url) throws InterruptedException {
         Document doc = null;
         while (doc == null) {

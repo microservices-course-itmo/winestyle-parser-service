@@ -16,7 +16,7 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Класс бизнес-логики для работы с вином.
+ * Класс бизнес-логики для работы с напитками.
  */
 @Service
 @RequiredArgsConstructor
@@ -31,32 +31,61 @@ public class AlcoholRepositoryService implements RepositoryService {
         alcoholRepository.save(alcohol);
     }
 
+    /**
+     * Обновление рейтинга 
+     * @param rating новый рейтинг
+     * @param url ссылка на напиток, у которого будем обновлять рейтинг
+     * @throws NoEntityException при отсутствии сущности
+     */
     public void updateRating(Float rating, String url) throws NoEntityException {
         Alcohol alcohol = getByUrl(url);
         alcohol.setRating(rating);
         alcoholRepository.save(alcohol);
     }
 
+
+    /**
+     * Получение списка напитков
+     * @return список напитков
+     */
     public List<Alcohol> getAll() {
         return alcoholRepository.findAll();
     }
 
+    /**
+     * Получение всех вин
+     * @return список вин
+     */
     public List<Alcohol> getAllWines() {
         return alcoholRepository.findAllWines();
     }
 
+    /**
+     * Получение всего шампанского
+     * @return список шампанского
+     */
     public List<Alcohol> getAllSparkling() {
         return alcoholRepository.findAllSparkling();
     }
 
+    /**
+     * Получение напитка по ссылке
+     * @param url ссылка на напиток
+     * @return напиток или NULL, если
+     * @throws NoEntityException при отсутствии сущности
+     */
     public Alcohol getByUrl(String url) throws NoEntityException {
         return alcoholRepository.findByUrl(url).orElseThrow(() ->
                 NoEntityException.createWith(Alcohol.class.getSimpleName().toLowerCase(), null, url)
         );
     }
 
+    /**
+     * Добавление напитка
+     * @param alcohol напиток
+     */
     public void add(Alcohol alcohol) {
-        try{
+        try {
             alcoholRepository.save(alcohol);
         } catch(Exception ex){
             ErrorOnSaving errorOnSaving = ErrorOnSaving.of(
@@ -69,6 +98,12 @@ public class AlcoholRepositoryService implements RepositoryService {
         }
     }
 
+    /**
+     * Получение напитка по id
+     * @param id номер напитка
+     * @return напиток
+     * @throws NoEntityException Если нет такого, кидаем эксепшен
+     */
     public Alcohol getByID(long id) throws NoEntityException {
         return alcoholRepository.findById(id).orElseThrow(() ->
                 NoEntityException.createWith(Alcohol.class.getSimpleName().toLowerCase(), id, null)
