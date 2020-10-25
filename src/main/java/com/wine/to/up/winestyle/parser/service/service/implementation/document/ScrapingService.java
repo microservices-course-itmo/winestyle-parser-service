@@ -18,9 +18,9 @@ import java.net.SocketTimeoutException;
 public class ScrapingService {
     /**
      * Достаем док из ссылки
-     * @param url Сыылка на страницу
+     * @param url Ссылка на страницу
      * @return документ 
-     * @throws InterruptedException Кидаем эксепшен, при прерывании
+     * @throws InterruptedException при блокировке потока исполнения Thread.sleep()
      */
     public Document getJsoupDocument(String url) throws InterruptedException {
         Document doc = null;
