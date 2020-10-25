@@ -11,7 +11,7 @@ import com.wine.to.up.winestyle.parser.service.service.ParserDirectorService;
 import com.wine.to.up.winestyle.parser.service.service.ParsingService;
 import com.wine.to.up.winestyle.parser.service.service.RepositoryService;
 import com.wine.to.up.winestyle.parser.service.service.WinestyleParserService;
-import com.wine.to.up.winestyle.parser.service.service.implementation.document.DocumentService;
+import com.wine.to.up.winestyle.parser.service.service.implementation.document.ScrapingService;
 import com.wine.to.up.winestyle.parser.service.service.implementation.helpers.SegmentationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,7 +26,7 @@ import org.springframework.stereotype.Component;
 public class ParserService implements WinestyleParserService {
     private final ParsingService parsingService;
     private final SegmentationService segmentationService;
-    private final DocumentService documentService;
+    private final ScrapingService scrapingService;
     private final RepositoryService alcoholRepositoryService;
     private final ParserDirectorService parserDirectorService;
     private final KafkaMessageSender<UpdateProducts.UpdateProductsMessage> kafkaSendMessageService;
@@ -34,8 +34,12 @@ public class ParserService implements WinestyleParserService {
 
     @Override
     public void parseBuildSave(String mainUrl, String relativeUrl, String alcoholType) throws InterruptedException {
-        Document currentDoc = documentService.setAlcoholUrl(mainUrl + relativeUrl).getAlcoholPage();
         LocalDateTime start = LocalDateTime.now();
+        String alcoholUrl = mainUrl + relativeUrl;
+        Document currentPage = scrapingService.getJsoupDocument(alcoholUrl);
+
+        int pagesNumber = getPagesNumber(currentPage);
+        int nextPageNumber = 2;
         int parsed = 0;
         long hoursPassed;
         long minutesPart;
@@ -43,15 +47,20 @@ public class ParserService implements WinestyleParserService {
 
         log.warn("Starting parsing of {}", alcoholType);
 
-        while (currentDoc != null) {
-            parsed += runAcrossProducts(mainUrl, currentDoc, alcoholType);
+        while (nextPageNumber <= pagesNumber) {
+            log.info("Parsing: {}", currentPage.location());
+
+            parsed += runAcrossProducts(mainUrl, currentPage, alcoholType);
             Duration timePassed = java.time.Duration.between((start), LocalDateTime.now());
             hoursPassed = timePassed.toHours();
             minutesPart = (timePassed.toMinutes() - hoursPassed * 60);
             secondsPart = (timePassed.toSeconds() - minutesPart * 60);
+
             log.info("Parsing of {}: {} in {} hours {} minutes {} seconds ({} entities per second)",
                     alcoholType, parsed, hoursPassed, minutesPart, secondsPart, parsed / (double) timePassed.toSeconds());
-            currentDoc = documentService.getNext();
+
+            nextPageNumber++;
+            currentPage = scrapingService.getJsoupDocument(alcoholUrl + "?page=" + nextPageNumber);
         }
 
         log.warn("Finished parsing of {} in {}", alcoholType, java.time.Duration.between((start), LocalDateTime.now()));
@@ -89,7 +98,7 @@ public class ParserService implements WinestyleParserService {
                     result = alcoholRepositoryService.getByUrl(productUrl);
                 } catch (NoEntityException ignore) { }
             } catch (NoEntityException ex) {
-                Document product = documentService.getProduct(mainUrl + productUrl);
+                Document product = scrapingService.getJsoupDocument(mainUrl + productUrl);
                 segmentationService.setProductDocument(product).setProductMainContent();
                 prepareParsingService();
                 parserDirectorService.makeAlcohol(builder, alcoholType);
@@ -106,6 +115,15 @@ public class ParserService implements WinestyleParserService {
             parsedNow++;
         }
         return parsedNow;
+    }
+
+    private int getPagesNumber(Document doc) {
+        try {
+            return Integer.parseInt(doc.selectFirst("#CatalogPagingBottom li:last-of-type").text());
+        } catch (NullPointerException ex) {
+            log.info("{} does not contain a pagination element: the number of pages is set to 1", doc.location());
+            return 1;
+        }
     }
 
     private void prepareParsingService() {
