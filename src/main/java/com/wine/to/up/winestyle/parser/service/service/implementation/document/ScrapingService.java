@@ -27,11 +27,11 @@ public class ScrapingService {
                                 "Chrome/85.0.4183.121 " +
                                 "Safari/537.36")
                         .get();
-            } catch (SocketTimeoutException | SSLException | ConnectException ex) {
-                log.error("Couldn't get a connection to website!", ex);
+            } catch (SocketTimeoutException | SSLException | ConnectException e) {
+                log.error("Couldn't get a connection to website!", e);
             } // Берем страничку html
             catch (IOException e) {
-                e.printStackTrace();
+                log.error("An error occurs whilst fetching the URL!", e);
             }
         }
         Thread.sleep(625);
