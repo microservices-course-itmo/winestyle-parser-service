@@ -47,10 +47,10 @@ public class ParserService implements WinestyleParserService {
 
         log.warn("Starting parsing of {}", alcoholType);
 
-        while (nextPageNumber <= pagesNumber) {
+        while(true) {
             log.info("Parsing: {}", currentPage.location());
 
-            parsed += runAcrossProducts(mainUrl, currentPage, alcoholType);
+            parsed += parseProducts(mainUrl, currentPage, alcoholType);
             Duration timePassed = java.time.Duration.between((start), LocalDateTime.now());
             hoursPassed = timePassed.toHours();
             minutesPart = (timePassed.toMinutes() - hoursPassed * 60);
@@ -59,8 +59,13 @@ public class ParserService implements WinestyleParserService {
             log.info("Parsing of {}: {} in {} hours {} minutes {} seconds ({} entities per second)",
                     alcoholType, parsed, hoursPassed, minutesPart, secondsPart, parsed / (double) timePassed.toSeconds());
 
-            nextPageNumber++;
+            if(nextPageNumber <= pagesNumber) {
+                break;
+            }
+
             currentPage = scrapingService.getJsoupDocument(alcoholUrl + "?page=" + nextPageNumber);
+
+            nextPageNumber++;
         }
 
         log.warn("Finished parsing of {} in {}", alcoholType, java.time.Duration.between((start), LocalDateTime.now()));
@@ -74,7 +79,7 @@ public class ParserService implements WinestyleParserService {
      * @return количество распаршенных позиций
      * @throws InterruptedException в случае прерывания со стороны пользователя
      */
-    private int runAcrossProducts(String mainUrl, Document currentDoc, String alcoholType) throws InterruptedException {
+    private int parseProducts(String mainUrl, Document currentDoc, String alcoholType) throws InterruptedException {
         String productUrl;
         int parsedNow = 0;
         Elements alcohol = segmentationService
