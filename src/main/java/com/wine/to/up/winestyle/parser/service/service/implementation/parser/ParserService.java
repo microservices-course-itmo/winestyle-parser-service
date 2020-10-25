@@ -59,7 +59,7 @@ public class ParserService implements WinestyleParserService {
             log.info("Parsing of {}: {} in {} hours {} minutes {} seconds ({} entities per second)",
                     alcoholType, parsed, hoursPassed, minutesPart, secondsPart, parsed / (double) timePassed.toSeconds());
 
-            if(nextPageNumber <= pagesNumber) {
+            if(nextPageNumber > pagesNumber) {
                 break;
             }
 
