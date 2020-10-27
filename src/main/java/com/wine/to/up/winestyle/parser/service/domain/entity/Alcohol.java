@@ -42,7 +42,7 @@ import com.wine.to.up.parser.common.api.schema.UpdateProducts.Product.Sugar;
 @AllArgsConstructor
 public class Alcohol {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(columnDefinition = "varchar(25)")

@@ -52,5 +52,3 @@ CREATE TABLE error_on_saving
     error        TEXT,
     timestamp    TIMESTAMP
 );
-
-create sequence hibernate_sequence;
