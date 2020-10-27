@@ -26,13 +26,6 @@ public class ScrapingService {
          loader = proxyService.getLoader();
     }
 
-    public synchronized Proxy getNextProxyRoundRobin() {
-        if (it == null || !it.hasNext()) {
-            it = proxies.iterator();
-        }
-        return it.next();
-    }
-
     /**
      * Достаем док из ссылки
      * @param url Ссылка на страницу
