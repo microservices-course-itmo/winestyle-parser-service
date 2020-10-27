@@ -43,13 +43,13 @@ public class ProxyService
         }
     }
 
-    private static java.net.Proxy convertProxy(String proxyAddress)
+    private static Proxy convertProxy(String proxyAddress)
     {
         String[] addressParts = proxyAddress.split(":");
         return new java.net.Proxy(java.net.Proxy.Type.SOCKS, new InetSocketAddress(addressParts[0], Integer.parseInt(addressParts[1])));
     }
 
-    private Proxy getProxyIfAlive(String proxyAddress) {
+    private IUnstableLoader getProxyIfAlive(String proxyAddress) {
         Proxy proxy = convertProxy(proxyAddress);
 
         try
@@ -59,7 +59,7 @@ public class ProxyService
                 .proxy(proxy)
                 .get();
 
-            return proxy;
+            return new ProxyWebPageLoader(proxy);
         }
         catch (Exception e)
         {
@@ -67,12 +67,12 @@ public class ProxyService
         }
     }
 
-    public List<Proxy> getProxies() {
+    public List<IUnstableLoader> getProxyLoaders() {
         log.info("Getting proxies");
         ExecutorService threadPool = Executors.newFixedThreadPool(100);
-        List<Proxy> alive = new ArrayList<>();
+        List<IUnstableLoader> alive = new ArrayList<>();
 
-        List<Future<Proxy>> futures;
+        List<Future<IUnstableLoader>> futures;
         List<String> proxyAddresses = getAllProxies();
         futures = proxyAddresses.stream()
                 .map(proxyAddress ->
@@ -80,10 +80,10 @@ public class ProxyService
                                 getProxyIfAlive(proxyAddress), threadPool))
                 .collect(Collectors.toList());
 
-        for (Future<Proxy> future : futures) {
+        for (Future<IUnstableLoader> future : futures) {
             try
             {
-                Proxy proxyResult = future.get();
+                IUnstableLoader proxyResult = future.get();
                 if (proxyResult != null)
                 {
                     log.info(proxyResult.toString());
@@ -97,5 +97,12 @@ public class ProxyService
         }
 
         return alive;
+    }
+
+    public IWebPageLoader getLoader()
+    {
+        SimpleWebPageLoader defaultLoader = new SimpleWebPageLoader();
+        List<IUnstableLoader> proxyLoaders = getProxyLoaders();
+        return new MultiProxyLoader(defaultLoader, proxyLoaders);
     }
 }
