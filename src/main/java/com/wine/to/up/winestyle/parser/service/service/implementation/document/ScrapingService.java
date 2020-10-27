@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import javax.net.ssl.SSLException;
 import java.io.IOException;
 import java.net.SocketException;
+import java.net.SocketTimeoutException;
 
 /**
  * Класс, который парсит страницы сайта. Скачивает html и возвращает Document.
@@ -43,7 +44,7 @@ public class ScrapingService {
         while (doc == null) {
             try {
                 doc = loader.getDocument(url);
-            } catch (SocketException | SocketTimeoutException| SSLException ex) {
+            } catch (SocketException | SocketTimeoutException | SSLException ex) {
                 log.error("Couldn't get a connection to website!", ex);
             } // Берем страничку html
             catch (IOException e) {
