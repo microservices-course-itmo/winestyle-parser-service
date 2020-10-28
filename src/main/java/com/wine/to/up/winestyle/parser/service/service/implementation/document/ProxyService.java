@@ -23,7 +23,7 @@ public class ProxyService
     private List<String> getAllProxies() {
         try
         {
-            URL url = new URL("https://api.proxyscrape.com/?request=getproxies&proxytype=socks5&timeout=10000&country=all");
+            URL url = new URL("https://api.proxyscrape.com/?request=getproxies&proxytype=socks5&country=all");
             URLConnection connection = url.openConnection();
             BufferedReader in = new BufferedReader(
                     new InputStreamReader(
@@ -57,8 +57,10 @@ public class ProxyService
             Jsoup
                 .connect("https://winestyle.ru/")
                 .proxy(proxy)
+                .timeout(300000)
                 .get();
 
+            log.trace("{} OK", proxyAddress);
             return new ProxyWebPageLoader(proxy);
         }
         catch (Exception e)
@@ -69,11 +71,12 @@ public class ProxyService
 
     public List<IUnstableLoader> getProxyLoaders() {
         log.info("Getting proxies");
-        ExecutorService threadPool = Executors.newFixedThreadPool(100);
         List<IUnstableLoader> alive = new ArrayList<>();
 
         List<Future<IUnstableLoader>> futures;
         List<String> proxyAddresses = getAllProxies();
+        ExecutorService threadPool = Executors.newFixedThreadPool(proxyAddresses.size());
+        log.info("Loaded list of {} proxies. Checking", proxyAddresses.size());
         futures = proxyAddresses.stream()
                 .map(proxyAddress ->
                         CompletableFuture.supplyAsync(() ->
@@ -86,7 +89,6 @@ public class ProxyService
                 IUnstableLoader proxyResult = future.get();
                 if (proxyResult != null)
                 {
-                    log.info(proxyResult.toString());
                     alive.add(proxyResult);
                 }
             }
@@ -95,6 +97,7 @@ public class ProxyService
                 e.printStackTrace();
             }
         }
+        log.info("Got {} suitable proxies", alive.size());
 
         return alive;
     }

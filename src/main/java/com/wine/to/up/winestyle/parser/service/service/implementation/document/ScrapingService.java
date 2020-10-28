@@ -19,11 +19,11 @@ import java.net.SocketTimeoutException;
 public class ScrapingService {
 
     private static final ProxyService proxyService;
-    private static final IWebPageLoader loader;
+    private static IWebPageLoader loader;
 
     static {
          proxyService = new ProxyService();
-         loader = proxyService.getLoader();
+         loader = new SimpleWebPageLoader();
     }
 
     /**
@@ -45,5 +45,9 @@ public class ScrapingService {
             }
         }
         return doc;
+    }
+
+    public void initProxy() {
+        loader = proxyService.getLoader();
     }
 }
