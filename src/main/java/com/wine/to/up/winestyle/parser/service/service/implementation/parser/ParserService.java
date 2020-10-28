@@ -47,7 +47,7 @@ public class ParserService implements WinestyleParserService {
 
         log.warn("Starting parsing of {}", alcoholType);
 
-        while(true) {
+        while (true) {
             log.info("Parsing: {}", currentPage.location());
 
             parsed += parseProducts(mainUrl, currentPage, alcoholType);
@@ -56,10 +56,11 @@ public class ParserService implements WinestyleParserService {
             minutesPart = (timePassed.toMinutes() - hoursPassed * 60);
             secondsPart = (timePassed.toSeconds() - minutesPart * 60);
 
-            log.info("Parsing of {}: {} in {} hours {} minutes {} seconds ({} entities per second)",
-                    alcoholType, parsed, hoursPassed, minutesPart, secondsPart, parsed / (double) timePassed.toSeconds());
+            log.info("Parsing of {}: {} entities in {} hours {} minutes {} seconds ({} entities per second, {}% successfully)",
+                    alcoholType, parsed, hoursPassed, minutesPart, secondsPart, parsed / (double) timePassed.toSeconds(),
+                    parsed / (10.0 * nextPageNumber) * 100);
 
-            if(nextPageNumber > pagesNumber) {
+            if (nextPageNumber > pagesNumber) {
                 break;
             }
 
@@ -68,7 +69,8 @@ public class ParserService implements WinestyleParserService {
             nextPageNumber++;
         }
 
-        log.warn("Finished parsing of {} in {}", alcoholType, java.time.Duration.between((start), LocalDateTime.now()));
+        log.warn("Finished parsing of {} in {}, {} ({}%) errors ", alcoholType, java.time.Duration.between((start), LocalDateTime.now()),
+                10 * nextPageNumber - parsed, (1.0 - (10 * nextPageNumber - parsed) * 100));
     }
 
     /**
