@@ -8,7 +8,8 @@
 
 Если вы хотите запустить сервис в составе docker-compose выполните следующее:
 
-- выполните `mvn spring-boot:build-image`, это запустит сборку докер образа самого сервиса
+- выполните `mvn spring-boot:build-image`, это запустит сборку докер образа самого сервиса. Используйте с ключом `-DskipTests`,
+  чтобы пропустить тесты - интеграционные тест-кейсы не пройдут, пока в вашей базе данных не появятся элементы
 - выполните `docker-compose -f profiles/minimal-Infrastructure.yml -f profiles/winestyle-parser-service.yml up`
 
 При изменении версии в сервиса в pom файле нужно изменить версию приложения в winestyle-parser-service.yml
