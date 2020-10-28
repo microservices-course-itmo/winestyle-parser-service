@@ -7,6 +7,7 @@ import com.wine.to.up.winestyle.parser.service.utility.CSVUtility;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -31,45 +32,51 @@ import javax.servlet.http.HttpServletResponse;
 public class MainController {
     private final RepositoryService alcoholRepositoryService;
 
-    @GetMapping("/alcohol")
+    @SuppressWarnings("deprecation")
+    @GetMapping(value = "/alcohol", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public List<Alcohol> getAlcohol() {
         log.info("Returned all alcohol via GET /winestyle/api/alcohol");
         return alcoholRepositoryService.getAll();
     }
 
-    @GetMapping("/wines")
+    @SuppressWarnings("deprecation")
+    @GetMapping(value = "/wines", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public List<Alcohol> getWines() {
         log.info("Returned all wines via GET /winestyle/api/wines");
         return alcoholRepositoryService.getAllWines();
     }
 
-    @GetMapping("/sparkling")
+    @SuppressWarnings("deprecation")
+    @GetMapping(value = "/sparkling", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public List<Alcohol> getSparkling() {
         log.info("Returned all sparkling via GET /winestyle/api/sparkling");
         return alcoholRepositoryService.getAllSparkling();
     }
 
-    @GetMapping("/alcohol/by-url/{url}")
+    @SuppressWarnings("deprecation")
+    @GetMapping(value ="/alcohol/by-url/{url}" , produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public Alcohol getAlcoholByUrl(@PathVariable String url) throws NoEntityException {
         log.info("Returned alcohol with url={} via GET /winestyle/api/alcohol/by-url/{}", url, url);
         return alcoholRepositoryService.getByUrl("/products/" + url);
     }
 
-    @GetMapping("/alcohol/{id}")
+    @SuppressWarnings("deprecation")
+    @GetMapping(value = "/alcohol/{id}", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public Alcohol getAlcoholById(@PathVariable long id) throws NoEntityException {
         log.info("Returned alcohol with id={} via GET /winestyle/api/alcohol/{}", id, id);
         return alcoholRepositoryService.getByID(id);
     }
 
     /**
-     * @param id id алкоголя в базе данных.
+     * @param id         id алкоголя в базе данных.
      * @param fieldsList список запрашиваемых полей.
      * @return HTTP-статус 200(ОК) и алкоголь с запрошенными полями в теле ответа.
      * @throws NoEntityException если искомая позиция не найдена.
      */
-    @GetMapping("/alcohol/with-fields/{id}")
-    public Map<String, Object> getAlcoholWithFields(@PathVariable long id,
-            @RequestParam String fieldsList) throws NoEntityException {
+    @SuppressWarnings("deprecation")
+    @GetMapping(value ="/alcohol/with-fields/{id}", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public Map<String, Object> getAlcoholWithFields(@PathVariable long id, @RequestParam String fieldsList)
+            throws NoEntityException {
         Set<String> requiredFields = new HashSet<>(Arrays.asList(fieldsList.split(",")));
         Map<String, Object> res = new HashMap<>();
         Alcohol alcohol = alcoholRepositoryService.getByID(id);
@@ -80,10 +87,12 @@ public class MainController {
             if (requiredFields.contains(fieldName)) {
                 try {
                     res.put(fieldName, field.get(alcohol));
-                } catch (IllegalArgumentException | IllegalAccessException ignore) { }
+                } catch (IllegalArgumentException | IllegalAccessException ignore) {
+                }
             }
         }
-        log.info("Returned alcohol with id={} with requested fields ({}) via GET /winestyle/api/alcohol/with-fields/{}", id, fieldsList, id);
+        log.info("Returned alcohol with id={} with requested fields ({}) via GET /winestyle/api/alcohol/with-fields/{}",
+                id, fieldsList, id);
         return res;
     }
 
