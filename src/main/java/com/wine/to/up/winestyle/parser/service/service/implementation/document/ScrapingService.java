@@ -1,6 +1,5 @@
 package com.wine.to.up.winestyle.parser.service.service.implementation.document;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.nodes.Document;
 import org.springframework.stereotype.Service;
@@ -15,13 +14,11 @@ import java.net.SocketTimeoutException;
  */
 @Service
 @Slf4j
-@RequiredArgsConstructor
 public class ScrapingService {
+    private final ProxyService proxyService;
+    private IWebPageLoader loader;
 
-    private static final ProxyService proxyService;
-    private static IWebPageLoader loader;
-
-    static {
+    public ScrapingService() {
         proxyService = new ProxyService();
         loader = new SimpleWebPageLoader();
     }
