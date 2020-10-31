@@ -4,7 +4,6 @@ import org.jsoup.nodes.Document;
 
 import java.io.IOException;
 
-public interface IWebPageLoader
-{
+public interface IWebPageLoader {
     Document getDocument(String url) throws IOException;
 }

@@ -22,8 +22,8 @@ public class ScrapingService {
     private static IWebPageLoader loader;
 
     static {
-         proxyService = new ProxyService();
-         loader = new SimpleWebPageLoader();
+        proxyService = new ProxyService();
+        loader = new SimpleWebPageLoader();
     }
 
     /**

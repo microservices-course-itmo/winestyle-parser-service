@@ -18,53 +18,38 @@ import java.util.stream.Collectors;
 
 @Service
 @Slf4j
-public class ProxyService
-{
+public class ProxyService {
+    private static Proxy convertProxy(String proxyAddress) {
+        String[] addressParts = proxyAddress.split(":");
+        return new java.net.Proxy(java.net.Proxy.Type.SOCKS, new InetSocketAddress(addressParts[0], Integer.parseInt(addressParts[1])));
+    }
+
     private List<String> getAllProxies() {
-        try
-        {
+        try {
             URL url = new URL("https://api.proxyscrape.com/?request=getproxies&proxytype=socks5&country=all");
             URLConnection connection = url.openConnection();
-            BufferedReader in = new BufferedReader(
-                    new InputStreamReader(
-                            connection.getInputStream()));
+            BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
             String inputLine;
 
             List<String> proxies = new ArrayList<>();
-            while ((inputLine = in.readLine()) != null)
-                proxies.add(inputLine);
+            while ((inputLine = in.readLine()) != null) proxies.add(inputLine);
             in.close();
             return proxies;
-        }
-        catch (IOException e)
-        {
+        } catch (IOException e) {
             e.printStackTrace();
             return List.of();
         }
     }
 
-    private static Proxy convertProxy(String proxyAddress)
-    {
-        String[] addressParts = proxyAddress.split(":");
-        return new java.net.Proxy(java.net.Proxy.Type.SOCKS, new InetSocketAddress(addressParts[0], Integer.parseInt(addressParts[1])));
-    }
-
     private IUnstableLoader getProxyIfAlive(String proxyAddress) {
         Proxy proxy = convertProxy(proxyAddress);
 
-        try
-        {
-            Jsoup
-                .connect("https://winestyle.ru/")
-                .proxy(proxy)
-                .timeout(300000)
-                .get();
+        try {
+            Jsoup.connect("https://winestyle.ru/").proxy(proxy).timeout(300000).get();
 
             log.trace("{} OK", proxyAddress);
             return new ProxyWebPageLoader(proxy);
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             return null;
         }
     }
@@ -77,23 +62,15 @@ public class ProxyService
         List<String> proxyAddresses = getAllProxies();
         ExecutorService threadPool = Executors.newFixedThreadPool(proxyAddresses.size());
         log.info("Loaded list of {} proxies. Checking", proxyAddresses.size());
-        futures = proxyAddresses.stream()
-                .map(proxyAddress ->
-                        CompletableFuture.supplyAsync(() ->
-                                getProxyIfAlive(proxyAddress), threadPool))
-                .collect(Collectors.toList());
+        futures = proxyAddresses.stream().map(proxyAddress -> CompletableFuture.supplyAsync(() -> getProxyIfAlive(proxyAddress), threadPool)).collect(Collectors.toList());
 
         for (Future<IUnstableLoader> future : futures) {
-            try
-            {
+            try {
                 IUnstableLoader proxyResult = future.get();
-                if (proxyResult != null)
-                {
+                if (proxyResult != null) {
                     alive.add(proxyResult);
                 }
-            }
-            catch (InterruptedException | ExecutionException e)
-            {
+            } catch (InterruptedException | ExecutionException e) {
                 e.printStackTrace();
             }
         }
@@ -102,8 +79,7 @@ public class ProxyService
         return alive;
     }
 
-    public IWebPageLoader getLoader()
-    {
+    public IWebPageLoader getLoader() {
         SimpleWebPageLoader defaultLoader = new SimpleWebPageLoader();
         List<IUnstableLoader> proxyLoaders = getProxyLoaders();
         return new MultiProxyLoader(defaultLoader, proxyLoaders);
