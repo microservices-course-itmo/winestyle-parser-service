@@ -12,6 +12,7 @@ import java.net.Proxy;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.*;
 import java.util.stream.Collectors;
@@ -37,7 +38,7 @@ public class ProxyService {
             return proxies;
         } catch (IOException e) {
             log.error("Cannot get proxies from external list", e);
-            return List.of();
+            return Collections.emptyList();
         }
     }
 
