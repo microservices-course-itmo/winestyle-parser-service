@@ -36,7 +36,7 @@ public class ProxyService {
             in.close();
             return proxies;
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error("Cannot get proxies from external list", e);
             return List.of();
         }
     }
@@ -71,7 +71,7 @@ public class ProxyService {
                     alive.add(proxyResult);
                 }
             } catch (InterruptedException | ExecutionException e) {
-                e.printStackTrace();
+                log.error("An exception occurred while checking proxy asynchronously", e);
             }
         }
         log.info("Got {} suitable proxies", alive.size());
