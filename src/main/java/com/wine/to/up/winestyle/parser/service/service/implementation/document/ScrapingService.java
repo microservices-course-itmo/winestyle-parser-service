@@ -17,10 +17,12 @@ import java.net.SocketTimeoutException;
 public class ScrapingService {
     private final ProxyService proxyService;
     private IWebPageLoader loader;
+    private int timeout;
 
     public ScrapingService() {
         proxyService = new ProxyService();
         loader = new SimpleWebPageLoader();
+        timeout = 0;
     }
 
     /**
@@ -41,10 +43,15 @@ public class ScrapingService {
                 log.error("An error occurs whilst fetching the URL!", e);
             }
         }
+        if (timeout > 0) Thread.sleep(timeout);
         return doc;
     }
 
     public void initProxy() {
         loader = proxyService.getLoader();
+    }
+
+    public void setTimeout(int timeout) {
+        this.timeout = timeout;
     }
 }
