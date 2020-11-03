@@ -1,8 +1,5 @@
 package com.wine.to.up.winestyle.parser.service.service.implementation.parser;
 
-import java.time.Duration;
-import java.time.LocalDateTime;
-
 import com.wine.to.up.commonlib.messaging.KafkaMessageSender;
 import com.wine.to.up.parser.common.api.schema.UpdateProducts;
 import com.wine.to.up.winestyle.parser.service.controller.exception.NoEntityException;
@@ -20,6 +17,9 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.springframework.stereotype.Component;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
+
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -36,6 +36,7 @@ public class ParserService implements WinestyleParserService {
     public void parseBuildSave(String mainUrl, String relativeUrl, String alcoholType) throws InterruptedException {
         LocalDateTime start = LocalDateTime.now();
         String alcoholUrl = mainUrl + relativeUrl;
+        scrapingService.setTimeout(625);
         Document currentPage = scrapingService.getJsoupDocument(alcoholUrl);
 
         int pagesNumber = getPagesNumber(currentPage);
