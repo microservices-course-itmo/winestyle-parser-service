@@ -55,7 +55,7 @@ public class ParserService implements WinestyleParserService {
             Duration timePassed = java.time.Duration.between((start), LocalDateTime.now());
             hoursPassed = timePassed.toHours();
             minutesPart = (timePassed.toMinutes() - hoursPassed * 60);
-            secondsPart = (timePassed.toSeconds() - minutesPart * 60);
+            secondsPart = (timePassed.toSeconds() - hoursPassed * 60 - minutesPart * 60);
 
             log.info("Parsing of {}: {} entities in {} hours {} minutes {} seconds ({} entities per second, {}% successfully)",
                     alcoholType, parsed, hoursPassed, minutesPart, secondsPart, parsed / (double) timePassed.toSeconds(),
