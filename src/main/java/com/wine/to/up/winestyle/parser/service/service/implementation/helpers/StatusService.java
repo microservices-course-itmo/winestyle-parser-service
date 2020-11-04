@@ -2,24 +2,28 @@ package com.wine.to.up.winestyle.parser.service.service.implementation.helpers;
 
 import org.springframework.stereotype.Component;
 
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Класс, отвечающий за проверку наличия парсинга
  */
 @Component
 public class StatusService {
-    private final AtomicBoolean isBusy = new AtomicBoolean(false);
+    private final HashMap<String, Boolean> SERVICE_BUSY_STATUS = new HashMap<>(
+            Map.of("wine", false, "sparkling", false));
 
-    public void release() {
-        isBusy.set(false);
-    }
 
     /**
-     * Пытается завладеть парсером как ресурсом
-     * @return true в случае, если парсер был свободен и удалось занять ресурс; false в обратном случае
+     * Проверка парсинга
+     * @param alcoholType Тип напитка
+     * @return Идет ли парсинг заданной категории
      */
-    public boolean tryBusy() {
-        return isBusy.compareAndSet(false, true);
+    public boolean isBusy(String alcoholType) {
+        return !SERVICE_BUSY_STATUS.get(alcoholType);
+    }
+
+    public void busy(String alcoholType) {
+        SERVICE_BUSY_STATUS.replace(alcoholType, !SERVICE_BUSY_STATUS.get(alcoholType));
     }
 }
