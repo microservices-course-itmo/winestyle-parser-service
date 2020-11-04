@@ -12,17 +12,18 @@ public class ServiceIsBusyException extends Exception {
 
     private static final long serialVersionUID = -1034054051600551718L;
     private final String cause;
+    private final String alcoholType;
 
     /**
      * Конструктор ошибки сервера
      * @param cause причина
      * @return ошибку сервера
      */
-    public static ServiceIsBusyException createWith(String cause) {
-        return new ServiceIsBusyException(cause);
+    public static ServiceIsBusyException createWith(String cause, String alcoholType) {
+        return new ServiceIsBusyException(cause, alcoholType);
     }
 
     public String getMessage() {
-        return String.format("The server reported: %s.", cause);
+        return String.format("The server reported: alcohol type: %s, error: %s.", alcoholType, cause);
     }
 }
