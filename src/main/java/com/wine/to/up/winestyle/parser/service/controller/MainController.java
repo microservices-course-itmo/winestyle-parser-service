@@ -32,36 +32,31 @@ import javax.servlet.http.HttpServletResponse;
 public class MainController {
     private final RepositoryService alcoholRepositoryService;
 
-    @SuppressWarnings("deprecation")
-    @GetMapping(value = "/alcohol", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @GetMapping(value = "/alcohol", produces = MediaType.APPLICATION_JSON_VALUE)
     public List<Alcohol> getAlcohol() {
         log.info("Returned all alcohol via GET /winestyle/api/alcohol");
         return alcoholRepositoryService.getAll();
     }
 
-    @SuppressWarnings("deprecation")
-    @GetMapping(value = "/wines", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @GetMapping(value = "/wines", produces = MediaType.APPLICATION_JSON_VALUE)
     public List<Alcohol> getWines() {
         log.info("Returned all wines via GET /winestyle/api/wines");
         return alcoholRepositoryService.getAllWines();
     }
 
-    @SuppressWarnings("deprecation")
-    @GetMapping(value = "/sparkling", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @GetMapping(value = "/sparkling", produces = MediaType.APPLICATION_JSON_VALUE)
     public List<Alcohol> getSparkling() {
         log.info("Returned all sparkling via GET /winestyle/api/sparkling");
         return alcoholRepositoryService.getAllSparkling();
     }
 
-    @SuppressWarnings("deprecation")
-    @GetMapping(value ="/alcohol/by-url/{url}" , produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @GetMapping(value ="/alcohol/by-url/{url}" , produces = MediaType.APPLICATION_JSON_VALUE)
     public Alcohol getAlcoholByUrl(@PathVariable String url) throws NoEntityException {
         log.info("Returned alcohol with url={} via GET /winestyle/api/alcohol/by-url/{}", url, url);
         return alcoholRepositoryService.getByUrl("/products/" + url);
     }
 
-    @SuppressWarnings("deprecation")
-    @GetMapping(value = "/alcohol/{id}", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @GetMapping(value = "/alcohol/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public Alcohol getAlcoholById(@PathVariable long id) throws NoEntityException {
         log.info("Returned alcohol with id={} via GET /winestyle/api/alcohol/{}", id, id);
         return alcoholRepositoryService.getByID(id);
@@ -73,8 +68,7 @@ public class MainController {
      * @return HTTP-статус 200(ОК) и алкоголь с запрошенными полями в теле ответа.
      * @throws NoEntityException если искомая позиция не найдена.
      */
-    @SuppressWarnings("deprecation")
-    @GetMapping(value ="/alcohol/with-fields/{id}", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @GetMapping(value ="/alcohol/with-fields/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public Map<String, Object> getAlcoholWithFields(@PathVariable long id, @RequestParam String fieldsList)
             throws NoEntityException {
         Set<String> requiredFields = new HashSet<>(Arrays.asList(fieldsList.split(",")));
@@ -98,6 +92,7 @@ public class MainController {
 
     @GetMapping(value = "/alcohol/csv")
     public void getAlcoholFile(HttpServletResponse response) {
+        response.setHeader("Content-Type", "text/csv; charset=utf-8");
         File file = new File("data.csv");
         if (!file.exists()) {
             try {
