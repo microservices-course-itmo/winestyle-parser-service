@@ -22,7 +22,7 @@ import java.util.concurrent.Executors;
 public class ParsingControllerService {
     private final WinestyleParserService alcoholParserService;
     private final StatusService statusService;
-    private final ExecutorService parsingExecutor = Executors.newSingleThreadExecutor();
+    private ExecutorService parsingExecutor;
 
     private final ImmutableMap<String, String> SUPPORTED_ALCOHOL_URLS = ImmutableMap.<String, String>builder()
             .put("wine", "/wine/all/")
@@ -34,12 +34,14 @@ public class ParsingControllerService {
         String alcoholUrl = SUPPORTED_ALCOHOL_URLS.get(alcoholType);
         if (alcoholUrl != null) {
             if (statusService.tryBusy()) {
+                parsingExecutor = Executors.newSingleThreadExecutor();
                 parsingExecutor.submit(() -> {
                     try {
                         parse(alcoholUrl, alcoholType);
                     } catch (InterruptedException ignore) {
                     } finally {
                         statusService.release();
+                        parsingExecutor.shutdown();
                     }
                 });
             } else {
