@@ -12,7 +12,10 @@ import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 
 /**
@@ -23,7 +26,8 @@ import java.io.PrintWriter;
 public class CSVUtility {
     public void toCsvFile(RepositoryService repositoryService) throws IOException {
         List<Alcohol> alcohol = repositoryService.getAll();
-        try (PrintWriter writer = new PrintWriter("data.csv")) {
+        try (OutputStream os = new FileOutputStream("data.csv");
+                PrintWriter writer = new PrintWriter(new OutputStreamWriter(os, "UTF-8"))) {
             HeaderColumnNameMappingStrategy<Alcohol> strategy = new HeaderColumnNameMappingStrategy<>();
             strategy.setType(Alcohol.class);
             StatefulBeanToCsv<Alcohol> alcoholCsv = new StatefulBeanToCsvBuilder<Alcohol>(writer)
