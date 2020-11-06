@@ -10,9 +10,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
 /**
  * Класс-парсер.
  */
@@ -22,7 +19,6 @@ import java.util.concurrent.Executors;
 public class ParsingControllerService {
     private final WinestyleParserService alcoholParserService;
     private final StatusService statusService;
-    private ExecutorService parsingExecutor;
 
     private final ImmutableMap<String, String> SUPPORTED_ALCOHOL_URLS = ImmutableMap.<String, String>builder()
             .put("wine", "/wine/all/")
@@ -34,16 +30,13 @@ public class ParsingControllerService {
         String alcoholUrl = SUPPORTED_ALCOHOL_URLS.get(alcoholType);
         if (alcoholUrl != null) {
             if (statusService.tryBusy()) {
-                parsingExecutor = Executors.newSingleThreadExecutor();
-                parsingExecutor.submit(() -> {
+                new Thread(() -> {
                     try {
                         parse(alcoholUrl, alcoholType);
-                    } catch (InterruptedException ignore) {
                     } finally {
                         statusService.release();
-                        parsingExecutor.shutdown();
                     }
-                });
+                }).start();
             } else {
                 throw ServiceIsBusyException.createWith("parsing job is already running");
             }
@@ -52,7 +45,7 @@ public class ParsingControllerService {
         }
     }
 
-    private void parse(String relativeUrl, String alcoholType) throws InterruptedException {
+    private void parse(String relativeUrl, String alcoholType) {
         log.info("Started parsing of {} via /winestyle/api/parse/{}", alcoholType, alcoholType);
         String mainUrl = "https://spb.winestyle.ru";
         alcoholParserService.parseBuildSave(mainUrl, relativeUrl, alcoholType);
