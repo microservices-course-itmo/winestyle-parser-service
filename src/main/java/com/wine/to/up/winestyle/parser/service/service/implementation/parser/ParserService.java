@@ -165,6 +165,31 @@ public class ParserService implements WinestyleParserService {
             countParsed(parsedNow);
             logParsed(alcoholType, start);
         }
+
+        private synchronized void countParsed(int parsedNow) {
+            parsed += parsedNow;
+        }
+
+        private void logParsed(String alcoholType, LocalDateTime start) {
+            long hoursPassed;
+            long minutesPart;
+            long secondsPart;
+            Duration timePassed = java.time.Duration.between((start), LocalDateTime.now());
+
+            hoursPassed = timePassed.toHours();
+            minutesPart = (timePassed.toMinutes() - hoursPassed * 60);
+            secondsPart = (timePassed.toSeconds() - hoursPassed * 3600 - minutesPart * 60);
+
+            log.info("Parsing of {}: {} in {} hours {} minutes {} seconds ({} entities per second)",
+                    alcoholType, parsed, hoursPassed, minutesPart, secondsPart, parsed / (double) timePassed.toSeconds());
+        }
+
+        private void prepareParsingService() {
+            parsingService.setListDescription(segmentationService.getListDescription());
+            parsingService.setLeftBlock(segmentationService.getLeftBlock());
+            parsingService.setArticlesBlock(segmentationService.getArticlesBlock());
+            parsingService.setDescriptionBlock(segmentationService.getDescriptionBlock());
+        }
     }
 
     private int getPagesNumber(Document doc) {
@@ -174,30 +199,5 @@ public class ParserService implements WinestyleParserService {
             log.info("{} does not contain a pagination element: the number of pages is set to 1", doc.location());
             return 1;
         }
-    }
-
-    private void prepareParsingService() {
-        parsingService.setListDescription(segmentationService.getListDescription());
-        parsingService.setLeftBlock(segmentationService.getLeftBlock());
-        parsingService.setArticlesBlock(segmentationService.getArticlesBlock());
-        parsingService.setDescriptionBlock(segmentationService.getDescriptionBlock());
-    }
-
-    private synchronized void countParsed(int parsedNow) {
-        parsed += parsedNow;
-    }
-
-    private void logParsed(String alcoholType, LocalDateTime start) {
-        long hoursPassed;
-        long minutesPart;
-        long secondsPart;
-        Duration timePassed = java.time.Duration.between((start), LocalDateTime.now());
-
-        hoursPassed = timePassed.toHours();
-        minutesPart = (timePassed.toMinutes() - hoursPassed * 60);
-        secondsPart = (timePassed.toSeconds() - minutesPart * 60);
-
-        log.info("Parsing of {}: {} in {} hours {} minutes {} seconds ({} entities per second)",
-                alcoholType, parsed, hoursPassed, minutesPart, secondsPart, parsed / (double) timePassed.toSeconds());
     }
 }
