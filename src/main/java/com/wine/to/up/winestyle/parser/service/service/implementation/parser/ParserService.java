@@ -49,6 +49,8 @@ public class ParserService implements WinestyleParserService {
 
         log.warn("Starting parsing of {}", alcoholType);
 
+        productsParsingExecutor = Executors.newFixedThreadPool(50);
+
         while (true) {
             log.info("Parsing: {}", currentDoc.location());
 
@@ -62,6 +64,8 @@ public class ParserService implements WinestyleParserService {
 
             nextPageNumber++;
         }
+
+        productsParsingExecutor.shutdown();
 
         log.warn("Finished parsing of {} in {}", alcoholType, java.time.Duration.between((start), LocalDateTime.now()));
     }
