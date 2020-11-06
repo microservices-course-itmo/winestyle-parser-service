@@ -85,54 +85,30 @@ public class ParserService implements WinestyleParserService {
         }
     }
 
-    private class ProductJob implements Callable<Integer> {
+    private class ProductJob implements Runnable {
         String mainUrl;
-        Document currentPage;
+        Document currentDoc;
         String alcoholType;
         LocalDateTime start;
-        long hoursPassed;
-        long minutesPart;
-        long secondsPart;
 
-        public ProductJob(String mainUrl, Document currentPage, String alcoholType, LocalDateTime start) {
+        /**
+         * @param mainUrl     адрес главной страницы сайта
+         * @param currentDoc  текущая страница с позициями
+         * @param alcoholType тип алкоголя
+         */
+        public ProductJob(String mainUrl, Document currentDoc, String alcoholType, LocalDateTime start) {
             this.mainUrl = mainUrl;
-            this.currentPage = currentPage;
+            this.currentDoc = currentDoc;
             this.alcoholType = alcoholType;
             this.start = start;
         }
 
-        @SneakyThrows
+        /**
+         * Парсер страницы с позициями
+         */
+        @SneakyThrows({InterruptedException.class, ExecutionException.class})
         @Override
-        public Integer call() {
-            int parsed = parseProducts(mainUrl, currentPage, alcoholType).get();
-            Duration timePassed = java.time.Duration.between((start), LocalDateTime.now());
-
-            hoursPassed = timePassed.toHours();
-            minutesPart = (timePassed.toMinutes() - hoursPassed * 60);
-            secondsPart = (timePassed.toSeconds() - minutesPart * 60);
-
-            productsParsingExecutor.submit(() -> log.info("Parsing of {}: {} in {} hours {} minutes {} seconds ({} entities per second)",
-                    alcoholType, parsed, hoursPassed, minutesPart, secondsPart, parsed / (double) timePassed.toSeconds()));
-
-            return parsed;
-        }
-    }
-
-    /**
-     * Парсер страницы с позициями
-     *
-     * @param mainUrl     адрес главной страницы сайта
-     * @param currentDoc  текущая страница с позициями
-     * @param alcoholType тип алкоголя
-     * @return количество распаршенных позиций
-     */
-    @SneakyThrows({InterruptedException.class, ExecutionException.class})
-    private Future<Integer> parseProducts(String mainUrl, Document currentDoc, String alcoholType) {
-        ExecutorService productsExecutor = Executors.newSingleThreadExecutor();
-
-        Future<Integer> parsed = productsExecutor.submit(() -> {
-            productsParsingExecutor = Executors.newCachedThreadPool();
-
+        public void run() {
             Future<Elements> alcohol = productsParsingExecutor.submit(() -> segmentationService
                     .setMainDocument(currentDoc)
                     .setMainMainContent()
@@ -148,17 +124,14 @@ public class ParserService implements WinestyleParserService {
                     parsingService.setInfoContainer(segmentationService.getInfoContainer());
 
                     productUrl = parsingService.parseUrl();
-                    log.debug("Now parsing url: {}", productUrl);
+                    log.info("Now parsing url: {}", productUrl);
 
-                    Alcohol result = null;
+                    Alcohol result;
                     try {
                         alcoholRepositoryService.getByUrl(productUrl);
-                        try {
-                            alcoholRepositoryService.updatePrice(parsingService.parsePrice(), productUrl);
-                            alcoholRepositoryService.updateRating(parsingService.parseWinestyleRating(), productUrl);
-                            result = alcoholRepositoryService.getByUrl(productUrl);
-                        } catch (NoEntityException ignore) {
-                        }
+                        alcoholRepositoryService.updatePrice(parsingService.parsePrice(), productUrl);
+                        alcoholRepositoryService.updateRating(parsingService.parseWinestyleRating(), productUrl);
+                        result = alcoholRepositoryService.getByUrl(productUrl);
                     } catch (NoEntityException ex) {
                         Document product = scrapingService.getJsoupDocument(mainUrl + productUrl);
                         segmentationService.setProductDocument(product).setProductMainContent();
@@ -170,7 +143,7 @@ public class ParserService implements WinestyleParserService {
                     kafkaSendMessageService.sendMessage(
                             UpdateProducts.UpdateProductsMessage.newBuilder()
                                     .setShopLink(mainUrl)
-                                    .addProducts(Objects.requireNonNull(result).asProduct())
+                                    .addProducts(result.asProduct())
                                     .build()
                     );
                     return 1;
