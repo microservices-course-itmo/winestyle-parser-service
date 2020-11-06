@@ -36,6 +36,7 @@ public class ParserService implements WinestyleParserService {
     private final KafkaMessageSender<UpdateProducts.UpdateProductsMessage> kafkaSendMessageService;
     private final Alcohol.AlcoholBuilder builder = Alcohol.builder();
     private ExecutorService productsParsingExecutor;
+    private int parsed = 0;
 
     @SneakyThrows
     @Override
@@ -173,11 +174,9 @@ public class ParserService implements WinestyleParserService {
                     return 1;
                 }).get();
             }
-            return parsedNow;
-        });
-
-        productsExecutor.shutdown();
-        return parsed;
+            countParsed(parsedNow);
+            logParsed(alcoholType, start);
+        }
     }
 
     private int getPagesNumber(Document doc) {
@@ -194,5 +193,23 @@ public class ParserService implements WinestyleParserService {
         parsingService.setLeftBlock(segmentationService.getLeftBlock());
         parsingService.setArticlesBlock(segmentationService.getArticlesBlock());
         parsingService.setDescriptionBlock(segmentationService.getDescriptionBlock());
+    }
+
+    private synchronized void countParsed(int parsedNow) {
+        parsed += parsedNow;
+    }
+
+    private void logParsed(String alcoholType, LocalDateTime start) {
+        long hoursPassed;
+        long minutesPart;
+        long secondsPart;
+        Duration timePassed = java.time.Duration.between((start), LocalDateTime.now());
+
+        hoursPassed = timePassed.toHours();
+        minutesPart = (timePassed.toMinutes() - hoursPassed * 60);
+        secondsPart = (timePassed.toSeconds() - minutesPart * 60);
+
+        log.info("Parsing of {}: {} in {} hours {} minutes {} seconds ({} entities per second)",
+                alcoholType, parsed, hoursPassed, minutesPart, secondsPart, parsed / (double) timePassed.toSeconds());
     }
 }
