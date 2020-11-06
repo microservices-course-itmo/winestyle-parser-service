@@ -13,10 +13,12 @@ import com.wine.to.up.winestyle.parser.service.service.ParsingService;
 import com.wine.to.up.winestyle.parser.service.service.RepositoryService;
 import com.wine.to.up.winestyle.parser.service.service.WinestyleParserService;
 import com.wine.to.up.winestyle.parser.service.service.implementation.document.ScrapingService;
+import com.wine.to.up.winestyle.parser.service.service.implementation.document.ScrapingServicePooledObjectFactory;
 import com.wine.to.up.winestyle.parser.service.service.implementation.helpers.SegmentationService;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.pool2.impl.GenericObjectPool;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
@@ -28,42 +30,48 @@ import org.springframework.stereotype.Component;
 public class ParserService implements WinestyleParserService {
     private final ParsingService parsingService;
     private final SegmentationService segmentationService;
-    private final ScrapingService scrapingService;
     private final RepositoryService alcoholRepositoryService;
     private final ParserDirectorService parserDirectorService;
     private final KafkaMessageSender<UpdateProducts.UpdateProductsMessage> kafkaSendMessageService;
     private final Alcohol.AlcoholBuilder builder = Alcohol.builder();
+    private final GenericObjectPool<ScrapingService> scrapingServiceObjectPool =
+            new GenericObjectPool<>(new ScrapingServicePooledObjectFactory());
     private ExecutorService productsParsingExecutor;
     private int parsed = 0;
 
     @SneakyThrows
     @Override
     public void parseBuildSave(String mainUrl, String relativeUrl, String alcoholType) {
+        scrapingServiceObjectPool.addObjects(50);
+        productsParsingExecutor = Executors.newFixedThreadPool(50);
+
+        ScrapingService scrapingService = scrapingServiceObjectPool.borrowObject();
         LocalDateTime start = LocalDateTime.now();
         String alcoholUrl = mainUrl + relativeUrl;
         Document currentDoc = scrapingService.getJsoupDocument(alcoholUrl);
+        scrapingServiceObjectPool.returnObject(scrapingService);
 
         int pagesNumber = getPagesNumber(currentDoc);
         int nextPageNumber = 2;
 
         log.warn("Starting parsing of {}", alcoholType);
 
-        productsParsingExecutor = Executors.newFixedThreadPool(50);
-
         while (true) {
             log.info("Parsing: {}", currentDoc.location());
 
-            productsParsingExecutor.execute(new ProductJob(mainUrl, currentDoc, alcoholType, start));
+            productsParsingExecutor.execute(
+                    new ProductJob(mainUrl, currentDoc, alcoholType, start));
 
             if (nextPageNumber > pagesNumber) {
                 break;
             }
 
-            currentDoc = productsParsingExecutor.submit(new DocumentJob(nextPageNumber, alcoholUrl)).get();
+            currentDoc = productsParsingExecutor.submit(
+                    new DocumentJob(nextPageNumber, alcoholUrl)
+            ).get();
 
             nextPageNumber++;
         }
-
         productsParsingExecutor.shutdown();
 
         log.warn("Finished parsing of {} in {}", alcoholType, java.time.Duration.between((start), LocalDateTime.now()));
@@ -81,7 +89,10 @@ public class ParserService implements WinestyleParserService {
         @Override
         @SneakyThrows
         public Document call() {
-            return scrapingService.getJsoupDocument(alcoholUrl + "?page=" + nextPageNumber);
+            ScrapingService scrapingService = scrapingServiceObjectPool.borrowObject();
+            Document document = scrapingService.getJsoupDocument(alcoholUrl + "?page=" + nextPageNumber);
+            scrapingServiceObjectPool.returnObject(scrapingService);
+            return document;
         }
     }
 
@@ -133,12 +144,14 @@ public class ParserService implements WinestyleParserService {
                         alcoholRepositoryService.updateRating(parsingService.parseWinestyleRating(), productUrl);
                         result = alcoholRepositoryService.getByUrl(productUrl);
                     } catch (NoEntityException ex) {
+                        ScrapingService scrapingService = scrapingServiceObjectPool.borrowObject();
                         Document product = scrapingService.getJsoupDocument(mainUrl + productUrl);
                         segmentationService.setProductDocument(product).setProductMainContent();
                         prepareParsingService();
                         parserDirectorService.makeAlcohol(builder, alcoholType);
                         result = builder.url(productUrl).build();
                         alcoholRepositoryService.add(result);
+                        scrapingServiceObjectPool.returnObject(scrapingService);
                     }
                     kafkaSendMessageService.sendMessage(
                             UpdateProducts.UpdateProductsMessage.newBuilder()

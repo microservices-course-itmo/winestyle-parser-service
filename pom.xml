@@ -23,6 +23,7 @@
         <jsoup.version>1.13.1</jsoup.version>
         <opencsv.version>5.2</opencsv.version>
         <commons.io.version>1.3.2</commons.io.version>
+        <commons.pool2.version>2.9.0</commons.pool2.version>
     </properties>
 
     <dependencies>
@@ -90,11 +91,15 @@
         </dependency>
 
         <!-- Apache commons -->
-
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-io</artifactId>
             <version>${commons.io.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-pool2</artifactId>
+            <version>${commons.pool2.version}</version>
         </dependency>
 
         <!-- Integration Testing  -->
