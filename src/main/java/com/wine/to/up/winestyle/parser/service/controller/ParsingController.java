@@ -33,7 +33,6 @@ public class ParsingController {
     public ResponseEntity<String> startParsing(@PathVariable String alcohol)
             throws ServiceIsBusyException, UnsupportedAlcoholTypeException {
         parsingControllerService.startParsingJob(alcohol);
-        log.info("Started parsing of {} via /winestyle/api/parse/{}", alcohol, alcohol);
         return new ResponseEntity<>("Parsing job was successfully launched.", HttpStatus.OK);
     }
 }

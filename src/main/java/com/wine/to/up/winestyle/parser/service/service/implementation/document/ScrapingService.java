@@ -1,6 +1,7 @@
 package com.wine.to.up.winestyle.parser.service.service.implementation.document;
 
 import lombok.extern.slf4j.Slf4j;
+import org.jsoup.HttpStatusException;
 import org.jsoup.nodes.Document;
 import org.springframework.stereotype.Service;
 
@@ -39,8 +40,10 @@ public class ScrapingService {
             } catch (SocketException | SocketTimeoutException | SSLException ex) {
                 log.error("Couldn't get a connection to website!", ex);
             } // Берем страничку html
-            catch (IOException e) {
+            catch (HttpStatusException e) {
                 log.error("An error occurs whilst fetching the URL!", e);
+            } catch (IOException e) {
+                e.printStackTrace();
             }
         }
         if (timeout > 0) Thread.sleep(timeout);

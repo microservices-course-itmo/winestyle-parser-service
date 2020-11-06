@@ -1,5 +1,9 @@
 package com.wine.to.up.winestyle.parser.service.service.implementation.parser;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.util.concurrent.*;
+
 import com.wine.to.up.commonlib.messaging.KafkaMessageSender;
 import com.wine.to.up.parser.common.api.schema.UpdateProducts;
 import com.wine.to.up.winestyle.parser.service.controller.exception.NoEntityException;
@@ -11,14 +15,12 @@ import com.wine.to.up.winestyle.parser.service.service.WinestyleParserService;
 import com.wine.to.up.winestyle.parser.service.service.implementation.document.ScrapingService;
 import com.wine.to.up.winestyle.parser.service.service.implementation.helpers.SegmentationService;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.springframework.stereotype.Component;
-
-import java.time.Duration;
-import java.time.LocalDateTime;
 
 @Slf4j
 @Component
@@ -31,98 +33,125 @@ public class ParserService implements WinestyleParserService {
     private final ParserDirectorService parserDirectorService;
     private final KafkaMessageSender<UpdateProducts.UpdateProductsMessage> kafkaSendMessageService;
     private final Alcohol.AlcoholBuilder builder = Alcohol.builder();
+    private ExecutorService productsParsingExecutor;
+    private int parsed = 0;
 
+    @SneakyThrows
     @Override
-    public void parseBuildSave(String mainUrl, String relativeUrl, String alcoholType) throws InterruptedException {
+    public void parseBuildSave(String mainUrl, String relativeUrl, String alcoholType) {
         LocalDateTime start = LocalDateTime.now();
         String alcoholUrl = mainUrl + relativeUrl;
-        scrapingService.setTimeout(625);
-        Document currentPage = scrapingService.getJsoupDocument(alcoholUrl);
+        Document currentDoc = scrapingService.getJsoupDocument(alcoholUrl);
 
-        int pagesNumber = getPagesNumber(currentPage);
+        int pagesNumber = getPagesNumber(currentDoc);
         int nextPageNumber = 2;
-        int parsed = 0;
-        long hoursPassed;
-        long minutesPart;
-        long secondsPart;
 
         log.warn("Starting parsing of {}", alcoholType);
 
+        productsParsingExecutor = Executors.newFixedThreadPool(50);
+
         while (true) {
-            log.info("Parsing: {}", currentPage.location());
+            log.info("Parsing: {}", currentDoc.location());
 
-            parsed += parseProducts(mainUrl, currentPage, alcoholType);
-            Duration timePassed = java.time.Duration.between((start), LocalDateTime.now());
-            hoursPassed = timePassed.toHours();
-            minutesPart = (timePassed.toMinutes() - hoursPassed * 60);
-            secondsPart = (timePassed.toSeconds() - hoursPassed * 3600 - minutesPart * 60);
-
-            log.info("Parsing of {}: {} entities in {} hours {} minutes {} seconds ({} entities per second, {}% successfully)",
-                    alcoholType, parsed, hoursPassed, minutesPart, secondsPart, parsed / (double) timePassed.toSeconds(),
-                    parsed / (10.0 * nextPageNumber) * 100);
+            productsParsingExecutor.execute(new ProductJob(mainUrl, currentDoc, alcoholType, start));
 
             if (nextPageNumber > pagesNumber) {
                 break;
             }
 
-            currentPage = scrapingService.getJsoupDocument(alcoholUrl + "?page=" + nextPageNumber);
+            currentDoc = productsParsingExecutor.submit(new DocumentJob(nextPageNumber, alcoholUrl)).get();
 
             nextPageNumber++;
         }
 
-        log.warn("Finished parsing of {} in {}, {} ({}%) errors ", alcoholType, java.time.Duration.between((start), LocalDateTime.now()),
-                10 * nextPageNumber - parsed, (1.0 - (10 * nextPageNumber - parsed) * 100));
+        productsParsingExecutor.shutdown();
+
+        log.warn("Finished parsing of {} in {}", alcoholType, java.time.Duration.between((start), LocalDateTime.now()));
     }
 
-    /**
-     * Парсер страницы с позициями
-     * @param mainUrl     адрес главной страницы сайта
-     * @param currentDoc  текущая страница с позициями
-     * @param alcoholType тип алкоголя
-     * @return количество распаршенных позиций
-     * @throws InterruptedException в случае прерывания со стороны пользователя
-     */
-    private int parseProducts(String mainUrl, Document currentDoc, String alcoholType) throws InterruptedException {
-        String productUrl;
-        int parsedNow = 0;
-        Elements alcohol = segmentationService
-                .setMainDocument(currentDoc)
-                .setMainMainContent()
-                .breakDocumentIntoProductElements();
+    private class DocumentJob implements Callable<Document> {
+        int nextPageNumber;
+        String alcoholUrl;
 
-        for (Element drink : alcohol) {
-            parsingService.setProductBlock(segmentationService.setProductBlock(drink).getProductBlock());
-            parsingService.setInfoContainer(segmentationService.getInfoContainer());
-
-            productUrl = parsingService.parseUrl();
-            log.debug("Now parsing url: {}", productUrl);
-
-            Alcohol result = null;
-            try {
-                alcoholRepositoryService.getByUrl(productUrl);
-                try {
-                    alcoholRepositoryService.updatePrice(parsingService.parsePrice(), productUrl);
-                    alcoholRepositoryService.updateRating(parsingService.parseWinestyleRating(), productUrl);
-                    result = alcoholRepositoryService.getByUrl(productUrl);
-                } catch (NoEntityException ignore) { }
-            } catch (NoEntityException ex) {
-                Document product = scrapingService.getJsoupDocument(mainUrl + productUrl);
-                segmentationService.setProductDocument(product).setProductMainContent();
-                prepareParsingService();
-                parserDirectorService.makeAlcohol(builder, alcoholType);
-                result = builder.url(productUrl).build();
-                alcoholRepositoryService.add(result);
-            }
-            assert result != null;
-            kafkaSendMessageService.sendMessage(
-                    UpdateProducts.UpdateProductsMessage.newBuilder()
-                            .setShopLink(mainUrl)
-                            .addProducts(result.asProduct())
-                            .build()
-            );
-            parsedNow++;
+        public DocumentJob(int nextPageNumber, String alcoholUrl) {
+            this.nextPageNumber = nextPageNumber;
+            this.alcoholUrl = alcoholUrl;
         }
-        return parsedNow;
+
+        @Override
+        @SneakyThrows
+        public Document call() {
+            return scrapingService.getJsoupDocument(alcoholUrl + "?page=" + nextPageNumber);
+        }
+    }
+
+    private class ProductJob implements Runnable {
+        String mainUrl;
+        Document currentDoc;
+        String alcoholType;
+        LocalDateTime start;
+
+        /**
+         * @param mainUrl     адрес главной страницы сайта
+         * @param currentDoc  текущая страница с позициями
+         * @param alcoholType тип алкоголя
+         */
+        public ProductJob(String mainUrl, Document currentDoc, String alcoholType, LocalDateTime start) {
+            this.mainUrl = mainUrl;
+            this.currentDoc = currentDoc;
+            this.alcoholType = alcoholType;
+            this.start = start;
+        }
+
+        /**
+         * Парсер страницы с позициями
+         */
+        @SneakyThrows({InterruptedException.class, ExecutionException.class})
+        @Override
+        public void run() {
+            Future<Elements> alcohol = productsParsingExecutor.submit(() -> segmentationService
+                    .setMainDocument(currentDoc)
+                    .setMainMainContent()
+                    .breakDocumentIntoProductElements());
+
+            int parsedNow = 0;
+
+            for (Element drink : alcohol.get()) {
+                parsedNow += productsParsingExecutor.submit(() -> {
+                    String productUrl;
+
+                    parsingService.setProductBlock(segmentationService.setProductBlock(drink).getProductBlock());
+                    parsingService.setInfoContainer(segmentationService.getInfoContainer());
+
+                    productUrl = parsingService.parseUrl();
+                    log.info("Now parsing url: {}", productUrl);
+
+                    Alcohol result;
+                    try {
+                        alcoholRepositoryService.getByUrl(productUrl);
+                        alcoholRepositoryService.updatePrice(parsingService.parsePrice(), productUrl);
+                        alcoholRepositoryService.updateRating(parsingService.parseWinestyleRating(), productUrl);
+                        result = alcoholRepositoryService.getByUrl(productUrl);
+                    } catch (NoEntityException ex) {
+                        Document product = scrapingService.getJsoupDocument(mainUrl + productUrl);
+                        segmentationService.setProductDocument(product).setProductMainContent();
+                        prepareParsingService();
+                        parserDirectorService.makeAlcohol(builder, alcoholType);
+                        result = builder.url(productUrl).build();
+                        alcoholRepositoryService.add(result);
+                    }
+                    kafkaSendMessageService.sendMessage(
+                            UpdateProducts.UpdateProductsMessage.newBuilder()
+                                    .setShopLink(mainUrl)
+                                    .addProducts(result.asProduct())
+                                    .build()
+                    );
+                    return 1;
+                }).get();
+            }
+            countParsed(parsedNow);
+            logParsed(alcoholType, start);
+        }
     }
 
     private int getPagesNumber(Document doc) {
@@ -139,5 +168,23 @@ public class ParserService implements WinestyleParserService {
         parsingService.setLeftBlock(segmentationService.getLeftBlock());
         parsingService.setArticlesBlock(segmentationService.getArticlesBlock());
         parsingService.setDescriptionBlock(segmentationService.getDescriptionBlock());
+    }
+
+    private synchronized void countParsed(int parsedNow) {
+        parsed += parsedNow;
+    }
+
+    private void logParsed(String alcoholType, LocalDateTime start) {
+        long hoursPassed;
+        long minutesPart;
+        long secondsPart;
+        Duration timePassed = java.time.Duration.between((start), LocalDateTime.now());
+
+        hoursPassed = timePassed.toHours();
+        minutesPart = (timePassed.toMinutes() - hoursPassed * 60);
+        secondsPart = (timePassed.toSeconds() - minutesPart * 60);
+
+        log.info("Parsing of {}: {} in {} hours {} minutes {} seconds ({} entities per second)",
+                alcoholType, parsed, hoursPassed, minutesPart, secondsPart, parsed / (double) timePassed.toSeconds());
     }
 }
