@@ -42,17 +42,17 @@ public class ParserService implements WinestyleParserService {
     public void parseBuildSave(String mainUrl, String relativeUrl, String alcoholType) {
         LocalDateTime start = LocalDateTime.now();
         String alcoholUrl = mainUrl + relativeUrl;
-        Document currentPage = scrapingService.getJsoupDocument(alcoholUrl);
+        Document currentDoc = scrapingService.getJsoupDocument(alcoholUrl);
 
-        int pagesNumber = getPagesNumber(currentPage);
+        int pagesNumber = getPagesNumber(currentDoc);
         int nextPageNumber = 2;
 
         log.warn("Starting parsing of {}", alcoholType);
 
         while (true) {
-            log.info("Parsing: {}", currentPage.location());
+            log.info("Parsing: {}", currentDoc.location());
 
-            productsParsingExecutor.submit(new ProductJob(mainUrl, currentPage, alcoholType, start));
+            productsParsingExecutor.execute(new ProductJob(mainUrl, currentDoc, alcoholType, start));
 
             if (nextPageNumber > pagesNumber) {
                 break;
