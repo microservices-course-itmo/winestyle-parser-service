@@ -2,7 +2,6 @@ package com.wine.to.up.winestyle.parser.service.service.implementation.parser;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.Objects;
 import java.util.concurrent.*;
 
 import com.wine.to.up.commonlib.messaging.KafkaMessageSender;
@@ -60,7 +59,7 @@ public class ParserService implements WinestyleParserService {
                 break;
             }
 
-            currentPage =  productsParsingExecutor.submit(new ProductRunner(nextPageNumber, alcoholUrl)).get();
+            currentDoc = productsParsingExecutor.submit(new DocumentJob(nextPageNumber, alcoholUrl)).get();
 
             nextPageNumber++;
         }
@@ -70,11 +69,11 @@ public class ParserService implements WinestyleParserService {
         log.warn("Finished parsing of {} in {}", alcoholType, java.time.Duration.between((start), LocalDateTime.now()));
     }
 
-    private class ProductRunner implements Callable<Document> {
+    private class DocumentJob implements Callable<Document> {
         int nextPageNumber;
         String alcoholUrl;
 
-        public ProductRunner(int nextPageNumber, String alcoholUrl) {
+        public DocumentJob(int nextPageNumber, String alcoholUrl) {
             this.nextPageNumber = nextPageNumber;
             this.alcoholUrl = alcoholUrl;
         }
