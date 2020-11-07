@@ -2,8 +2,10 @@ package com.wine.to.up.winestyle.parser.service.service.implementation.parser;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.concurrent.*;
 
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.wine.to.up.commonlib.messaging.KafkaMessageSender;
 import com.wine.to.up.parser.common.api.schema.UpdateProducts;
 import com.wine.to.up.winestyle.parser.service.controller.exception.NoEntityException;
@@ -19,10 +21,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.pool2.impl.GenericObjectPool;
+import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.springframework.stereotype.Component;
+
+import javax.annotation.PostConstruct;
 
 @Slf4j
 @Component
@@ -34,20 +39,60 @@ public class ParserService implements WinestyleParserService {
     private final ParserDirectorService parserDirectorService;
     private final KafkaMessageSender<UpdateProducts.UpdateProductsMessage> kafkaSendMessageService;
     private final Alcohol.AlcoholBuilder builder = Alcohol.builder();
-    private final GenericObjectPool<ScrapingService> scrapingServiceObjectPool =
-            new GenericObjectPool<>(new ScrapingServicePooledObjectFactory());
-    private ExecutorService productsParsingExecutor;
+
+    private final int MAX_THREAD_COUNT = 50;
+
+    private final GenericObjectPoolConfig<ScrapingService> scrapingServiceGenericObjectPoolConfig =
+            new GenericObjectPoolConfig<>();
+    private GenericObjectPool<ScrapingService> scrapingServiceObjectPool;
+
+    private final ThreadFactory parsingThreadFactory = new ThreadFactoryBuilder()
+            .setNameFormat("Parsing-%d")
+            .build();
+    private ExecutorService parsingThreadPool;
+
     private int parsed = 0;
+
+    @SneakyThrows
+    @PostConstruct
+    public void poolsInit() {
+        scrapingServiceGenericObjectPoolConfig.setMaxTotal(MAX_THREAD_COUNT);
+        scrapingServiceGenericObjectPoolConfig.setMaxIdle(MAX_THREAD_COUNT);
+
+        scrapingServiceObjectPool = new GenericObjectPool<>(
+                new ScrapingServicePooledObjectFactory(),
+                scrapingServiceGenericObjectPoolConfig
+        );
+
+        scrapingServiceObjectPool.addObjects(MAX_THREAD_COUNT);
+
+        parsingThreadPool = Executors.newFixedThreadPool(MAX_THREAD_COUNT, parsingThreadFactory);
+    }
+
+    @SneakyThrows
+    public void poolsRenew() {
+        if (scrapingServiceObjectPool.isClosed()) {
+            scrapingServiceObjectPool = new GenericObjectPool<>(
+                    new ScrapingServicePooledObjectFactory(),
+                    scrapingServiceGenericObjectPoolConfig
+            );
+            scrapingServiceObjectPool.addObjects(MAX_THREAD_COUNT);
+        }
+
+        if (parsingThreadPool.isShutdown()) {
+            parsingThreadPool = Executors.newFixedThreadPool(MAX_THREAD_COUNT, parsingThreadFactory);
+        }
+    }
 
     @SneakyThrows
     @Override
     public void parseBuildSave(String mainUrl, String relativeUrl, String alcoholType) {
-        scrapingServiceObjectPool.addObjects(50);
-        productsParsingExecutor = Executors.newFixedThreadPool(50);
+        poolsRenew();
 
-        ScrapingService scrapingService = scrapingServiceObjectPool.borrowObject();
         LocalDateTime start = LocalDateTime.now();
         String alcoholUrl = mainUrl + relativeUrl;
+
+        ScrapingService scrapingService = scrapingServiceObjectPool.borrowObject();
         Document currentDoc = scrapingService.getJsoupDocument(alcoholUrl);
         scrapingServiceObjectPool.returnObject(scrapingService);
 
@@ -56,44 +101,43 @@ public class ParserService implements WinestyleParserService {
 
         log.warn("Starting parsing of {}", alcoholType);
 
-        while (true) {
-            log.info("Parsing: {}", currentDoc.location());
+        try {
+            while (true) {
+                log.info("Parsing: {}", currentDoc.location());
 
-            productsParsingExecutor.execute(
-                    new ProductJob(mainUrl, currentDoc, alcoholType, start));
+                parsingThreadPool.execute(new ProductJob(mainUrl, currentDoc, alcoholType, start));
 
-            if (nextPageNumber > pagesNumber) {
-                break;
+                if (nextPageNumber > pagesNumber) {
+                    break;
+                }
+
+                currentDoc = getDocument(nextPageNumber, alcoholUrl);
+
+                nextPageNumber++;
             }
+        } finally {
+            parsingThreadPool.shutdown();
 
-            currentDoc = productsParsingExecutor.submit(
-                    new DocumentJob(nextPageNumber, alcoholUrl)
-            ).get();
+            parsingThreadPool.awaitTermination(10, TimeUnit.SECONDS);
 
-            nextPageNumber++;
+            scrapingServiceObjectPool.close();
+
+            log.info("Finished parsing of {} in {}", alcoholType, java.time.Duration.between((start), LocalDateTime.now()));
+
+            final List<Runnable> unparsed = parsingThreadPool.shutdownNow();
+
+            log.debug("Unparsed {}: {}", alcoholType, unparsed.size());
+
+            parsed = 0;
         }
-        productsParsingExecutor.shutdown();
-
-        log.warn("Finished parsing of {} in {}", alcoholType, java.time.Duration.between((start), LocalDateTime.now()));
     }
 
-    private class DocumentJob implements Callable<Document> {
-        int nextPageNumber;
-        String alcoholUrl;
-
-        public DocumentJob(int nextPageNumber, String alcoholUrl) {
-            this.nextPageNumber = nextPageNumber;
-            this.alcoholUrl = alcoholUrl;
-        }
-
-        @Override
-        @SneakyThrows
-        public Document call() {
-            ScrapingService scrapingService = scrapingServiceObjectPool.borrowObject();
-            Document document = scrapingService.getJsoupDocument(alcoholUrl + "?page=" + nextPageNumber);
-            scrapingServiceObjectPool.returnObject(scrapingService);
-            return document;
-        }
+    @SneakyThrows
+    public Document getDocument(int pageNumber, String alcoholUrl) {
+        ScrapingService scrapingService = scrapingServiceObjectPool.borrowObject();
+        Document document = scrapingService.getJsoupDocument(alcoholUrl + "?page=" + pageNumber);
+        scrapingServiceObjectPool.returnObject(scrapingService);
+        return document;
     }
 
     private class ProductJob implements Runnable {
@@ -120,15 +164,15 @@ public class ParserService implements WinestyleParserService {
         @SneakyThrows({InterruptedException.class, ExecutionException.class})
         @Override
         public void run() {
-            Future<Elements> alcohol = productsParsingExecutor.submit(() -> segmentationService
+            Elements alcohol = segmentationService
                     .setMainDocument(currentDoc)
                     .setMainMainContent()
-                    .breakDocumentIntoProductElements());
+                    .breakDocumentIntoProductElements();
 
             int parsedNow = 0;
 
-            for (Element drink : alcohol.get()) {
-                parsedNow += productsParsingExecutor.submit(() -> {
+            for (Element drink : alcohol) {
+                parsedNow += parsingThreadPool.submit(() -> {
                     String productUrl;
 
                     parsingService.setProductBlock(segmentationService.setProductBlock(drink).getProductBlock());
@@ -190,6 +234,7 @@ public class ParserService implements WinestyleParserService {
             parsingService.setArticlesBlock(segmentationService.getArticlesBlock());
             parsingService.setDescriptionBlock(segmentationService.getDescriptionBlock());
         }
+
     }
 
     private int getPagesNumber(Document doc) {
