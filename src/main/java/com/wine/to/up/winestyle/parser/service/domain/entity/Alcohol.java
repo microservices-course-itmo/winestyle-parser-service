@@ -8,6 +8,8 @@ import com.wine.to.up.parser.common.api.schema.UpdateProducts;
 import com.wine.to.up.parser.common.api.schema.UpdateProducts.Product.Color;
 import com.wine.to.up.parser.common.api.schema.UpdateProducts.Product.Sugar;
 
+import java.util.Base64;
+
 /**
  * <pre>
  * Класс - сущность "алкоголь", содержащая поля:
@@ -122,7 +124,7 @@ public class Alcohol {
             builder.setLink(url);
         // TODO set image
         if (image != null)
-             builder.setImage(String.valueOf(image));
+             builder.setImage(Base64.getEncoder().encodeToString(image.getImage()));
         if (cropYear != null)
             builder.setYear(cropYear);
         if (manufacturer != null)
