@@ -50,8 +50,9 @@ public class ScrapingService {
         return doc;
     }
 
-    public void initProxy() {
-        loader = proxyService.getLoader();
+
+    public void initProxy(int maxTimeout) {
+        loader = proxyService.getLoader(maxTimeout);
     }
 
     public void setTimeout(int timeout) {
