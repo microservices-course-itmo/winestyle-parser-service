@@ -1,8 +1,10 @@
 package com.wine.to.up.winestyle.parser.service.controller;
 
 import com.wine.to.up.winestyle.parser.service.controller.exception.NoEntityException;
+import com.wine.to.up.winestyle.parser.service.controller.exception.ServiceIsBusyException;
 import com.wine.to.up.winestyle.parser.service.domain.entity.Alcohol;
 import com.wine.to.up.winestyle.parser.service.service.RepositoryService;
+import com.wine.to.up.winestyle.parser.service.service.implementation.controller.MainControllerService;
 import com.wine.to.up.winestyle.parser.service.utility.CSVUtility;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,6 +31,7 @@ import javax.servlet.http.HttpServletResponse;
 @Slf4j
 public class MainController {
     private final RepositoryService alcoholRepositoryService;
+    private final MainControllerService mainControllerService;
 
     @GetMapping(value = "/alcohol", produces = MediaType.APPLICATION_JSON_VALUE)
     public List<Alcohol> getAlcohol() {
@@ -109,5 +112,11 @@ public class MainController {
             log.error("Cannot write feeding database csv to outputStream (GET /winestyle/api/wine/csv)");
             throw new RuntimeException("Error while feeding file to outputStream");
         }
+    }
+
+    @PostMapping("/proxy/init")
+    public ResponseEntity<String> initProxy(@RequestParam int maxTimeout) throws ServiceIsBusyException {
+        mainControllerService.startProxyInitJob(maxTimeout);
+        return new ResponseEntity<>("Proxy initialization job was successfully launched.", HttpStatus.OK);
     }
 }
