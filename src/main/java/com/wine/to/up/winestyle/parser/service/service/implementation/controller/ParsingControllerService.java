@@ -34,7 +34,7 @@ public class ParsingControllerService {
                 log.info("Started parsing of {} via /winestyle/api/parse/{}", alcoholType, alcoholType);
                 new Thread(() -> {
                     try {
-                        parse(alcoholUrl, alcoholType);
+                        alcoholParserService.parseBuildSave("https://spb.winestyle.ru", alcoholUrl, alcoholType);
                     } finally {
                         statusService.release(ServiceType.PARSER);
                     }
@@ -45,11 +45,5 @@ public class ParsingControllerService {
         } else {
             throw UnsupportedAlcoholTypeException.createWith("is not supported", alcoholType);
         }
-    }
-
-    private void parse(String relativeUrl, String alcoholType) {
-        log.info("Started parsing of {} via /winestyle/api/parse/{}", alcoholType, alcoholType);
-        String mainUrl = "https://spb.winestyle.ru";
-        alcoholParserService.parseBuildSave(mainUrl, relativeUrl, alcoholType);
     }
 }
