@@ -34,11 +34,11 @@ public class MainControllerService {
             if (requiredFields.contains(fieldName)) {
                 try {
                     res.put(fieldName, field.get(alcohol));
-                } catch (IllegalArgumentException e) {
-                    throw IllegalFieldException.createWith("Alcohol", fieldName);
                 } catch (IllegalAccessException e) {
                     log.error("Requested {} field is inaccessible", field.getName());
                 }
+            } else {
+                throw IllegalFieldException.createWith("Alcohol", fieldName);
             }
         }
         log.info("Returned alcohol with id={} with requested fields ({}) via GET /winestyle/api/alcohol/with-fields/{}",
