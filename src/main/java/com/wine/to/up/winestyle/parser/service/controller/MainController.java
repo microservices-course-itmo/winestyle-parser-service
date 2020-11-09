@@ -7,12 +7,10 @@ import com.wine.to.up.winestyle.parser.service.utility.CSVUtility;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -50,8 +48,8 @@ public class MainController {
         return alcoholRepositoryService.getAllSparkling();
     }
 
-    @GetMapping(value ="/alcohol/by-url/{url}" , produces = MediaType.APPLICATION_JSON_VALUE)
-    public Alcohol getAlcoholByUrl(@PathVariable String url) throws NoEntityException {
+    @GetMapping(value = "/alcohol/by-url", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Alcohol getAlcoholByUrl(@RequestParam String url) throws NoEntityException {
         log.info("Returned alcohol with url={} via GET /winestyle/api/alcohol/by-url/{}", url, url);
         return alcoholRepositoryService.getByUrl("/products/" + url);
     }
@@ -68,7 +66,7 @@ public class MainController {
      * @return HTTP-статус 200(ОК) и алкоголь с запрошенными полями в теле ответа.
      * @throws NoEntityException если искомая позиция не найдена.
      */
-    @GetMapping(value ="/alcohol/with-fields/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/alcohol/with-fields/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public Map<String, Object> getAlcoholWithFields(@PathVariable long id, @RequestParam String fieldsList)
             throws NoEntityException {
         Set<String> requiredFields = new HashSet<>(Arrays.asList(fieldsList.split(",")));
