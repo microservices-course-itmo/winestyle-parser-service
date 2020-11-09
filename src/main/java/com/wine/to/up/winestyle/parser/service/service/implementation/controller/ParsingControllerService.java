@@ -5,6 +5,7 @@ import com.wine.to.up.winestyle.parser.service.controller.exception.ServiceIsBus
 import com.wine.to.up.winestyle.parser.service.service.WinestyleParserService;
 
 import com.google.common.collect.ImmutableMap;
+import com.wine.to.up.winestyle.parser.service.service.implementation.helpers.enums.ServiceType;
 import com.wine.to.up.winestyle.parser.service.service.implementation.helpers.StatusService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,12 +30,13 @@ public class ParsingControllerService {
     public void startParsingJob(String alcoholType) throws ServiceIsBusyException, UnsupportedAlcoholTypeException {
         String alcoholUrl = SUPPORTED_ALCOHOL_URLS.get(alcoholType);
         if (alcoholUrl != null) {
-            if (statusService.tryBusy()) {
+            if (statusService.tryBusy(ServiceType.PARSER)) {
+                log.info("Started parsing of {} via /winestyle/api/parse/{}", alcoholType, alcoholType);
                 new Thread(() -> {
                     try {
                         parse(alcoholUrl, alcoholType);
                     } finally {
-                        statusService.release();
+                        statusService.release(ServiceType.PARSER);
                     }
                 }).start();
             } else {
