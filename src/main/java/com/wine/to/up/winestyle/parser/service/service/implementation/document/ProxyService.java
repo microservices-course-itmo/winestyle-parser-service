@@ -71,8 +71,10 @@ public class ProxyService {
                 if (proxyResult != null) {
                     alive.add(proxyResult);
                 }
-            } catch (InterruptedException | ExecutionException e) {
+            } catch (ExecutionException e) {
                 log.error("An exception occurred while checking proxy asynchronously", e);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
             }
         }
         log.info("Got {} suitable proxies", alive.size());
