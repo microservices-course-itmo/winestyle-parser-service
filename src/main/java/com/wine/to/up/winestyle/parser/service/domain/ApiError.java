@@ -15,7 +15,8 @@ public class ApiError {
 
     /**
      * Конструктор
-     * @param errors  список с ошибками
+     *
+     * @param errors список с ошибками
      */
     public ApiError(List<String> errors) {
         this.errors = errors;

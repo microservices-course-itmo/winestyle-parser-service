@@ -5,7 +5,7 @@ import lombok.Data;
 import java.io.Serializable;
 
 /**
- * Передаваемый объект сущности вино. 
+ * Передаваемый объект сущности вино.
  */
 @Data
 public class WineDto implements Serializable {

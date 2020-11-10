@@ -17,6 +17,7 @@ public class StatusService {
 
     /**
      * Пытается завладеть парсером как ресурсом
+     *
      * @return true в случае, если парсер был свободен и удалось занять ресурс; false в обратном случае
      */
     public boolean tryBusy() {

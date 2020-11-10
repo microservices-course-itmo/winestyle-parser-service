@@ -96,16 +96,16 @@ public class Alcohol {
     @Column(columnDefinition = "varchar(125)")
     private String grape;
 
-    @Column(columnDefinition="TEXT")
+    @Column(columnDefinition = "TEXT")
     private String taste;
 
-    @Column(columnDefinition="TEXT")
+    @Column(columnDefinition = "TEXT")
     private String aroma;
 
-    @Column(columnDefinition="TEXT")
+    @Column(columnDefinition = "TEXT")
     private String foodPairing;
 
-    @Column(columnDefinition="TEXT")
+    @Column(columnDefinition = "TEXT")
     private String description;
 
     @Setter
@@ -114,6 +114,7 @@ public class Alcohol {
 
     /**
      * Преобразование нашего класса Wine в общий для парсеров класс Product
+     *
      * @return Product
      */
     public UpdateProducts.Product asProduct() {
@@ -123,53 +124,53 @@ public class Alcohol {
         if (url != null)
             builder.setLink(url);
         if (imageUrl != null)
-             builder.setImage(imageUrl);
+            builder.setImage(imageUrl);
         if (cropYear != null)
             builder.setYear(cropYear);
         if (manufacturer != null)
             builder.setManufacturer(manufacturer);
         if (brand != null)
             builder.setBrand(brand);
-        if (color != null){
+        if (color != null) {
             Color localcolor = Color.UNRECOGNIZED;
-            if(this.color.matches("^(Белое|Голубое)") ){
-                localcolor = Color.WHITE; 
-            }else if(this. color.startsWith("Розовое")){
-                localcolor =  Color.ROSE; 
-            }else if(this.color.startsWith("Оранжевое")){
-                localcolor =  Color.ORANGE ;
-            }else if(this.color.startsWith("Красное")){
-                localcolor =  Color.RED;
+            if (this.color.matches("^(Белое|Голубое)")) {
+                localcolor = Color.WHITE;
+            } else if (this.color.startsWith("Розовое")) {
+                localcolor = Color.ROSE;
+            } else if (this.color.startsWith("Оранжевое")) {
+                localcolor = Color.ORANGE;
+            } else if (this.color.startsWith("Красное")) {
+                localcolor = Color.RED;
             }
             builder.setColor(localcolor);
         }
         if (country != null)
             builder.setCountry(country);
         if (region != null)
-            builder.addRegion(region); 
+            builder.addRegion(region);
         if (volume != null)
             builder.setCapacity(volume);
         if (strength != null)
             builder.setStrength(strength.matches("^Б.+") ? 0.f :
                     Float.parseFloat(strength.substring(0, strength.length() - 1)));
-        if (sugar != null){
-            Sugar  localsugar = Sugar.UNRECOGNIZED;
-            if(this.sugar.matches("^(Сухое|Брют).*")  ){
+        if (sugar != null) {
+            Sugar localsugar = Sugar.UNRECOGNIZED;
+            if (this.sugar.matches("^(Сухое|Брют).*")) {
                 localsugar = Sugar.DRY;
-            }else if(this. sugar.startsWith("Полусухое") ){
-                localsugar =  Sugar.MEDIUM_DRY; 
-            }else if(this.sugar.startsWith("Полусладкое")){
-                localsugar =  Sugar.MEDIUM  ;
-            }else if(this. sugar.startsWith("Сладкое") ){
-                localsugar = Sugar.SWEET ;
+            } else if (this.sugar.startsWith("Полусухое")) {
+                localsugar = Sugar.MEDIUM_DRY;
+            } else if (this.sugar.startsWith("Полусладкое")) {
+                localsugar = Sugar.MEDIUM;
+            } else if (this.sugar.startsWith("Сладкое")) {
+                localsugar = Sugar.SWEET;
             }
             builder.setSugar(localsugar);
         }
-           
+
         if (price != null)
             builder.setNewPrice(price);
         if (grape != null)
-            builder.addGrapeSort(grape); 
+            builder.addGrapeSort(grape);
         if (taste != null)
             builder.setTaste(taste);
         if (aroma != null)

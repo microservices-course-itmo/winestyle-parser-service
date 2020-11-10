@@ -8,7 +8,6 @@ import org.springframework.stereotype.Component;
  * It changes metrics of Micrometer and Prometheus simultaneously
  * Micrometer's metrics exposed at /actuator/prometheus
  * Prometheus' metrics exposed at /metrics-prometheus
- *
  */
 @Component
 public class WinestyleParserServiceMetricsCollector extends CommonMetricsCollector {

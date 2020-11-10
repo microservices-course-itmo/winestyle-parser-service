@@ -15,7 +15,6 @@ public class Image {
 
     @Getter
     @Lob
-    @Column(columnDefinition="BYTEA")
-    @Getter
+    @Column(columnDefinition = "BYTEA")
     private byte[] data;
 }

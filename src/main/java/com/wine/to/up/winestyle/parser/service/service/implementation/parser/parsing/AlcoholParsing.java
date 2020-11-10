@@ -55,6 +55,7 @@ public class AlcoholParsing implements ParsingService {
 
     /**
      * Парсер картинки.
+     *
      * @return Ссылка на картинку, которую мы достали или Null, если картинки нет.
      */
     @Override
@@ -70,6 +71,7 @@ public class AlcoholParsing implements ParsingService {
 
     /**
      * Парсер винограда, свойство: год сбора.
+     *
      * @return Год сбора ИЛИ null, если его нет.
      */
     @Override
@@ -87,6 +89,7 @@ public class AlcoholParsing implements ParsingService {
 
     /**
      * Парсер цены вина.
+     *
      * @return Стоимость вина ИЛИ null, если её нет.
      */
     @Override
@@ -103,6 +106,7 @@ public class AlcoholParsing implements ParsingService {
 
     /**
      * Парсер рейтинга вина.
+     *
      * @return Рейтинг вина ИЛИ null, если его нет.
      */
     @Override
@@ -118,6 +122,7 @@ public class AlcoholParsing implements ParsingService {
 
     /**
      * Парсер объема.
+     *
      * @return Объем в мл ИЛИ null, если его нет.
      */
     @Override
@@ -139,6 +144,7 @@ public class AlcoholParsing implements ParsingService {
 
     /**
      * Парсер производителя вина.
+     *
      * @return Производитель ИЛИ null, если его нет.
      */
     @Override
@@ -158,6 +164,7 @@ public class AlcoholParsing implements ParsingService {
 
     /**
      * Парсер бренда вина.
+     *
      * @return Бренд ИЛИ null, если его нет.
      */
     @Override
@@ -177,6 +184,7 @@ public class AlcoholParsing implements ParsingService {
 
     /**
      * Парсер страны происхождения винограда.
+     *
      * @return Страна ИЛИ Null, если свойства нет.
      */
     @Override
@@ -204,6 +212,7 @@ public class AlcoholParsing implements ParsingService {
 
     /**
      * Парсер регионов происхождения винограда.
+     *
      * @return Регионы ИЛИ Null, если свойства нет.
      */
     @Override
@@ -219,6 +228,7 @@ public class AlcoholParsing implements ParsingService {
 
     /**
      * Парсер крепости вина.
+     *
      * @return Крепость ИЛИ null, если свойства нет.
      */
     @Override
@@ -238,6 +248,7 @@ public class AlcoholParsing implements ParsingService {
 
     /**
      * Парсер сорта винограда.
+     *
      * @return Объединенная строка сортов винограда ИЛИ null, если их нет.
      */
     @Override
@@ -257,6 +268,7 @@ public class AlcoholParsing implements ParsingService {
 
     /**
      * Парсер свойств: Тип и отеннок вина/игристого.
+     *
      * @return Тип напитка ИЛИ массив из двух Null, если свойств нет.
      */
     @Override
@@ -340,6 +352,7 @@ public class AlcoholParsing implements ParsingService {
 
     /**
      * Парсер сладости/сухости.
+     *
      * @return Сладость/сухость ИЛИ Null, если свойства нет.
      */
     @Override
@@ -355,6 +368,7 @@ public class AlcoholParsing implements ParsingService {
 
     /**
      * Парсер вкуса вина.
+     *
      * @return Вкус вина ИЛИ null, если нет его описания.
      */
     @Override
@@ -370,6 +384,7 @@ public class AlcoholParsing implements ParsingService {
 
     /**
      * Парсер аромата вина.
+     *
      * @return Аромат ИЛИ null, если нет его описания.
      */
     @Override
@@ -385,6 +400,7 @@ public class AlcoholParsing implements ParsingService {
 
     /**
      * Парсер сочетания вина с блюдами.
+     *
      * @return Строку сочетаний ИЛИ null, если их нет.
      */
     @Override
@@ -400,6 +416,7 @@ public class AlcoholParsing implements ParsingService {
 
     /**
      * Парсер описания.
+     *
      * @return Описание, которое мы достали, ИЛИ Null, если описания нет.
      */
     @Override

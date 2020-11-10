@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/winestyle/api/parse")
 @Slf4j
 public class ParsingController {
-    private final ParsingControllerService  parsingControllerService;
+    private final ParsingControllerService parsingControllerService;
 
     /**
      * @param alcohol тип алкоголя для парсинга (wine или sparkling).
