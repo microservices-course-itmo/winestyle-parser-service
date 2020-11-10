@@ -1,5 +1,7 @@
 package com.wine.to.up.winestyle.parser.service.domain.entity;
 
+import lombok.Getter;
+
 import javax.persistence.*;
 
 @Entity
@@ -13,5 +15,6 @@ public class Image {
 
     @Lob
     @Column(columnDefinition="BYTEA")
-    private byte[] image;
+    @Getter
+    private byte[] data;
 }
