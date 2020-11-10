@@ -21,7 +21,7 @@ public class ParsingControllerService {
     private final WinestyleParserService alcoholParserService;
     private final StatusService statusService;
 
-    private final ImmutableMap<String, String> SUPPORTED_ALCOHOL_URLS = ImmutableMap.<String, String>builder()
+    private static final ImmutableMap<String, String> SUPPORTED_ALCOHOL_URLS = ImmutableMap.<String, String>builder()
             .put("wine", "/wine/all/")
             .put("sparkling", "/champagnes-and-sparkling/champagnes/sparkling/sparkling-blue_ll/")
             .build();

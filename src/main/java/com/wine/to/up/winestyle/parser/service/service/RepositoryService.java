@@ -9,12 +9,16 @@ public interface RepositoryService {
     void add(Alcohol alcohol);
 
     void updatePrice(Float price, String url) throws NoEntityException;
+
     void updateRating(Float rating, String url) throws NoEntityException;
 
     List<Alcohol> getAll();
+
     List<Alcohol> getAllWines();
+
     List<Alcohol> getAllSparkling();
 
     Alcohol getByUrl(String url) throws NoEntityException;
+
     Alcohol getByID(long id) throws NoEntityException;
 }

@@ -43,16 +43,16 @@ public class KafkaConfiguration {
      * Uses custom serializer as the messages within single topic should be the same type. And
      * the messages in different topics can have different types and require different serializers
      *
-     * @param producerProperties       is the general producer properties. {@link #producerProperties()}
-     * @param parserApiProperties      class containing the values of the given service's API properties (in this particular case topic name)
-     * @param metricsCollector         class encapsulating the logic of the metrics collecting and publishing
+     * @param producerProperties  is the general producer properties. {@link #producerProperties()}
+     * @param parserApiProperties class containing the values of the given service's API properties (in this particular case topic name)
+     * @param metricsCollector    class encapsulating the logic of the metrics collecting and publishing
      */
     @Bean
     KafkaMessageSender<UpdateProducts.UpdateProductsMessage> wineStyleKafkaMessageSender(Properties producerProperties,
-            ParserCommonApiProperties parserApiProperties, WinestyleParserServiceMetricsCollector metricsCollector) {
-                
+                                                                                         ParserCommonApiProperties parserApiProperties, WinestyleParserServiceMetricsCollector metricsCollector) {
+
         producerProperties.setProperty(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, EventSerializer.class.getName());
 
-        return new KafkaMessageSender<>(new KafkaProducer<>(producerProperties), parserApiProperties.getParserWinePositionParsedEvents(), metricsCollector);
+        return new KafkaMessageSender<>(new KafkaProducer<>(producerProperties), parserApiProperties.getWineParsedEventsTopicName(), metricsCollector);
     }
 }

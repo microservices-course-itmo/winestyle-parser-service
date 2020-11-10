@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Класс, сохраняющий все распаршенные вина в csv-файл data.csv.
@@ -27,7 +28,7 @@ public class CSVUtility {
     public void toCsvFile(RepositoryService repositoryService) throws IOException {
         List<Alcohol> alcohol = repositoryService.getAll();
         try (OutputStream os = new FileOutputStream("data.csv");
-                PrintWriter writer = new PrintWriter(new OutputStreamWriter(os, "UTF-8"))) {
+             PrintWriter writer = new PrintWriter(new OutputStreamWriter(os, StandardCharsets.UTF_8))) {
             HeaderColumnNameMappingStrategy<Alcohol> strategy = new HeaderColumnNameMappingStrategy<>();
             strategy.setType(Alcohol.class);
             StatefulBeanToCsv<Alcohol> alcoholCsv = new StatefulBeanToCsvBuilder<Alcohol>(writer)

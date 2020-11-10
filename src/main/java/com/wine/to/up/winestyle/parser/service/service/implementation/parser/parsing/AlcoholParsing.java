@@ -55,6 +55,7 @@ public class AlcoholParsing implements ParsingService {
 
     /**
      * Парсер картинки.
+     *
      * @return Ссылка на картинку, которую мы достали или Null, если картинки нет.
      */
     @Override
@@ -70,6 +71,7 @@ public class AlcoholParsing implements ParsingService {
 
     /**
      * Парсер винограда, свойство: год сбора.
+     *
      * @return Год сбора ИЛИ null, если его нет.
      */
     @Override
@@ -87,13 +89,14 @@ public class AlcoholParsing implements ParsingService {
 
     /**
      * Парсер цены вина.
+     *
      * @return Стоимость вина ИЛИ null, если её нет.
      */
     @Override
     public Float parsePrice() {
         try {
             String priceValue = productBlock.selectFirst(".price").ownText();
-            priceValue = priceValue.replaceAll(" ", "");
+            priceValue = priceValue.replace(" ", "");
             return Float.parseFloat(priceValue);
         } catch (Exception ex) {
             log.warn("{}: product's price is not specified", url);
@@ -103,6 +106,7 @@ public class AlcoholParsing implements ParsingService {
 
     /**
      * Парсер рейтинга вина.
+     *
      * @return Рейтинг вина ИЛИ null, если его нет.
      */
     @Override
@@ -111,13 +115,14 @@ public class AlcoholParsing implements ParsingService {
             String rating = infoContainer.selectFirst(".info-container meta[itemprop=ratingValue]").attr("content");
             return Float.parseFloat(rating) / 2.f;
         } catch (Exception ex) {
-            log.warn("{}product's winestyle's rating is not specified", url);
+            log.warn("{}: product's winestyle's rating is not specified", url);
             return null;
         }
     }
 
     /**
      * Парсер объема.
+     *
      * @return Объем в мл ИЛИ null, если его нет.
      */
     @Override
@@ -139,6 +144,7 @@ public class AlcoholParsing implements ParsingService {
 
     /**
      * Парсер производителя вина.
+     *
      * @return Производитель ИЛИ null, если его нет.
      */
     @Override
@@ -158,6 +164,7 @@ public class AlcoholParsing implements ParsingService {
 
     /**
      * Парсер бренда вина.
+     *
      * @return Бренд ИЛИ null, если его нет.
      */
     @Override
@@ -177,6 +184,7 @@ public class AlcoholParsing implements ParsingService {
 
     /**
      * Парсер страны происхождения винограда.
+     *
      * @return Страна ИЛИ Null, если свойства нет.
      */
     @Override
@@ -204,6 +212,7 @@ public class AlcoholParsing implements ParsingService {
 
     /**
      * Парсер регионов происхождения винограда.
+     *
      * @return Регионы ИЛИ Null, если свойства нет.
      */
     @Override
@@ -219,6 +228,7 @@ public class AlcoholParsing implements ParsingService {
 
     /**
      * Парсер крепости вина.
+     *
      * @return Крепость ИЛИ null, если свойства нет.
      */
     @Override
@@ -238,6 +248,7 @@ public class AlcoholParsing implements ParsingService {
 
     /**
      * Парсер сорта винограда.
+     *
      * @return Объединенная строка сортов винограда ИЛИ null, если их нет.
      */
     @Override
@@ -257,11 +268,11 @@ public class AlcoholParsing implements ParsingService {
 
     /**
      * Парсер свойств: Тип и отеннок вина/игристого.
+     *
      * @return Тип напитка ИЛИ массив из двух Null, если свойств нет.
      */
     @Override
-    public String parseType(Boolean isSpakrling) {
-        String type;
+    public String parseType(boolean isSpakrling) {
         try {
             Element typeAndColorElement = listDescription.selectFirst("span:matches(([Вв]ино)[:/].*)");
             Element typeAndColorParent = typeAndColorElement.parent();
@@ -269,47 +280,9 @@ public class AlcoholParsing implements ParsingService {
             String typeColorSugar = typeAndColorParent.text();
             typeAndColorParent.remove();
             if (isSpakrling) {
-                int indexOfDelim = typeColorSugar.indexOf("-");
-                if (indexOfDelim >= 0) {
-                    type = typeColorSugar.substring(0, indexOfDelim);
-                    colorAndSugar = typeColorSugar.substring(indexOfDelim + 1);
-                    return type;
-                } else if (typeColorSugar.matches("^[ШИ].+")) {
-                    isColorPresented = false;
-                    indexOfDelim = typeColorSugar.indexOf(", ");
-                    if (indexOfDelim >= 0) {
-                        type = typeColorSugar.substring(0, indexOfDelim);
-                        colorAndSugar = typeColorSugar.substring(indexOfDelim + 2);
-                        return type;
-                    } else {
-                        isColorPresented = false;
-                        isSugarPresented = false;
-                        return typeColorSugar;
-                    }
-                } else {
-                    isColorPresented = false;
-                    if (region.equals("Шампань")) {
-                        return "Шампанское";
-                    } else {
-                        return "Игристое";
-                    }
-                }
+                return parseSparklingType(typeColorSugar);
             } else {
-                int indexOfDelim = typeColorSugar.indexOf(", ");
-                if (indexOfDelim >= 0) {
-                    type = typeColorSugar.substring(0, indexOfDelim);
-                } else {
-                    isSugarPresented = false;
-                    type = typeColorSugar;
-                }
-                if (type.matches("^(?!C|Пол|Р|Б|О|Г|Кра).+")) {
-                    colorAndSugar = typeColorSugar.substring(indexOfDelim + 2);
-                    isColorPresented = false;
-                    return type;
-                } else {
-                    colorAndSugar = typeColorSugar;
-                    return "Вино";
-                }
+                return parseWineType(typeColorSugar);
             }
         } catch (NullPointerException e) {
             isColorPresented = false;
@@ -340,6 +313,7 @@ public class AlcoholParsing implements ParsingService {
 
     /**
      * Парсер сладости/сухости.
+     *
      * @return Сладость/сухость ИЛИ Null, если свойства нет.
      */
     @Override
@@ -355,6 +329,7 @@ public class AlcoholParsing implements ParsingService {
 
     /**
      * Парсер вкуса вина.
+     *
      * @return Вкус вина ИЛИ null, если нет его описания.
      */
     @Override
@@ -370,6 +345,7 @@ public class AlcoholParsing implements ParsingService {
 
     /**
      * Парсер аромата вина.
+     *
      * @return Аромат ИЛИ null, если нет его описания.
      */
     @Override
@@ -385,6 +361,7 @@ public class AlcoholParsing implements ParsingService {
 
     /**
      * Парсер сочетания вина с блюдами.
+     *
      * @return Строку сочетаний ИЛИ null, если их нет.
      */
     @Override
@@ -400,6 +377,7 @@ public class AlcoholParsing implements ParsingService {
 
     /**
      * Парсер описания.
+     *
      * @return Описание, которое мы достали, ИЛИ Null, если описания нет.
      */
     @Override
@@ -410,6 +388,53 @@ public class AlcoholParsing implements ParsingService {
         } catch (NullPointerException ex) {
             log.warn("{}: product's description is not specified", url);
             return null;
+        }
+    }
+
+    private String parseWineType(String typeColorSugar) {
+        String type;
+        int indexOfDelim = typeColorSugar.indexOf(", ");
+        if (indexOfDelim >= 0) {
+            type = typeColorSugar.substring(0, indexOfDelim);
+        } else {
+            isSugarPresented = false;
+            type = typeColorSugar;
+        }
+        if (type.matches("^(?!C|Пол|Р|Б|О|Г|Кра).+")) {
+            colorAndSugar = typeColorSugar.substring(indexOfDelim + 2);
+            isColorPresented = false;
+            return type;
+        } else {
+            colorAndSugar = typeColorSugar;
+            return "Вино";
+        }
+    }
+
+    private String parseSparklingType(String typeColorSugar) {
+        String type;
+        int indexOfDelim = typeColorSugar.indexOf("-");
+        if (indexOfDelim >= 0) {
+            type = typeColorSugar.substring(0, indexOfDelim);
+            colorAndSugar = typeColorSugar.substring(indexOfDelim + 1);
+            return type;
+        } else if (typeColorSugar.matches("^[ШИ].+")) {
+            isColorPresented = false;
+            indexOfDelim = typeColorSugar.indexOf(", ");
+            if (indexOfDelim >= 0) {
+                type = typeColorSugar.substring(0, indexOfDelim);
+                colorAndSugar = typeColorSugar.substring(indexOfDelim + 2);
+                return type;
+            } else {
+                isSugarPresented = false;
+                return typeColorSugar;
+            }
+        } else {
+            isColorPresented = false;
+            if (region.equals("Шампань")) {
+                return "Шампанское";
+            } else {
+                return "Игристое";
+            }
         }
     }
 }

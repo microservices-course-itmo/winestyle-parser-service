@@ -8,11 +8,10 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.springframework.stereotype.Service;
 
-@Service
-
 /**
  * Класс, отвечающий за разделение данных со страницы
  */
+@Service
 public class SegmentationService {
     @Accessors(chain = true)
     @Setter
@@ -30,7 +29,7 @@ public class SegmentationService {
 
     /**
      * Добавление данных
-     * 
+     *
      * @return
      */
     public SegmentationService setMainMainContent() {
@@ -44,7 +43,7 @@ public class SegmentationService {
 
     /**
      * Разделение на элементы
-     * 
+     *
      * @return
      */
     public Elements breakDocumentIntoProductElements() {
@@ -53,7 +52,7 @@ public class SegmentationService {
 
     /**
      * Получить остальную информацию
-     * 
+     *
      * @return контейнер с информацией
      */
     public Element getInfoContainer() {
@@ -63,7 +62,7 @@ public class SegmentationService {
 
     /**
      * Описания
-     * 
+     *
      * @return из контейнера берется список описаний
      */
     public Element getListDescription() {
@@ -72,7 +71,7 @@ public class SegmentationService {
 
     /**
      * Взятие блока с картинкой
-     * 
+     *
      * @return блок с картинкой
      */
     public Element getLeftBlock() {
@@ -81,7 +80,7 @@ public class SegmentationService {
 
     /**
      * Описание вкуса
-     * 
+     *
      * @return блок с описанием
      */
     public Element getArticlesBlock() {
@@ -90,7 +89,7 @@ public class SegmentationService {
 
     /**
      * Описание продукта
-     * 
+     *
      * @return описание
      */
     public Element getDescriptionBlock() {

@@ -28,8 +28,9 @@ public class ScrapingService {
 
     /**
      * Достаем док из ссылки
+     *
      * @param url Ссылка на страницу
-     * @return документ 
+     * @return документ
      * @throws InterruptedException при блокировке потока исполнения Thread.sleep()
      */
     public Document getJsoupDocument(String url) throws InterruptedException {
