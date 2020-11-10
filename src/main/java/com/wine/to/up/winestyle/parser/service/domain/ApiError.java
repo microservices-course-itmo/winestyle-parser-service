@@ -1,7 +1,7 @@
 package com.wine.to.up.winestyle.parser.service.domain;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
 import java.util.List;
@@ -11,7 +11,7 @@ import java.util.List;
  */
 @Setter
 @Getter
-@RequiredArgsConstructor
+@AllArgsConstructor
 public class ApiError {
     private List<String> errors;
 }
