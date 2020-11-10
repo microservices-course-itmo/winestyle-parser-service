@@ -14,6 +14,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Field;
 import java.util.*;
 
 @Service
@@ -27,18 +28,18 @@ public class MainControllerService {
         Set<String> requiredFields = new HashSet<>(Arrays.asList(fieldsList.split(",")));
         Map<String, Object> res = new HashMap<>();
         Alcohol alcohol = alcoholRepositoryService.getByID(id);
-        String fieldName;
-        for (java.lang.reflect.Field field : Alcohol.class.getDeclaredFields()) {
-            field.setAccessible(true);
-            fieldName = field.getName();
-            if (requiredFields.contains(fieldName)) {
-                try {
-                    res.put(fieldName, field.get(alcohol));
-                } catch (IllegalAccessException e) {
-                    log.error("Requested {} field is inaccessible", field.getName());
-                }
-            } else {
+        Field field;
+        for (String fieldName : requiredFields) {
+            try {
+                field = alcohol.getClass().getDeclaredField(fieldName);
+            } catch (NoSuchFieldException e) {
                 throw IllegalFieldException.createWith("Alcohol", fieldName);
+            }
+            try {
+                field.setAccessible(true);
+                res.put(fieldName, field.get(alcohol));
+            } catch (IllegalAccessException e) {
+                log.error("Requested {} field is inaccessible", field.getName());
             }
         }
         log.info("Returned alcohol with id={} with requested fields ({}) via GET /winestyle/api/alcohol/with-fields/{}",
