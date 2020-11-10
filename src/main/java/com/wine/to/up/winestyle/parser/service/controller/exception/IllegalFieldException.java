@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 public class IllegalFieldException extends Exception {
 
     private static final long serialVersionUID = -6933406005453479808L;
-    private final Object entityName;
+    private final String entityName;
     private final String field;
 
     /**
