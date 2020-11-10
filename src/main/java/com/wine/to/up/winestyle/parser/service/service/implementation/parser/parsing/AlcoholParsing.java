@@ -96,7 +96,7 @@ public class AlcoholParsing implements ParsingService {
     public Float parsePrice() {
         try {
             String priceValue = productBlock.selectFirst(".price").ownText();
-            priceValue = priceValue.replaceAll(" ", "");
+            priceValue = priceValue.replace(" ", "");
             return Float.parseFloat(priceValue);
         } catch (Exception ex) {
             log.warn("{}: product's price is not specified", url);
@@ -272,7 +272,7 @@ public class AlcoholParsing implements ParsingService {
      * @return Тип напитка ИЛИ массив из двух Null, если свойств нет.
      */
     @Override
-    public String parseType(Boolean isSpakrling) {
+    public String parseType(boolean isSpakrling) {
         String type;
         try {
             Element typeAndColorElement = listDescription.selectFirst("span:matches(([Вв]ино)[:/].*)");
@@ -294,7 +294,6 @@ public class AlcoholParsing implements ParsingService {
                         colorAndSugar = typeColorSugar.substring(indexOfDelim + 2);
                         return type;
                     } else {
-                        isColorPresented = false;
                         isSugarPresented = false;
                         return typeColorSugar;
                     }

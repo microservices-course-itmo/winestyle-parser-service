@@ -29,7 +29,7 @@ public interface ParsingService {
 
     String parseGrape();
 
-    String parseType(Boolean isSparkling);
+    String parseType(boolean isSparkling);
 
     String parseColor();
 
