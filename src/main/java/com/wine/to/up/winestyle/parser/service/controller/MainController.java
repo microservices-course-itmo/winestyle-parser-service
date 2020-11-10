@@ -1,5 +1,7 @@
 package com.wine.to.up.winestyle.parser.service.controller;
 
+import com.wine.to.up.winestyle.parser.service.controller.exception.ClientConnectionProblem;
+import com.wine.to.up.winestyle.parser.service.controller.exception.FileCreationExeption;
 import com.wine.to.up.winestyle.parser.service.controller.exception.NoEntityException;
 import com.wine.to.up.winestyle.parser.service.domain.entity.Alcohol;
 import com.wine.to.up.winestyle.parser.service.service.RepositoryService;
@@ -82,6 +84,7 @@ public class MainController {
                 try {
                     res.put(fieldName, field.get(alcohol));
                 } catch (IllegalArgumentException | IllegalAccessException ignore) {
+                    //THIS NEVER HAPPENS
                 }
             }
         }
@@ -99,7 +102,7 @@ public class MainController {
                 CSVUtility.toCsvFile(alcoholRepositoryService);
             } catch (IOException e) {
                 log.error("Cannot write database to file (GET /winestyle/api/alcohol/csv)");
-                throw new RuntimeException("Cannot write database to file");
+                throw new FileCreationExeption();
             }
         }
         try (InputStream is = new FileInputStream(file)) {
@@ -109,7 +112,7 @@ public class MainController {
             log.info("Successfully dumped the database and returned csv (GET /winestyle/api/wine/csv)");
         } catch (IOException ex) {
             log.error("Cannot write feeding database csv to outputStream (GET /winestyle/api/wine/csv)");
-            throw new RuntimeException("Error while feeding file to outputStream");
+            throw new ClientConnectionProblem();
         }
     }
 }

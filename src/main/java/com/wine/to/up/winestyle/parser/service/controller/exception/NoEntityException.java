@@ -27,6 +27,7 @@ public class NoEntityException extends Exception {
         return new NoEntityException(entity, id, url);
     }
     
+    @Override
     public String getMessage() {
         if(url == null) {
             return "The server reported: " + entity + " with ID=" + id + " was not found.";

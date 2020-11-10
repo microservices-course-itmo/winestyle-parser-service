@@ -18,6 +18,7 @@ public class UnsupportedAlcoholTypeException extends Exception {
         return new UnsupportedAlcoholTypeException(cause, alcoholType);
     }
 
+    @Override
     public String getMessage() {
         return "The server reported: " + alcoholType + " alcohol type " + cause;
     }

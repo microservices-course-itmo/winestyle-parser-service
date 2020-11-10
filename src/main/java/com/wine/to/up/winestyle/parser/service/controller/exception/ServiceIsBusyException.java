@@ -22,6 +22,7 @@ public class ServiceIsBusyException extends Exception {
         return new ServiceIsBusyException(cause);
     }
 
+    @Override
     public String getMessage() {
         return String.format("The server reported: %s.", cause);
     }
