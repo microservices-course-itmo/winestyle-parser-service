@@ -27,7 +27,8 @@ public class IllegalFieldException extends Exception {
         return new IllegalFieldException(entityName, field);
     }
 
+    @Override
     public String getMessage() {
-        return "The server reported: " + entityName + " entity has no field called \"" + field + "\".";
+        return "The server reported: " + entityName + " entity has no field called " + field + ".";
     }
 }
