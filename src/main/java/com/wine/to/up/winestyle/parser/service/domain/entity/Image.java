@@ -13,6 +13,7 @@ public class Image {
     @OneToOne
     private Alcohol alcohol;
 
+    @Getter
     @Lob
     @Column(columnDefinition="BYTEA")
     @Getter

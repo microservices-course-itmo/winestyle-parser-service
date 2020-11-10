@@ -23,7 +23,8 @@ public class GlobalExceptionHandler {
      * @param ex      Целевое исключение
      * @param request Текущий запрос
      */
-    @ExceptionHandler({ServiceIsBusyException.class, NoEntityException.class, UnsupportedAlcoholTypeException.class})
+    @ExceptionHandler({ServiceIsBusyException.class, NoEntityException.class, UnsupportedAlcoholTypeException.class,
+            IllegalFieldException.class})
     public final ResponseEntity<ApiError> handleException(Exception ex, WebRequest request) {
         HttpHeaders headers = new HttpHeaders();
 
@@ -47,14 +48,23 @@ public class GlobalExceptionHandler {
 
             return handleUnsupportedAlcoholTypeException(unsupportedAlcoholTypeException, headers, status, request);
         }
+
+        if (ex instanceof IllegalFieldException) {
+            HttpStatus status = HttpStatus.BAD_REQUEST;
+            IllegalFieldException illegalFieldException = (IllegalFieldException) ex;
+
+            return handleIllegalFieldException(illegalFieldException, headers, status, request);
+        }
+
         return handleExceptionInternal(ex, null, new HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR, request);
     }
 
     /**
-     * Обработчик ошибки запуска сервера
-     * @param ex Ошибка занятости сервера
+     * Обработчик исключения запуска сервера
+     *
+     * @param ex      Исключение занятости сервера
      * @param headers HTTP заголовки
-     * @param status HTTP статус
+     * @param status  HTTP статус
      * @param request запрос
      * @return
      */
@@ -66,29 +76,15 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * Обработчик ошибки отутствия сущности
-     * @param ex Ошибка отсутствия сущности
+     * Обработчик исключения отутствия сущности
+     *
+     * @param ex      Ислючение отсутствия сущности
      * @param headers HTTP заголовки
-     * @param status HTTP статус
+     * @param status  HTTP статус
      * @param request запрос
      * @return
      */
     protected ResponseEntity<ApiError> handleNoEntityException(NoEntityException ex,
-                                                                    HttpHeaders headers, HttpStatus status,
-                                                                    WebRequest request) {
-        List<String> errors = Collections.singletonList(ex.getMessage());
-        return handleExceptionInternal(ex, new ApiError(errors), headers, status, request);
-    }
-
-    /**
-     * Обработчик ошибки о неподдерживаемом типе алкоголя
-     * @param ex Исключение о неподдерживаемом типе алкоголя
-     * @param headers HTTP заголовки
-     * @param status HTTP статус
-     * @param request Запрос
-     * @return
-     */
-    protected ResponseEntity<ApiError> handleUnsupportedAlcoholTypeException(UnsupportedAlcoholTypeException ex,
                                                                HttpHeaders headers, HttpStatus status,
                                                                WebRequest request) {
         List<String> errors = Collections.singletonList(ex.getMessage());
@@ -96,11 +92,44 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * Обработчик оставшихся ошибок
-     * @param ex Общее исключение 
-     * @param body Список ошибок
+     * Обработчик исключения о неподдерживаемом типе алкоголя
+     *
+     * @param ex      Исключение о неподдерживаемом типе алкоголя
      * @param headers HTTP заголовки
-     * @param status HTTP статус
+     * @param status  HTTP статус
+     * @param request Запрос
+     * @return
+     */
+    protected ResponseEntity<ApiError> handleUnsupportedAlcoholTypeException(UnsupportedAlcoholTypeException ex,
+                                                                             HttpHeaders headers, HttpStatus status,
+                                                                             WebRequest request) {
+        List<String> errors = Collections.singletonList(ex.getMessage());
+        return handleExceptionInternal(ex, new ApiError(errors), headers, status, request);
+    }
+
+    /**
+     * Обработчик исключения о несуществующих полях сущности
+     *
+     * @param ex      Исключения о несуществующих полях сущности
+     * @param headers HTTP заголовки
+     * @param status  HTTP статус
+     * @param request Запрос
+     * @return
+     */
+    protected ResponseEntity<ApiError> handleIllegalFieldException(IllegalFieldException ex,
+                                                                   HttpHeaders headers, HttpStatus status,
+                                                                   WebRequest request) {
+        List<String> errors = Collections.singletonList(ex.getMessage());
+        return handleExceptionInternal(ex, new ApiError(errors), headers, status, request);
+    }
+
+    /**
+     * Обработчик исключений по-умолчанию
+     *
+     * @param ex      Общее исключение
+     * @param body    Список ошибок
+     * @param headers HTTP заголовки
+     * @param status  HTTP статус
      * @param request Запрос
      * @return
      */

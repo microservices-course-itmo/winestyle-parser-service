@@ -111,7 +111,7 @@ public class AlcoholParsing implements ParsingService {
             String rating = infoContainer.selectFirst(".info-container meta[itemprop=ratingValue]").attr("content");
             return Float.parseFloat(rating) / 2.f;
         } catch (Exception ex) {
-            log.warn("{}product's winestyle's rating is not specified", url);
+            log.warn("{}: product's winestyle's rating is not specified", url);
             return null;
         }
     }
