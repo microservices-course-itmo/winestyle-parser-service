@@ -8,15 +8,18 @@ import com.wine.to.up.winestyle.parser.service.domain.entity.Alcohol;
 import com.wine.to.up.winestyle.parser.service.service.implementation.repository.AlcoholRepositoryService;
 import com.wine.to.up.winestyle.parser.service.utility.CSVUtility;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletResponse;
+import java.beans.IntrospectionException;
+import java.beans.PropertyDescriptor;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
 @Service
@@ -25,23 +28,25 @@ import java.util.*;
 public class MainControllerService {
     private final AlcoholRepositoryService alcoholRepositoryService;
 
+    @SneakyThrows({IntrospectionException.class, InvocationTargetException.class})
     public Map<String, Object> getAlcoholWithFields(long id, String fieldsList)
             throws NoEntityException, IllegalFieldException {
         Set<String> requiredFields = new HashSet<>(Arrays.asList(fieldsList.split(",")));
         Map<String, Object> res = new HashMap<>();
-        Alcohol alcohol = alcoholRepositoryService.getByID(id);
-        Field field;
+        PropertyDescriptor pd;
         for (String fieldName : requiredFields) {
             try {
-                field = alcohol.getClass().getDeclaredField(fieldName);
+                Alcohol.class.getDeclaredField(fieldName);
             } catch (NoSuchFieldException e) {
                 throw IllegalFieldException.createWith("Alcohol", fieldName);
             }
             try {
-                field.setAccessible(true);
-                res.put(fieldName, field.get(alcohol));
+                String getterName = "get" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
+                Alcohol alcohol = alcoholRepositoryService.getByID(id);
+                pd = new PropertyDescriptor(fieldName, Alcohol.class, getterName, null);
+                res.put(fieldName, pd.getReadMethod().invoke(alcohol));
             } catch (IllegalAccessException e) {
-                log.error("Requested {} field is inaccessible", field.getName());
+                log.error("Requested {} field is inaccessible", fieldName);
             }
         }
         log.info("Returned alcohol with id={} with requested fields ({}) via GET /winestyle/api/alcohol/with-fields/{}",
