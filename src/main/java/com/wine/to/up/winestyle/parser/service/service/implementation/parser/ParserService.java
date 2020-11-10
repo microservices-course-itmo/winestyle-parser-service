@@ -40,7 +40,7 @@ public class ParserService implements WinestyleParserService {
     private final KafkaMessageSender<UpdateProducts.UpdateProductsMessage> kafkaSendMessageService;
     private final Alcohol.AlcoholBuilder builder = Alcohol.builder();
 
-    private final int MAX_THREAD_COUNT = 50;
+    private static final int MAX_THREAD_COUNT = 50;
 
     private final GenericObjectPoolConfig<ScrapingService> scrapingServiceGenericObjectPoolConfig =
             new GenericObjectPoolConfig<>();
