@@ -129,31 +129,46 @@ public class Alcohol {
             builder.setManufacturer(manufacturer);
         if (brand != null)
             builder.setBrand(brand);
-        if (color != null)
-            builder.setColor(color.startsWith("Красное") ? Color.RED :
-                    color.matches("^(Белое|Голубое)") ? Color.WHITE :
-                    color.startsWith("Розовое") ? Color.ROSE :
-                    color.startsWith("Оранжевое") ? Color.ORANGE :
-                    Color.UNRECOGNIZED);
+        if (color != null){
+            Color localcolor = Color.UNRECOGNIZED;
+            if(this.color.matches("^(Белое|Голубое)") ){
+                localcolor = Color.WHITE; 
+            }else if(this. color.startsWith("Розовое")){
+                localcolor =  Color.ROSE; 
+            }else if(this.color.startsWith("Оранжевое")){
+                localcolor =  Color.ORANGE ;
+            }else if(this.color.startsWith("Красное")){
+                localcolor =  Color.RED;
+            }
+            builder.setColor(localcolor);
+        }
         if (country != null)
             builder.setCountry(country);
         if (region != null)
-            builder.addRegion(region); // FIXME addRegion ?
+            builder.addRegion(region); 
         if (volume != null)
             builder.setCapacity(volume);
         if (strength != null)
             builder.setStrength(strength.matches("^Б.+") ? 0.f :
                     Float.parseFloat(strength.substring(0, strength.length() - 1)));
-        if (sugar != null)
-            builder.setSugar(sugar.matches("^(Сухое|Брют).*") ? Sugar.DRY :
-                    sugar.startsWith("Полусухое") ? Sugar.MEDIUM_DRY :
-                    sugar.startsWith("Полусладкое") ? Sugar.MEDIUM :
-                    sugar.startsWith("Сладкое") ? Sugar.SWEET :
-                    Sugar.UNRECOGNIZED);
+        if (sugar != null){
+            Sugar  localsugar = Sugar.UNRECOGNIZED;
+            if(this.sugar.matches("^(Сухое|Брют).*")  ){
+                localsugar = Sugar.DRY;
+            }else if(this. sugar.startsWith("Полусухое") ){
+                localsugar =  Sugar.MEDIUM_DRY; 
+            }else if(this.sugar.startsWith("Полусладкое")){
+                localsugar =  Sugar.MEDIUM  ;
+            }else if(this. sugar.startsWith("Сладкое") ){
+                localsugar = Sugar.SWEET ;
+            }
+            builder.setSugar(localsugar);
+        }
+           
         if (price != null)
             builder.setNewPrice(price);
         if (grape != null)
-            builder.addGrapeSort(grape); // FIXME addGrapeSort ?
+            builder.addGrapeSort(grape); 
         if (taste != null)
             builder.setTaste(taste);
         if (aroma != null)
