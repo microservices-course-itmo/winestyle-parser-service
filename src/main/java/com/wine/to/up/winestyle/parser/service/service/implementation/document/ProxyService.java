@@ -2,6 +2,8 @@ package com.wine.to.up.winestyle.parser.service.service.implementation.document;
 
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
 import java.io.BufferedReader;
@@ -14,12 +16,16 @@ import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
 @Service
 @Slf4j
 public class ProxyService {
+    @Autowired
+    private Environment env;
+
     private static Proxy convertProxy(String proxyAddress) {
         String[] addressParts = proxyAddress.split(":");
         return new java.net.Proxy(java.net.Proxy.Type.SOCKS, new InetSocketAddress(addressParts[0], Integer.parseInt(addressParts[1])));
@@ -27,7 +33,7 @@ public class ProxyService {
 
     private List<String> getAllProxies() {
         try {
-            URL url = new URL("https://api.proxyscrape.com/?request=getproxies&proxytype=socks5&country=all");
+            URL url = new URL(Objects.requireNonNull(env.getProperty("proxy.list.url")));
             URLConnection connection = url.openConnection();
             BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
             String inputLine;
