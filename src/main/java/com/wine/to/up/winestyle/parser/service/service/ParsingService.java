@@ -25,7 +25,7 @@ public interface ParsingService {
 
     String parseRegion();
 
-    String parseStrength();
+    Float parseStrength();
 
     String parseGrape();
 

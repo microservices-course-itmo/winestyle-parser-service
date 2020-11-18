@@ -232,15 +232,15 @@ public class AlcoholParsing implements ParsingService {
      * @return Крепость ИЛИ null, если свойства нет.
      */
     @Override
-    public String parseStrength() {
+    public Float parseStrength() {
         try {
             Element strengthElement = listDescription.selectFirst("span:contains(Крепость:)");
             Element strengthParent = strengthElement.parent();
             strengthElement.remove();
             String strength = strengthParent.text();
             strengthParent.remove();
-            return strength;
-        } catch (NullPointerException ex) {
+            return Float.parseFloat(strength.substring(0, strength.length() - 1));
+        } catch (Exception ex) {
             log.warn("{}: product's strength is not specified", url);
             return null;
         }

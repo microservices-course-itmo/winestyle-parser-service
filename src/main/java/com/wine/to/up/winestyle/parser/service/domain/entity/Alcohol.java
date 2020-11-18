@@ -147,9 +147,12 @@ public class Alcohol {
             builder.addRegion(region);
         if (volume != null)
             builder.setCapacity(volume);
-        if (strength != null)
-            builder.setStrength(strength.matches("^Б.+") ? 0.f :
-                    Float.parseFloat(strength.substring(0, strength.length() - 1)));
+        }
+
+        if (strength != null) {
+            builder.setStrength(strength);
+        }
+
         if (sugar != null) {
             Sugar localsugar = Sugar.UNRECOGNIZED;
             if (this.sugar.matches("^(Сухое|Брют).*")) {
