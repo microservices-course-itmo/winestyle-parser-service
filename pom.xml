@@ -4,9 +4,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <!--    TODO create-service: rename artifact-->
-    <artifactId>demo-service</artifactId>
-    <!--    "current-version" is used for building image and should not include a "SNAPSHOT" word. -->
+    <artifactId>winestyle-parser-service</artifactId>
     <version>${current-version}-SNAPSHOT</version>
     <packaging>jar</packaging>
 
@@ -17,12 +15,11 @@
     </parent>
 
     <properties>
-        <!--        TODO create-service: set version to initial (0.1.0)-->
-        <current-version>0.3.0</current-version>
+        <current-version>0.5.0</current-version>
 
-        <service.commonlib.version>0.2.1-SNAPSHOT</service.commonlib.version>
-        <!--        TODO create-service: replace-->
-        <demo.service.api.version>0.3.0-SNAPSHOT</demo.service.api.version>
+        <service.commonlib.version>0.2.2-SNAPSHOT</service.commonlib.version>
+        <parser.common.api.version>0.2.2-SNAPSHOT</parser.common.api.version>
+
     </properties>
 
     <dependencies>
@@ -79,8 +76,8 @@
         <!--        TODO create-service: replace-->
         <dependency>
             <groupId>com.wine.to.up</groupId>
-            <artifactId>demo-service-api</artifactId>
-            <version>${demo.service.api.version}</version>
+            <artifactId>parser-common-api</artifactId>
+            <version>${parser.common.api.version}</version>
         </dependency>
     </dependencies>
 </project>
