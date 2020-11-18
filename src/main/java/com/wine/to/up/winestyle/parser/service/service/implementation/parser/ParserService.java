@@ -109,6 +109,8 @@ public class ParserService implements WinestyleParserService {
         int pagesNumber = getPagesNumber(currentDoc);
         int nextPageNumber = 2;
 
+        scrapingService.initProxy(10000);
+
         log.warn("Starting parsing of {}", alcoholType);
 
         List<Future<Integer>> unparsedFutures = new ArrayList<>();
