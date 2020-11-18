@@ -20,6 +20,7 @@ public class MultiProxyLoader implements IWebPageLoader {
 
     private synchronized IUnstableLoader getNextProxy() {
         if (loaderList.isEmpty()) return null;
+        
         if (iterator == null || !iterator.hasNext()) {
             iterator = loaderList.iterator();
         }
