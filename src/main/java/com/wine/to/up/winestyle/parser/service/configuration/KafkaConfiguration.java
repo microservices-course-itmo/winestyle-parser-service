@@ -9,10 +9,8 @@ import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Scope;
 
 import java.util.Properties;
 
@@ -28,7 +26,6 @@ public class KafkaConfiguration {
      * Creating general producer properties. Common for all the producers
      */
     @Bean
-    @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
     public Properties producerProperties() {
         Properties properties = new Properties();
         properties.setProperty(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, brokers);
