@@ -1,11 +1,13 @@
 package com.wine.to.up.winestyle.parser.service.service.implementation.document;
 
+import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
 import java.io.IOException;
 import java.net.Proxy;
 
+@Slf4j
 public class ProxyWebPageLoader implements IUnstableLoader {
     private final Proxy proxy;
     private int failuresCount;
@@ -18,6 +20,7 @@ public class ProxyWebPageLoader implements IUnstableLoader {
     @Override
     public Document getDocument(String url) throws IOException {
         try {
+            log.info("Getting " + url + " through " + proxy.toString());
             Document document = Jsoup.connect(url)
                     .userAgent("Mozilla/5.0 (Windows NT 6.1; Win64; x64) "
                             + "AppleWebKit/537.36 (KHTML, like Gecko) "

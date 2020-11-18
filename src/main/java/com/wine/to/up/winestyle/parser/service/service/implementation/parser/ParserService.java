@@ -14,6 +14,7 @@ import com.wine.to.up.winestyle.parser.service.service.ParserDirectorService;
 import com.wine.to.up.winestyle.parser.service.service.ParsingService;
 import com.wine.to.up.winestyle.parser.service.service.RepositoryService;
 import com.wine.to.up.winestyle.parser.service.service.WinestyleParserService;
+import com.wine.to.up.winestyle.parser.service.service.implementation.document.ProxyService;
 import com.wine.to.up.winestyle.parser.service.service.implementation.document.ScrapingService;
 import com.wine.to.up.winestyle.parser.service.service.implementation.document.ScrapingServicePooledObjectFactory;
 import com.wine.to.up.winestyle.parser.service.service.implementation.helpers.SegmentationService;
@@ -28,6 +29,10 @@ import org.jsoup.select.Elements;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.concurrent.*;
 
 @Slf4j
 @Component
@@ -60,7 +65,7 @@ public class ParserService implements WinestyleParserService {
         scrapingServiceGenericObjectPoolConfig.setMaxIdle(MAX_THREAD_COUNT);
 
         scrapingServiceObjectPool = new GenericObjectPool<>(
-                new ScrapingServicePooledObjectFactory(),
+                new ScrapingServicePooledObjectFactory(new ProxyService()),
                 scrapingServiceGenericObjectPoolConfig
         );
 
@@ -73,7 +78,7 @@ public class ParserService implements WinestyleParserService {
     public void poolsRenew() {
         if (scrapingServiceObjectPool.isClosed()) {
             scrapingServiceObjectPool = new GenericObjectPool<>(
-                    new ScrapingServicePooledObjectFactory(),
+                    new ScrapingServicePooledObjectFactory(new ProxyService()),
                     scrapingServiceGenericObjectPoolConfig
             );
             scrapingServiceObjectPool.addObjects(MAX_THREAD_COUNT);
