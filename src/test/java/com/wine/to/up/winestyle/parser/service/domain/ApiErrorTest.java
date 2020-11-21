@@ -1,7 +1,5 @@
 package com.wine.to.up.winestyle.parser.service.domain;
 
-import com.wine.to.up.winestyle.parser.service.controller.exception.FileCreationExeption;
-import com.wine.to.up.winestyle.parser.service.controller.exception.ServiceIsBusyException;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -13,13 +11,12 @@ import static org.junit.jupiter.api.Assertions.*;
 class ApiErrorTest {
 
     static ApiError apiError;
-    static String expectedString = "[The server reported: busy exception., Cannot write database to file!]";
+    static String expectedString = "[test fail]";
 
     @BeforeAll
     static void setUp() {
         List<String> errors = new ArrayList<>();
-        errors.add(ServiceIsBusyException.createWith("busy exception").getMessage());
-        errors.add(new FileCreationExeption().getMessage());
+        errors.add("test fail");
         apiError = new ApiError(errors);
     }
 
