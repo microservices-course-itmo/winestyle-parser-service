@@ -57,9 +57,9 @@ public class ParserService implements WinestyleParserService {
 
     private int parsed = 0;
 
-    @SneakyThrows
+    @SneakyThrows(Exception.class)
     @PostConstruct
-    public void poolsInit() {
+    public void initPools() {
         scrapingServiceGenericObjectPoolConfig.setMaxTotal(MAX_THREAD_COUNT);
         scrapingServiceGenericObjectPoolConfig.setMaxIdle(MAX_THREAD_COUNT);
 
@@ -73,8 +73,8 @@ public class ParserService implements WinestyleParserService {
         parsingThreadPool = Executors.newFixedThreadPool(MAX_THREAD_COUNT, parsingThreadFactory);
     }
 
-    @SneakyThrows
-    public void poolsRenew() {
+    @SneakyThrows(Exception.class)
+    public void renewPools() {
         if (scrapingServiceObjectPool.isClosed()) {
             scrapingServiceObjectPool = new GenericObjectPool<>(
                     new ScrapingServicePooledObjectFactory(),
@@ -88,7 +88,7 @@ public class ParserService implements WinestyleParserService {
         }
     }
 
-    @SneakyThrows
+    @SneakyThrows(Exception.class)
     @Override
     public void parseBuildSave(String alcoholUrlPart, AlcoholType alcoholType) {
         renewPools();
@@ -136,7 +136,7 @@ public class ParserService implements WinestyleParserService {
         }
     }
 
-    @SneakyThrows
+    @SneakyThrows(Exception.class)
     public Document getDocument(int pageNumber, String alcoholUrl) {
         ScrapingService scrapingService = scrapingServiceObjectPool.borrowObject();
         Document document = scrapingService.getJsoupDocument(alcoholUrl + "?page=" + pageNumber);
