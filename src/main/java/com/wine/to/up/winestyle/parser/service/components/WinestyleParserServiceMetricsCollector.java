@@ -1,6 +1,7 @@
 package com.wine.to.up.winestyle.parser.service.components;
 
 import com.wine.to.up.commonlib.metrics.CommonMetricsCollector;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 /**
@@ -11,13 +12,7 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class WinestyleParserServiceMetricsCollector extends CommonMetricsCollector {
-    private static final String SERVICE_NAME = "winestyle_parser_service";
-
-    public WinestyleParserServiceMetricsCollector() {
-        this(SERVICE_NAME);
-    }
-
-    private WinestyleParserServiceMetricsCollector(String serviceName) {
+    public WinestyleParserServiceMetricsCollector(@Value("${spring.kafka.metrics.service-name}") String serviceName) {
         super(serviceName);
     }
 }
