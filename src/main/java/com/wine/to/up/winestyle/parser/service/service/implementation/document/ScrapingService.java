@@ -52,7 +52,7 @@ public class ScrapingService {
     }
 
 
-    public void initProxy(int maxTimeout) {
+    public void initProxies(int maxTimeout) {
         loader = proxyService.getLoader(maxTimeout);
     }
 

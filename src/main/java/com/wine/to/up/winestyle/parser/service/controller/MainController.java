@@ -8,15 +8,14 @@ import com.wine.to.up.winestyle.parser.service.service.RepositoryService;
 import com.wine.to.up.winestyle.parser.service.service.implementation.controller.MainControllerService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.*;
-
 import javax.servlet.http.HttpServletResponse;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Контроллер, возвращающий результаты парсинга
@@ -77,8 +76,8 @@ public class MainController {
     }
 
     @PostMapping("/proxy/init")
-    public ResponseEntity<String> initProxy(@RequestParam int maxTimeout) throws ServiceIsBusyException {
-        mainControllerService.startProxyInitJob(maxTimeout);
+    public ResponseEntity<String> initProxies(@RequestParam int maxTimeout) throws ServiceIsBusyException {
+        mainControllerService.startProxiesInitJob(maxTimeout);
         return new ResponseEntity<>("Proxy initialization job was successfully launched.", HttpStatus.OK);
     }
 }

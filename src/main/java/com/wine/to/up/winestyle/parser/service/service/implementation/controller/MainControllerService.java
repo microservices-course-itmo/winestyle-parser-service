@@ -1,10 +1,10 @@
 package com.wine.to.up.winestyle.parser.service.service.implementation.controller;
 
-import com.wine.to.up.winestyle.parser.service.controller.exception.ClientConnectionProblem;
-import com.wine.to.up.winestyle.parser.service.controller.exception.FileCreationExeption;
-import com.wine.to.up.winestyle.parser.service.controller.exception.IllegalFieldException;
-import com.wine.to.up.winestyle.parser.service.controller.exception.NoEntityException;
+import com.wine.to.up.winestyle.parser.service.controller.exception.*;
 import com.wine.to.up.winestyle.parser.service.domain.entity.Alcohol;
+import com.wine.to.up.winestyle.parser.service.service.implementation.document.ScrapingService;
+import com.wine.to.up.winestyle.parser.service.service.implementation.helpers.StatusService;
+import com.wine.to.up.winestyle.parser.service.service.implementation.helpers.enums.ServiceType;
 import com.wine.to.up.winestyle.parser.service.service.implementation.repository.AlcoholRepositoryService;
 import com.wine.to.up.winestyle.parser.service.utility.CSVUtility;
 import lombok.RequiredArgsConstructor;
@@ -21,11 +21,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
-
-import com.wine.to.up.winestyle.parser.service.controller.exception.ServiceIsBusyException;
-import com.wine.to.up.winestyle.parser.service.service.implementation.document.ScrapingService;
-import com.wine.to.up.winestyle.parser.service.service.implementation.helpers.StatusService;
-import com.wine.to.up.winestyle.parser.service.service.implementation.helpers.enums.ServiceType;
 
 @Service
 @RequiredArgsConstructor
@@ -84,11 +79,11 @@ public class MainControllerService {
     }
 
 
-    public void startProxyInitJob(int maxTimeout) throws ServiceIsBusyException {
+    public void startProxiesInitJob(int maxTimeout) throws ServiceIsBusyException {
         if (statusService.tryBusy(ServiceType.PROXY)) {
             new Thread(() -> {
                 try {
-                    scrapingService.initProxy(maxTimeout);
+                    scrapingService.initProxies(maxTimeout);
                 } finally {
                     statusService.release(ServiceType.PROXY);
                 }
