@@ -2,7 +2,7 @@ package com.wine.to.up.winestyle.parser.service.service.implementation.parser;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.wine.to.up.commonlib.messaging.KafkaMessageSender;
-import com.wine.to.up.parser.common.api.schema.UpdateProducts;
+import com.wine.to.up.parser.common.api.schema.ParserApi;
 import com.wine.to.up.winestyle.parser.service.controller.exception.NoEntityException;
 import com.wine.to.up.winestyle.parser.service.service.implementation.helpers.enums.AlcoholType;
 import com.wine.to.up.winestyle.parser.service.domain.entity.Alcohol;
@@ -38,7 +38,7 @@ public class ParserService implements WinestyleParserService {
     private final SegmentationService segmentationService;
     private final RepositoryService alcoholRepositoryService;
     private final ParserDirectorService parserDirectorService;
-    private final KafkaMessageSender<UpdateProducts.UpdateProductsMessage> kafkaSendMessageService;
+    private final KafkaMessageSender<ParserApi.WineParsedEvent> kafkaSendMessageService;
     private final Alcohol.AlcoholBuilder builder = Alcohol.builder();
 
     @Value("${spring.jsoup.scraping.winestyle-main-spb-url}")
@@ -199,9 +199,9 @@ public class ParserService implements WinestyleParserService {
                         scrapingServiceObjectPool.returnObject(scrapingService);
                     }
                     kafkaSendMessageService.sendMessage(
-                            UpdateProducts.UpdateProductsMessage.newBuilder()
-                                    .setShopLink(mainUrl)
-                                    .addProducts(result.asProduct())
+                            ParserApi.WineParsedEvent.newBuilder()
+                                    .setShopLink(mainPageUrl)
+                                    .addWines(result.asProduct())
                                     .build()
                     );
                     return 1;

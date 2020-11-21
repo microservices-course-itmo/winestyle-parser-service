@@ -2,7 +2,7 @@ package com.wine.to.up.winestyle.parser.service.configuration;
 
 import com.wine.to.up.commonlib.messaging.KafkaMessageSender;
 import com.wine.to.up.parser.common.api.ParserCommonApiProperties;
-import com.wine.to.up.parser.common.api.schema.UpdateProducts;
+import com.wine.to.up.parser.common.api.schema.ParserApi;
 import com.wine.to.up.winestyle.parser.service.components.WinestyleParserServiceMetricsCollector;
 import com.wine.to.up.winestyle.parser.service.messaging.serialization.EventSerializer;
 import org.apache.kafka.clients.producer.KafkaProducer;
@@ -45,11 +45,9 @@ public class KafkaConfiguration {
      * @param metricsCollector    class encapsulating the logic of the metrics collecting and publishing
      */
     @Bean
-    KafkaMessageSender<UpdateProducts.UpdateProductsMessage> wineStyleKafkaMessageSender(Properties producerProperties,
-                                                                                         ParserCommonApiProperties parserApiProperties, WinestyleParserServiceMetricsCollector metricsCollector) {
-
+    KafkaMessageSender<ParserApi.WineParsedEvent> wineStyleKafkaMessageSender(Properties producerProperties,
+                                                                                    ParserCommonApiProperties parserApiProperties, WinestyleParserServiceMetricsCollector metricsCollector) {
         producerProperties.setProperty(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, EventSerializer.class.getName());
-
         return new KafkaMessageSender<>(new KafkaProducer<>(producerProperties), parserApiProperties.getWineParsedEventsTopicName(), metricsCollector);
     }
 }

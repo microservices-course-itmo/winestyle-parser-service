@@ -1,14 +1,12 @@
 package com.wine.to.up.winestyle.parser.service.domain.entity;
 
+import com.wine.to.up.parser.common.api.schema.ParserApi;
+import com.wine.to.up.parser.common.api.schema.ParserApi.Wine.Color;
+import com.wine.to.up.parser.common.api.schema.ParserApi.Wine.Sugar;
 import lombok.*;
 
 import javax.persistence.*;
-
 import java.util.Arrays;
-
-import com.wine.to.up.parser.common.api.schema.UpdateProducts;
-import com.wine.to.up.parser.common.api.schema.UpdateProducts.Product.Color;
-import com.wine.to.up.parser.common.api.schema.UpdateProducts.Product.Sugar;
 
 /**
  * <pre>
@@ -117,8 +115,8 @@ public class Alcohol {
      *
      * @return Product
      */
-    public UpdateProducts.Product asProduct() {
-        UpdateProducts.Product.Builder builder = UpdateProducts.Product.newBuilder();
+    public ParserApi.Wine asProduct() {
+        ParserApi.Wine.Builder builder = ParserApi.Wine.newBuilder();
 
         builder.setName(name);
 
