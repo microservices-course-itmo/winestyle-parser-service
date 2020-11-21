@@ -1,14 +1,10 @@
 package com.wine.to.up.winestyle.parser.service.service.implementation.parser;
 
-import java.time.Duration;
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.concurrent.*;
-
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.wine.to.up.commonlib.messaging.KafkaMessageSender;
 import com.wine.to.up.parser.common.api.schema.UpdateProducts;
 import com.wine.to.up.winestyle.parser.service.controller.exception.NoEntityException;
+import com.wine.to.up.winestyle.parser.service.service.implementation.helpers.enums.AlcoholType;
 import com.wine.to.up.winestyle.parser.service.domain.entity.Alcohol;
 import com.wine.to.up.winestyle.parser.service.service.ParserDirectorService;
 import com.wine.to.up.winestyle.parser.service.service.ParsingService;
@@ -25,9 +21,14 @@ import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.concurrent.*;
 
 @Slf4j
 @Component
@@ -39,6 +40,9 @@ public class ParserService implements WinestyleParserService {
     private final ParserDirectorService parserDirectorService;
     private final KafkaMessageSender<UpdateProducts.UpdateProductsMessage> kafkaSendMessageService;
     private final Alcohol.AlcoholBuilder builder = Alcohol.builder();
+
+    @Value("${spring.jsoup.scraping.winestyle-main-spb-url}")
+    private String mainPageUrl;
 
     private static final int MAX_THREAD_COUNT = 50;
 
@@ -86,11 +90,11 @@ public class ParserService implements WinestyleParserService {
 
     @SneakyThrows
     @Override
-    public void parseBuildSave(String mainUrl, String relativeUrl, String alcoholType) {
-        poolsRenew();
+    public void parseBuildSave(String alcoholUrlPart, AlcoholType alcoholType) {
+        renewPools();
 
         LocalDateTime start = LocalDateTime.now();
-        String alcoholUrl = mainUrl + relativeUrl;
+        String alcoholUrl = mainPageUrl + alcoholUrlPart;
 
         ScrapingService scrapingService = scrapingServiceObjectPool.borrowObject();
         Document currentDoc = scrapingService.getJsoupDocument(alcoholUrl);
@@ -105,7 +109,7 @@ public class ParserService implements WinestyleParserService {
             while (true) {
                 log.info("Parsing: {}", currentDoc.location());
 
-                parsingThreadPool.execute(new ProductJob(mainUrl, currentDoc, alcoholType, start));
+                parsingThreadPool.execute(new ProductJob(currentDoc, alcoholType, start));
 
                 if (nextPageNumber > pagesNumber) {
                     break;
@@ -141,18 +145,15 @@ public class ParserService implements WinestyleParserService {
     }
 
     private class ProductJob implements Runnable {
-        String mainUrl;
         Document currentDoc;
-        String alcoholType;
+        AlcoholType alcoholType;
         LocalDateTime start;
 
         /**
-         * @param mainUrl     адрес главной страницы сайта
          * @param currentDoc  текущая страница с позициями
          * @param alcoholType тип алкоголя
          */
-        public ProductJob(String mainUrl, Document currentDoc, String alcoholType, LocalDateTime start) {
-            this.mainUrl = mainUrl;
+        public ProductJob(Document currentDoc, AlcoholType alcoholType, LocalDateTime start) {
             this.currentDoc = currentDoc;
             this.alcoholType = alcoholType;
             this.start = start;
@@ -189,7 +190,7 @@ public class ParserService implements WinestyleParserService {
                         result = alcoholRepositoryService.getByUrl(productUrl);
                     } catch (NoEntityException ex) {
                         ScrapingService scrapingService = scrapingServiceObjectPool.borrowObject();
-                        Document product = scrapingService.getJsoupDocument(mainUrl + productUrl);
+                        Document product = scrapingService.getJsoupDocument(mainPageUrl + productUrl);
                         segmentationService.setProductDocument(product).setProductMainContent();
                         prepareParsingService();
                         parserDirectorService.makeAlcohol(builder, alcoholType);
@@ -214,7 +215,7 @@ public class ParserService implements WinestyleParserService {
             parsed += parsedNow;
         }
 
-        private void logParsed(String alcoholType, LocalDateTime start) {
+        private void logParsed(AlcoholType alcoholType, LocalDateTime start) {
             long hoursPassed;
             long minutesPart;
             long secondsPart;

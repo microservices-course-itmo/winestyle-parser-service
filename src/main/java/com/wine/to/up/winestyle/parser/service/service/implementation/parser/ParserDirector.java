@@ -1,5 +1,6 @@
 package com.wine.to.up.winestyle.parser.service.service.implementation.parser;
 
+import com.wine.to.up.winestyle.parser.service.service.implementation.helpers.enums.AlcoholType;
 import com.wine.to.up.winestyle.parser.service.domain.entity.Alcohol;
 import com.wine.to.up.winestyle.parser.service.service.ParserDirectorService;
 import com.wine.to.up.winestyle.parser.service.service.ParsingService;
@@ -12,7 +13,8 @@ import org.springframework.stereotype.Service;
 public class ParserDirector implements ParserDirectorService {
     private final ParsingService alcoholParsing;
 
-    public void makeAlcohol(Alcohol.AlcoholBuilder builder, String alcoholType) {
+    @Override
+    public void makeAlcohol(Alcohol.AlcoholBuilder builder, AlcoholType alcoholType) {
         builder.name(alcoholParsing.parseName());
         builder.cropYear(alcoholParsing.parseCropYear());
         builder.price(alcoholParsing.parsePrice());
@@ -24,7 +26,7 @@ public class ParserDirector implements ParserDirectorService {
         builder.grape(alcoholParsing.parseGrape());
         builder.country(alcoholParsing.parseCountry());
         builder.region(alcoholParsing.parseRegion());
-        if (alcoholType.equals("wine")) {
+        if (alcoholType == AlcoholType.WINE) {
             builder.type(alcoholParsing.parseType(false));
         } else {
             builder.type(alcoholParsing.parseType(true));
