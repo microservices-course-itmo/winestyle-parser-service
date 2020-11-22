@@ -3,6 +3,7 @@ package com.wine.to.up.winestyle.parser.service.service.implementation.parser;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.*;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
@@ -65,7 +66,7 @@ public class ParserService implements WinestyleParserService {
         try {
             scrapingServiceObjectPool.addObjects(MAX_THREAD_COUNT);
         } catch (Exception e) {
-            log.error("Error on adding new threads to {}", scrapingServiceObjectPool.getClass().getSimpleName(), e);
+            log.error("Error on adding new threads to scrapingServiceObjectPool", e);
         }
 
         parsingThreadPool = Executors.newFixedThreadPool(MAX_THREAD_COUNT, parsingThreadFactory);
@@ -80,7 +81,7 @@ public class ParserService implements WinestyleParserService {
             try {
                 scrapingServiceObjectPool.addObjects(MAX_THREAD_COUNT);
             } catch (Exception e) {
-                log.error("Error on adding new threads to {}", scrapingServiceObjectPool.getClass().getSimpleName(), e);
+                log.error("Error on adding new threads to scrapingServiceObjectPool", e);
             }
         }
 
@@ -90,14 +91,20 @@ public class ParserService implements WinestyleParserService {
     }
 
     @Override
-    public void parseBuildSave(String mainUrl, String relativeUrl, String alcoholType) {
+    public void parseBuildSave(String mainUrl, String relativeUrl, String alcoholType) throws InterruptedException {
         poolsRenew();
 
         LocalDateTime start = LocalDateTime.now();
         String alcoholUrl = mainUrl + relativeUrl;
 
-        ScrapingService scrapingService = scrapingServiceObjectPool.borrowObject();
-        Document currentDoc = scrapingService.getJsoupDocument(alcoholUrl);
+        ScrapingService scrapingService = null;
+        try {
+            scrapingService = scrapingServiceObjectPool.borrowObject();
+        } catch (Exception e) {
+            log.error("Error on borrowing instance of {} from scrapingServiceObjectPool", ScrapingService.class.getSimpleName(), e);
+        }
+        Document currentDoc = Objects.requireNonNull(scrapingService).getJsoupDocument(alcoholUrl);
+
         scrapingServiceObjectPool.returnObject(scrapingService);
 
         int pagesNumber = getPagesNumber(currentDoc);
@@ -136,9 +143,17 @@ public class ParserService implements WinestyleParserService {
         }
     }
 
-    public Document getDocument(int pageNumber, String alcoholUrl) {
-        ScrapingService scrapingService = scrapingServiceObjectPool.borrowObject();
-        Document document = scrapingService.getJsoupDocument(alcoholUrl + "?page=" + pageNumber);
+    public Document getDocument(int pageNumber, String alcoholUrl) throws InterruptedException {
+        ScrapingService scrapingService = null;
+
+        try {
+            scrapingService = scrapingServiceObjectPool.borrowObject();
+        } catch (Exception e) {
+            log.error("Error on borrowing instance of {} from scrapingServiceObjectPool", ScrapingService.class.getSimpleName(), e);
+        }
+
+        Document document = Objects.requireNonNull(scrapingService).getJsoupDocument(alcoholUrl + "?page=" + pageNumber);
+
         scrapingServiceObjectPool.returnObject(scrapingService);
         return document;
     }
