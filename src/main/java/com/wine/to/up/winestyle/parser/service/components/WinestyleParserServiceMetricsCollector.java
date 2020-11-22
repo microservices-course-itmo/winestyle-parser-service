@@ -12,4 +12,13 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class WinestyleParserServiceMetricsCollector extends CommonMetricsCollector {
+    private static final String SERVICE_NAME = "winestyle_parser_service";
+
+    public WinestyleParserServiceMetricsCollector() {
+        this(SERVICE_NAME);
+    }
+
+    private WinestyleParserServiceMetricsCollector(String serviceName) {
+        super(serviceName);
+    }
 }

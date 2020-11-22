@@ -23,6 +23,7 @@ public class AlcoholParsing implements ParsingService {
     private Element descriptionBlock;
 
     private String name;
+    private String url;
     private String region;
     private boolean isRegionPresented = true;
     private boolean isColorPresented = true;
@@ -48,7 +49,8 @@ public class AlcoholParsing implements ParsingService {
      */
     @Override
     public String parseUrl() {
-        return productBlock.selectFirst("a").attr("href");
+        url = productBlock.selectFirst("a").attr("href");
+        return url;
     }
 
     /**
@@ -61,7 +63,7 @@ public class AlcoholParsing implements ParsingService {
             Element imageElement = leftBlock.selectFirst("a.img-container");
             return imageElement.attr("href");
         } catch (NullPointerException ex) {
-            log.warn("product's image is not specified");
+            log.warn("{}: product's image is not specified", url);
             return null;
         }
     }
@@ -79,7 +81,7 @@ public class AlcoholParsing implements ParsingService {
                 return Integer.parseInt(word);
             }
         }
-        log.warn("product's crop year is not specified");
+        log.warn("{}: product's crop year is not specified", url);
         return null;
     }
 
@@ -94,7 +96,7 @@ public class AlcoholParsing implements ParsingService {
             priceValue = priceValue.replaceAll(" ", "");
             return Float.parseFloat(priceValue);
         } catch (Exception ex) {
-            log.warn("product's price is not specified");
+            log.warn("{}: product's price is not specified", url);
             return null;
         }
     }
@@ -109,7 +111,7 @@ public class AlcoholParsing implements ParsingService {
             String rating = infoContainer.selectFirst(".info-container meta[itemprop=ratingValue]").attr("content");
             return Float.parseFloat(rating) / 2.f;
         } catch (Exception ex) {
-            log.warn("product's winestyle's rating is not specified");
+            log.warn("{}: product's winestyle's rating is not specified", url);
             return null;
         }
     }
@@ -130,7 +132,7 @@ public class AlcoholParsing implements ParsingService {
 
             return volume;
         } catch (NullPointerException ex) {
-            log.warn("product's volume is not specified");
+            log.warn("{}: product's volume is not specified", url);
             return null;
         }
     }
@@ -149,7 +151,7 @@ public class AlcoholParsing implements ParsingService {
             manufacturerParent.remove();
             return manufacturer;
         } catch (NullPointerException ex) {
-            log.warn("product's manufacturer is not specified");
+            log.warn("{}: product's manufacturer is not specified", url);
             return null;
         }
     }
@@ -168,7 +170,7 @@ public class AlcoholParsing implements ParsingService {
             brandParent.remove();
             return brand;
         } catch (NullPointerException ex) {
-            log.warn("product's brand is not specified");
+            log.warn("{}: product's brand is not specified", url);
             return null;
         }
     }
@@ -195,7 +197,7 @@ public class AlcoholParsing implements ParsingService {
                 return countryAndRegion;
             }
         } catch (NullPointerException ex) {
-            log.warn("product's country and region are not specified");
+            log.warn("{}: product's country and region are not specified", url);
             return null;
         }
     }
@@ -209,7 +211,7 @@ public class AlcoholParsing implements ParsingService {
         if (isRegionPresented) {
             return region;
         } else {
-            log.warn("product's region is not specified");
+            log.warn("{}: product's region is not specified", url);
             isRegionPresented = true;
             return null;
         }
@@ -229,7 +231,7 @@ public class AlcoholParsing implements ParsingService {
             strengthParent.remove();
             return strength;
         } catch (NullPointerException ex) {
-            log.warn("product's strength is not specified");
+            log.warn("{}: product's strength is not specified", url);
             return null;
         }
     }
@@ -248,7 +250,7 @@ public class AlcoholParsing implements ParsingService {
             grapeParent.remove();
             return grape;
         } catch (NullPointerException ex) {
-            log.warn("product's grape sort is not specified");
+            log.warn("{}: product's grape sort is not specified", url);
             return null;
         }
     }
@@ -312,7 +314,7 @@ public class AlcoholParsing implements ParsingService {
         } catch (NullPointerException e) {
             isColorPresented = false;
             isSugarPresented = false;
-            log.warn("product's type, color and sugar are not specified");
+            log.warn("{}: product's type, color and sugar are not specified", url);
             return null;
         }
     }
@@ -330,7 +332,7 @@ public class AlcoholParsing implements ParsingService {
                 return colorAndSugar.substring(0, 1).toUpperCase() + colorAndSugar.substring(1);
             }
         } else {
-            log.warn("sparkling's color is not specified");
+            log.warn("{}: sparkling's color is not specified", url);
             isColorPresented = true;
             return null;
         }
@@ -345,7 +347,7 @@ public class AlcoholParsing implements ParsingService {
         if (isSugarPresented) {
             return colorAndSugar;
         } else {
-            log.warn("product's sugar is not specified");
+            log.warn("{}: product's sugar is not specified", url);
             isSugarPresented = true;
             return null;
         }
@@ -361,7 +363,7 @@ public class AlcoholParsing implements ParsingService {
             Element tasteElement = articlesBlock.selectFirst("span:contains(Вкус)").nextElementSibling();
             return tasteElement.text();
         } catch (NullPointerException ex) {
-            log.warn("product's taste is not specified");
+            log.warn("{}: product's taste is not specified", url);
             return null;
         }
     }
@@ -376,7 +378,7 @@ public class AlcoholParsing implements ParsingService {
             Element aromaElement = articlesBlock.selectFirst("span:contains(Аром)").nextElementSibling();
             return aromaElement.text();
         } catch (NullPointerException ex) {
-            log.warn("product's aroma is not specified");
+            log.warn("{}: product's aroma is not specified", url);
             return null;
         }
     }
@@ -391,7 +393,7 @@ public class AlcoholParsing implements ParsingService {
             Element foodPairingElement = articlesBlock.selectFirst("span:contains(Гаст)").nextElementSibling();
             return foodPairingElement.text();
         } catch (NullPointerException ex) {
-            log.warn("product's food pairing is not specified");
+            log.warn("{}: product's food pairing is not specified", url);
             return null;
         }
     }
@@ -406,7 +408,7 @@ public class AlcoholParsing implements ParsingService {
             Element descriptionElement = descriptionBlock.selectFirst(".description-block");
             return descriptionElement.text();
         } catch (NullPointerException ex) {
-            log.warn("product's description is not specified");
+            log.warn("{}: product's description is not specified", url);
             return null;
         }
     }
