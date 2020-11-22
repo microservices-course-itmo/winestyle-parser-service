@@ -37,7 +37,7 @@ public class ParserService implements WinestyleParserService {
     private final SegmentationService segmentationService;
     private final RepositoryService alcoholRepositoryService;
     private final ParserDirectorService parserDirectorService;
-    private final KafkaMessageSender<UpdateProducts.UpdateProductsMessage> kafkaSendMessageService;
+    private final KafkaMessageSender<ParserApi.WineParsedEvent> kafkaSendMessageService;
     private final Alcohol.AlcoholBuilder builder = Alcohol.builder();
 
     private final int MAX_THREAD_COUNT = 50;
@@ -227,9 +227,9 @@ public class ParserService implements WinestyleParserService {
                         scrapingServiceObjectPool.returnObject(scrapingService);
                     }
                     kafkaSendMessageService.sendMessage(
-                            UpdateProducts.UpdateProductsMessage.newBuilder()
+                            ParserApi.WineParsedEvent.newBuilder()
                                     .setShopLink(mainUrl)
-                                    .addProducts(result.asProduct())
+                                    .addWines(result.asProduct())
                                     .build()
                     );
                     return 1;
