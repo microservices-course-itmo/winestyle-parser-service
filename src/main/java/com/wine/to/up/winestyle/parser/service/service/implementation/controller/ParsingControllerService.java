@@ -33,6 +33,8 @@ public class ParsingControllerService {
                 new Thread(() -> {
                     try {
                         parse(alcoholUrl, alcoholType);
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
                     } finally {
                         statusService.release();
                     }
@@ -45,7 +47,7 @@ public class ParsingControllerService {
         }
     }
 
-    private void parse(String relativeUrl, String alcoholType) {
+    private void parse(String relativeUrl, String alcoholType) throws InterruptedException {
         log.info("Started parsing of {} via /winestyle/api/parse/{}", alcoholType, alcoholType);
         String mainUrl = "https://spb.winestyle.ru";
         alcoholParserService.parseBuildSave(mainUrl, relativeUrl, alcoholType);

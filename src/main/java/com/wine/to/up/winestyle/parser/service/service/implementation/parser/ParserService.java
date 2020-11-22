@@ -1,14 +1,8 @@
 package com.wine.to.up.winestyle.parser.service.service.implementation.parser;
 
-import java.time.Duration;
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Objects;
-import java.util.concurrent.*;
-
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.wine.to.up.commonlib.messaging.KafkaMessageSender;
-import com.wine.to.up.parser.common.api.schema.UpdateProducts;
+import com.wine.to.up.parser.common.api.schema.ParserApi;
 import com.wine.to.up.winestyle.parser.service.controller.exception.NoEntityException;
 import com.wine.to.up.winestyle.parser.service.domain.entity.Alcohol;
 import com.wine.to.up.winestyle.parser.service.service.ParserDirectorService;
@@ -28,6 +22,12 @@ import org.jsoup.select.Elements;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.concurrent.*;
 
 @Slf4j
 @Component
@@ -112,11 +112,13 @@ public class ParserService implements WinestyleParserService {
 
         log.warn("Starting parsing of {}", alcoholType);
 
+        List<Future<Integer>> unparsedFutures = new ArrayList<>();
+
         try {
             while (true) {
                 log.info("Parsing: {}", currentDoc.location());
 
-                parsingThreadPool.execute(new ProductJob(mainUrl, currentDoc, alcoholType, start));
+                unparsedFutures.add(parsingThreadPool.submit(new ProductJob(mainUrl, currentDoc, alcoholType, start)));
 
                 if (nextPageNumber > pagesNumber) {
                     break;
@@ -135,9 +137,17 @@ public class ParserService implements WinestyleParserService {
 
             log.info("Finished parsing of {} in {}", alcoholType, java.time.Duration.between((start), LocalDateTime.now()));
 
-            final List<Runnable> unparsed = parsingThreadPool.shutdownNow();
+            int unparsed = 0;
 
-            log.debug("Unparsed {}: {}", alcoholType, unparsed.size());
+            for (Future<Integer> unparsedFuture : unparsedFutures) {
+                try {
+                    unparsed += unparsedFuture.get();
+                } catch (InterruptedException | ExecutionException e) {
+                    unparsed += parsingThreadPool.shutdownNow().size();
+                }
+            }
+
+            log.debug("Unparsed {}: {}", alcoholType, unparsed);
 
             parsed = 0;
         }
@@ -158,7 +168,7 @@ public class ParserService implements WinestyleParserService {
         return document;
     }
 
-    private class ProductJob implements Runnable {
+    private class ProductJob implements Callable<Integer> {
         String mainUrl;
         Document currentDoc;
         String alcoholType;
@@ -180,7 +190,7 @@ public class ParserService implements WinestyleParserService {
          * Парсер страницы с позициями
          */
         @Override
-        public void run() {
+        public Integer call() throws InterruptedException {
             Elements alcohol = segmentationService
                     .setMainDocument(currentDoc)
                     .setMainMainContent()
@@ -188,8 +198,10 @@ public class ParserService implements WinestyleParserService {
 
             int parsedNow = 0;
 
+            List<Future<Integer>> parsingFutures = new ArrayList<>();
+
             for (Element drink : alcohol) {
-                parsedNow += parsingThreadPool.submit(() -> {
+                parsingFutures.add(parsingThreadPool.submit(() -> {
                     String productUrl;
 
                     parsingService.setProductBlock(segmentationService.setProductBlock(drink).getProductBlock());
@@ -221,10 +233,19 @@ public class ParserService implements WinestyleParserService {
                                     .build()
                     );
                     return 1;
-                }).get();
+                }));
+            }
+            int unparsed = 0;
+            for (int i = 0; i < alcohol.size(); i++) {
+                try {
+                    parsedNow += parsingFutures.get(i).get();
+                } catch (ExecutionException e) {
+                    unparsed += 1;
+                }
             }
             countParsed(parsedNow);
             logParsed(alcoholType, start);
+            return unparsed;
         }
 
         private synchronized void countParsed(int parsedNow) {
