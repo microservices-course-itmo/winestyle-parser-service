@@ -6,10 +6,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class ServiceIsBusyExceptionTest {
 
-    String exceptedMessage = "The server reported: test exception.";
+    String expectedMessage = "The server reported: test exception.";
 
     @Test
     void getMessage() {
-        assertEquals(exceptedMessage, ServiceIsBusyException.createWith("test exception").getMessage());
+        assertEquals(expectedMessage, ServiceIsBusyException.createWith("test exception").getMessage());
     }
 }

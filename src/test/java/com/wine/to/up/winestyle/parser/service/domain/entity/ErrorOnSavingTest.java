@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 
 import java.sql.Timestamp;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class ErrorOnSavingTest {
     static Alcohol alcohol;
@@ -15,7 +15,7 @@ class ErrorOnSavingTest {
     String expectedErrorOnSavingString = "ErrorOnSaving(id=1, " +
             "type=test, name=test, url=test, imageUrl=test, cropYear=1990, " +
             "manufacturer=test, brand=test, color=test, country=test, region=test, " +
-            "volume=1.0, strength=test, sugar=test, price=1.0, grape=test, " +
+            "volume=1.0, strength=1.0, sugar=test, price=1.0, grape=test, " +
             "taste=test, aroma=test, foodPairing=test, description=test, rating=1.0, " +
             "unsavedId=1, timestamp=1970-01-01 03:00:00.0, error=test error string)";
     String expectedErrorOnSavingNullString = "ErrorOnSaving(id=null, " +
@@ -32,7 +32,7 @@ class ErrorOnSavingTest {
         alcohol = Alcohol.builder()
                 .id(1L).name("test").type("test").url("test").imageUrl("test").cropYear(1990)
                 .manufacturer("test").brand("test").color("test").country("test").region("test")
-                .volume(1F).strength("test").sugar("test").price(1F)
+                .volume(1F).strength(1F).sugar("test").price(1F)
                 .grape("test").taste("test").aroma("test").foodPairing("test")
                 .description("test").rating(1F)
                 .build();
@@ -54,7 +54,7 @@ class ErrorOnSavingTest {
                 .country(alcohol.getCountry())
                 .region(alcohol.getRegion())
                 .volume(alcohol.getVolume() == null ? null : alcohol.getVolume().toString())
-                .strength(alcohol.getStrength())
+                .strength(alcohol.getStrength() == null ? null : alcohol.getStrength().toString())
                 .sugar(alcohol.getSugar())
                 .price(alcohol.getPrice() == null ? null : alcohol.getPrice().toString())
                 .grape(alcohol.getGrape())
@@ -67,7 +67,7 @@ class ErrorOnSavingTest {
                 .error(error)
                 .timestamp(timestamp)
                 .build();
-        assertEquals(errorOnSaving.toString(), expectedErrorOnSavingString);
+        assertEquals(expectedErrorOnSavingString, errorOnSaving.toString());
     }
 
     @Test
@@ -85,7 +85,7 @@ class ErrorOnSavingTest {
                 .country(alcoholNull.getCountry())
                 .region(alcoholNull.getRegion())
                 .volume(alcoholNull.getVolume() == null ? null : alcoholNull.getVolume().toString())
-                .strength(alcoholNull.getStrength())
+                .strength(alcoholNull.getStrength() == null ? null : alcohol.getStrength().toString())
                 .sugar(alcoholNull.getSugar())
                 .price(alcoholNull.getPrice() == null ? null : alcoholNull.getPrice().toString())
                 .grape(alcoholNull.getGrape())
@@ -98,6 +98,6 @@ class ErrorOnSavingTest {
                 .error(error)
                 .timestamp(timestamp)
                 .build();
-        assertEquals(errorOnSaving.toString(), expectedErrorOnSavingNullString);
+        assertEquals(expectedErrorOnSavingNullString, errorOnSaving.toString());
     }
 }

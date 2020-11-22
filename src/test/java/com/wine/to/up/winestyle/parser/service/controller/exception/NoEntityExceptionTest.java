@@ -2,9 +2,9 @@ package com.wine.to.up.winestyle.parser.service.controller.exception;
 
 import com.wine.to.up.winestyle.parser.service.domain.entity.Alcohol;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class NoEntityExceptionTest {
 

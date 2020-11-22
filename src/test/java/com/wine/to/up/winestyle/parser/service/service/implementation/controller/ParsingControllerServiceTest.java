@@ -1,32 +1,36 @@
 package com.wine.to.up.winestyle.parser.service.service.implementation.controller;
 
-import com.google.common.collect.ImmutableMap;
 import com.wine.to.up.winestyle.parser.service.service.implementation.helpers.StatusService;
+import com.wine.to.up.winestyle.parser.service.service.implementation.helpers.enums.ServiceType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 class ParsingControllerServiceTest {
 
     private StatusService statusService;
-
-    private static final ImmutableMap<String, String> SUPPORTED_ALCOHOL_URLS = ImmutableMap.<String, String>builder()
-            .put("wine", "/wine/all/")
-            .put("sparkling", "/champagnes-and-sparkling/champagnes/sparkling/sparkling-blue_ll/")
-            .build();
 
     @BeforeEach
     public void setUp(){
         statusService = new StatusService();
     }
 
-    //checking statusService
+    //checking statusService - PARSER
     @Test
-    void startParsingJobStatusTest() {
-        assertTrue(statusService.tryBusy());
-        assertFalse(statusService.tryBusy());
-        statusService.release();
-        assertTrue(statusService.tryBusy());
+    void startParsingJobParserStatusTest() {
+        assertTrue(statusService.tryBusy(ServiceType.PARSER));
+        assertFalse(statusService.tryBusy(ServiceType.PARSER));
+        statusService.release(ServiceType.PARSER);
+        assertTrue(statusService.tryBusy(ServiceType.PARSER));
+    }
+    //checking statusService - PARSER
+    @Test
+    void startParsingJobProxyStatusTest() {
+        assertTrue(statusService.tryBusy(ServiceType.PROXY));
+        assertFalse(statusService.tryBusy(ServiceType.PROXY));
+        statusService.release(ServiceType.PROXY);
+        assertTrue(statusService.tryBusy(ServiceType.PROXY));
     }
 }

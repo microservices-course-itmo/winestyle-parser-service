@@ -6,10 +6,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class IllegalFieldExceptionTest {
 
-    String exceptedMessage = "The server reported: wine entity has no field called wrong field.";
+    String expectedMessage = "The server reported: wine entity has no field called wrong field.";
 
     @Test
     void getMessage() {
-        assertEquals(exceptedMessage, IllegalFieldException.createWith("wine","wrong field").getMessage());
+        assertEquals(expectedMessage, IllegalFieldException.createWith("wine","wrong field").getMessage());
     }
 }
