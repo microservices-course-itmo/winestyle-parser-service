@@ -18,7 +18,6 @@ import com.wine.to.up.winestyle.parser.service.service.implementation.document.S
 import com.wine.to.up.winestyle.parser.service.service.implementation.document.ScrapingServicePooledObjectFactory;
 import com.wine.to.up.winestyle.parser.service.service.implementation.helpers.SegmentationService;
 import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.pool2.impl.GenericObjectPool;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
@@ -53,7 +52,6 @@ public class ParserService implements WinestyleParserService {
 
     private int parsed = 0;
 
-    @SneakyThrows
     @PostConstruct
     public void poolsInit() {
         scrapingServiceGenericObjectPoolConfig.setMaxTotal(MAX_THREAD_COUNT);
@@ -64,19 +62,26 @@ public class ParserService implements WinestyleParserService {
                 scrapingServiceGenericObjectPoolConfig
         );
 
-        scrapingServiceObjectPool.addObjects(MAX_THREAD_COUNT);
+        try {
+            scrapingServiceObjectPool.addObjects(MAX_THREAD_COUNT);
+        } catch (Exception e) {
+            log.error("Error on adding new threads to {}", scrapingServiceObjectPool.getClass().getSimpleName(), e);
+        }
 
         parsingThreadPool = Executors.newFixedThreadPool(MAX_THREAD_COUNT, parsingThreadFactory);
     }
 
-    @SneakyThrows
     public void poolsRenew() {
         if (scrapingServiceObjectPool.isClosed()) {
             scrapingServiceObjectPool = new GenericObjectPool<>(
                     new ScrapingServicePooledObjectFactory(),
                     scrapingServiceGenericObjectPoolConfig
             );
-            scrapingServiceObjectPool.addObjects(MAX_THREAD_COUNT);
+            try {
+                scrapingServiceObjectPool.addObjects(MAX_THREAD_COUNT);
+            } catch (Exception e) {
+                log.error("Error on adding new threads to {}", scrapingServiceObjectPool.getClass().getSimpleName(), e);
+            }
         }
 
         if (parsingThreadPool.isShutdown()) {
@@ -84,7 +89,6 @@ public class ParserService implements WinestyleParserService {
         }
     }
 
-    @SneakyThrows
     @Override
     public void parseBuildSave(String mainUrl, String relativeUrl, String alcoholType) {
         poolsRenew();
@@ -132,7 +136,6 @@ public class ParserService implements WinestyleParserService {
         }
     }
 
-    @SneakyThrows
     public Document getDocument(int pageNumber, String alcoholUrl) {
         ScrapingService scrapingService = scrapingServiceObjectPool.borrowObject();
         Document document = scrapingService.getJsoupDocument(alcoholUrl + "?page=" + pageNumber);
@@ -161,7 +164,6 @@ public class ParserService implements WinestyleParserService {
         /**
          * Парсер страницы с позициями
          */
-        @SneakyThrows({InterruptedException.class, ExecutionException.class})
         @Override
         public void run() {
             Elements alcohol = segmentationService

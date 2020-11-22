@@ -4,7 +4,6 @@ import com.wine.to.up.winestyle.parser.service.controller.exception.ServiceIsBus
 import com.wine.to.up.winestyle.parser.service.controller.exception.UnsupportedAlcoholTypeException;
 import com.wine.to.up.winestyle.parser.service.service.implementation.controller.ParsingControllerService;
 import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -13,9 +12,8 @@ import org.springframework.stereotype.Component;
 public class AlcoholParsingScheduler {
     private final ParsingControllerService parsingControllerService;
 
-    @SneakyThrows(UnsupportedAlcoholTypeException.class)
     @Scheduled(cron = "${scheduler.cron.expression}")
-    public void onScheduleParseWine() throws InterruptedException {
+    public void onScheduleParseWine() throws InterruptedException, UnsupportedAlcoholTypeException {
         try {
             parsingControllerService.startParsingJob("wine");
         } catch (ServiceIsBusyException e) {
@@ -24,9 +22,8 @@ public class AlcoholParsingScheduler {
         }
     }
 
-    @SneakyThrows(UnsupportedAlcoholTypeException.class)
     @Scheduled(cron = "${scheduler.cron.expression}")
-    public void onScheduleParseSparkling() throws InterruptedException {
+    public void onScheduleParseSparkling() throws InterruptedException, UnsupportedAlcoholTypeException {
         try {
             parsingControllerService.startParsingJob("sparkling");
         } catch (ServiceIsBusyException e) {
