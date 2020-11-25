@@ -45,6 +45,8 @@ public class ParsingControllerService {
             new Thread(() -> {
                 try {
                     alcoholParserService.parseBuildSave(SUPPORTED_ALCOHOL_URLS.get(alcoholType), alcoholType);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
                 } finally {
                     statusService.release(ServiceType.PARSER);
                 }
