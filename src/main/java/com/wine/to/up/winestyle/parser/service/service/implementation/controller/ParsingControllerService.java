@@ -1,10 +1,9 @@
 package com.wine.to.up.winestyle.parser.service.service.implementation.controller;
 
-import com.wine.to.up.winestyle.parser.service.controller.exception.UnsupportedAlcoholTypeException;
-import com.wine.to.up.winestyle.parser.service.controller.exception.ServiceIsBusyException;
-import com.wine.to.up.winestyle.parser.service.service.WinestyleParserService;
-
 import com.google.common.collect.ImmutableMap;
+import com.wine.to.up.winestyle.parser.service.controller.exception.ServiceIsBusyException;
+import com.wine.to.up.winestyle.parser.service.controller.exception.UnsupportedAlcoholTypeException;
+import com.wine.to.up.winestyle.parser.service.service.WinestyleParserService;
 import com.wine.to.up.winestyle.parser.service.service.implementation.helpers.StatusService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

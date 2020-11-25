@@ -3,7 +3,6 @@ package com.wine.to.up.winestyle.parser.service.service.implementation.parser;
 import com.wine.to.up.winestyle.parser.service.domain.entity.Alcohol;
 import com.wine.to.up.winestyle.parser.service.service.ParserDirectorService;
 import com.wine.to.up.winestyle.parser.service.service.ParsingService;
-
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

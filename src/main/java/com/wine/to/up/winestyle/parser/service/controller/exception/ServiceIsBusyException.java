@@ -3,6 +3,7 @@ package com.wine.to.up.winestyle.parser.service.controller.exception;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
+
 /**
  * Класс-ошибка, который кидается при попытке запустить парсинг при уже запущеном парсинге.
  */
@@ -15,6 +16,7 @@ public class ServiceIsBusyException extends Exception {
 
     /**
      * Конструктор ошибки сервера
+     *
      * @param cause причина
      * @return ошибку сервера
      */

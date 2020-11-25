@@ -4,7 +4,6 @@ import com.wine.to.up.winestyle.parser.service.controller.exception.NoEntityExce
 import com.wine.to.up.winestyle.parser.service.domain.entity.Alcohol;
 import com.wine.to.up.winestyle.parser.service.domain.entity.ErrorOnSaving;
 import com.wine.to.up.winestyle.parser.service.repository.AlcoholRepository;
-
 import com.wine.to.up.winestyle.parser.service.repository.ErrorOnSavingRepository;
 import com.wine.to.up.winestyle.parser.service.service.RepositoryService;
 import lombok.RequiredArgsConstructor;
@@ -32,9 +31,10 @@ public class AlcoholRepositoryService implements RepositoryService {
     }
 
     /**
-     * Обновление рейтинга 
+     * Обновление рейтинга
+     *
      * @param rating новый рейтинг
-     * @param url ссылка на напиток, у которого будем обновлять рейтинг
+     * @param url    ссылка на напиток, у которого будем обновлять рейтинг
      * @throws NoEntityException при отсутствии сущности
      */
     public void updateRating(Float rating, String url) throws NoEntityException {
@@ -46,6 +46,7 @@ public class AlcoholRepositoryService implements RepositoryService {
 
     /**
      * Получение списка напитков
+     *
      * @return список напитков
      */
     public List<Alcohol> getAll() {
@@ -54,6 +55,7 @@ public class AlcoholRepositoryService implements RepositoryService {
 
     /**
      * Получение всех вин
+     *
      * @return список вин
      */
     public List<Alcohol> getAllWines() {
@@ -62,6 +64,7 @@ public class AlcoholRepositoryService implements RepositoryService {
 
     /**
      * Получение всего шампанского
+     *
      * @return список шампанского
      */
     public List<Alcohol> getAllSparkling() {
@@ -70,6 +73,7 @@ public class AlcoholRepositoryService implements RepositoryService {
 
     /**
      * Получение напитка по ссылке
+     *
      * @param url ссылка на напиток
      * @return напиток или NULL, если
      * @throws NoEntityException при отсутствии сущности
@@ -82,12 +86,13 @@ public class AlcoholRepositoryService implements RepositoryService {
 
     /**
      * Добавление напитка
+     *
      * @param alcohol напиток
      */
     public void add(Alcohol alcohol) {
         try {
             alcoholRepository.save(alcohol);
-        } catch(Exception ex){
+        } catch (Exception ex) {
             ErrorOnSaving errorOnSaving = ErrorOnSaving.of(
                     alcohol,
                     new Timestamp(System.currentTimeMillis()),
@@ -100,6 +105,7 @@ public class AlcoholRepositoryService implements RepositoryService {
 
     /**
      * Получение напитка по id
+     *
      * @param id номер напитка
      * @return напиток
      * @throws NoEntityException Если нет такого, кидаем эксепшен

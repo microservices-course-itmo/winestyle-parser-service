@@ -1,6 +1,9 @@
 package com.wine.to.up.winestyle.parser.service.domain.entity;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import javax.persistence.*;
 import java.sql.Timestamp;

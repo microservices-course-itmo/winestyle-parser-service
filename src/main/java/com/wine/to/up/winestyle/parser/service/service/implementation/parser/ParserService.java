@@ -44,11 +44,10 @@ public class ParserService implements WinestyleParserService {
 
     private final GenericObjectPoolConfig<ScrapingService> scrapingServiceGenericObjectPoolConfig =
             new GenericObjectPoolConfig<>();
-    private GenericObjectPool<ScrapingService> scrapingServiceObjectPool;
-
     private final ThreadFactory parsingThreadFactory = new ThreadFactoryBuilder()
             .setNameFormat("Parsing-%d")
             .build();
+    private GenericObjectPool<ScrapingService> scrapingServiceObjectPool;
     private ExecutorService parsingThreadPool;
 
     private int parsed = 0;
@@ -168,6 +167,15 @@ public class ParserService implements WinestyleParserService {
         return document;
     }
 
+    private int getPagesNumber(Document doc) {
+        try {
+            return Integer.parseInt(doc.selectFirst("#CatalogPagingBottom li:last-of-type").text());
+        } catch (NullPointerException ex) {
+            log.info("{} does not contain a pagination element: the number of pages is set to 1", doc.location());
+            return 1;
+        }
+    }
+
     private class ProductJob implements Callable<Integer> {
         String mainUrl;
         Document currentDoc;
@@ -273,14 +281,5 @@ public class ParserService implements WinestyleParserService {
             parsingService.setDescriptionBlock(segmentationService.getDescriptionBlock());
         }
 
-    }
-
-    private int getPagesNumber(Document doc) {
-        try {
-            return Integer.parseInt(doc.selectFirst("#CatalogPagingBottom li:last-of-type").text());
-        } catch (NullPointerException ex) {
-            log.info("{} does not contain a pagination element: the number of pages is set to 1", doc.location());
-            return 1;
-        }
     }
 }

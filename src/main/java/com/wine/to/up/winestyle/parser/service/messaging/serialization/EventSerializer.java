@@ -1,7 +1,6 @@
 package com.wine.to.up.winestyle.parser.service.messaging.serialization;
 
 import com.wine.to.up.parser.common.api.schema.ParserApi;
-
 import org.apache.kafka.common.serialization.Serializer;
 
 /**

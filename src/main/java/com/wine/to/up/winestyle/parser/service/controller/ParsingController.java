@@ -5,7 +5,6 @@ import com.wine.to.up.winestyle.parser.service.controller.exception.UnsupportedA
 import com.wine.to.up.winestyle.parser.service.service.implementation.controller.ParsingControllerService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -22,7 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/winestyle/api/parse")
 @Slf4j
 public class ParsingController {
-    private final ParsingControllerService  parsingControllerService;
+    private final ParsingControllerService parsingControllerService;
 
     /**
      * @param alcohol тип алкоголя для парсинга (wine или sparkling).
