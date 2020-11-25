@@ -4,6 +4,7 @@ import com.wine.to.up.winestyle.parser.service.controller.exception.ServiceIsBus
 import com.wine.to.up.winestyle.parser.service.service.implementation.controller.MainControllerService;
 import com.wine.to.up.winestyle.parser.service.service.implementation.controller.ParsingControllerService;
 import com.wine.to.up.winestyle.parser.service.service.implementation.helpers.enums.AlcoholType;
+import com.wine.to.up.winestyle.parser.service.service.implementation.helpers.enums.City;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -19,7 +20,7 @@ public class AlcoholParsingScheduler {
     @Scheduled(cron = "${spring.task.scheduling.cron-expression}")
     public void onScheduleParseWine() throws InterruptedException {
         try {
-            parsingControllerService.startParsingJob(AlcoholType.WINE);
+            parsingControllerService.startParsingJob(City.SPB, AlcoholType.WINE);
         } catch (ServiceIsBusyException e) {
             Thread.sleep(3600000);
             onScheduleParseWine();
@@ -29,7 +30,7 @@ public class AlcoholParsingScheduler {
     @Scheduled(cron = "${spring.task.scheduling.cron-expression}")
     public void onScheduleParseSparkling() throws InterruptedException {
         try {
-            parsingControllerService.startParsingJob(AlcoholType.SPARKLING);
+            parsingControllerService.startParsingJob(City.SPB, AlcoholType.SPARKLING);
         } catch (ServiceIsBusyException e) {
             Thread.sleep(3600000);
             onScheduleParseSparkling();
