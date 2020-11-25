@@ -7,8 +7,13 @@ import static org.junit.jupiter.api.Assertions.*;
 class AlcoholTypeTest {
 
     @Test
-    void testToString() {
+    void toStringTest() {
         assertEquals("wine", AlcoholType.WINE.toString());
         assertEquals("sparkling", AlcoholType.SPARKLING.toString());
+    }
+
+    @Test
+    void values() {
+        assertTrue(AlcoholType.values().length == 2);
     }
 }
