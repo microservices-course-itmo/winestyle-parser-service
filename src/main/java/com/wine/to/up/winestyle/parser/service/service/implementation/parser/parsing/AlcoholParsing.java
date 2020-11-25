@@ -4,6 +4,7 @@ import com.wine.to.up.winestyle.parser.service.service.ParsingService;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.nodes.Element;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Slf4j
@@ -22,6 +23,39 @@ public class AlcoholParsing implements ParsingService {
     @Setter
     private Element descriptionBlock;
 
+    @Value("${spring.jsoup.parsing.css.query.name}")
+    private String nameElementCssQuery;
+    @Value("${spring.jsoup.parsing.css.query.url}")
+    private String urlElementCssQuery;
+    @Value("${spring.jsoup.parsing.css.query.image-url}")
+    private String imageUrlElementCssQuery;
+    @Value("${spring.jsoup.parsing.css.query.price}")
+    private String priceElementCssQuery;
+    @Value("${spring.jsoup.parsing.css.query.winestyle-rating}")
+    private String winestyleRatingElementCssQuery;
+    @Value("${spring.jsoup.parsing.css.query.volume}")
+    private String volumeElementCssQuery;
+    @Value("${spring.jsoup.parsing.css.query.manufacturer}")
+    private String manufacturerElementCssQuery;
+    @Value("${spring.jsoup.parsing.css.query.brand}")
+    private String brandElementCssQuery;
+    @Value("${spring.jsoup.parsing.css.query.country}")
+    private String countryElementCssQuery;
+    @Value("${spring.jsoup.parsing.css.query.strength}")
+    private String strengthElementCssQuery;
+    @Value("${spring.jsoup.parsing.css.query.grape}")
+    private String grapeElementCssQuery;
+    @Value("${spring.jsoup.parsing.css.query.type}")
+    private String typeElementCssQuery;
+    @Value("${spring.jsoup.parsing.css.query.taste}")
+    private String tasteElementCssQuery;
+    @Value("${spring.jsoup.parsing.css.query.aroma}")
+    private String aromaElementCssQuery;
+    @Value("${spring.jsoup.parsing.css.query.food-pairing}")
+    private String foodPairingCssQuery;
+    @Value("${spring.jsoup.parsing.css.query.description}")
+    private String descriptionCssQuery;
+
     private String name;
     private String url;
     private String region;
@@ -37,7 +71,7 @@ public class AlcoholParsing implements ParsingService {
      */
     @Override
     public String parseName() {
-        Element nameElement = productBlock.selectFirst(".title");
+        Element nameElement = productBlock.selectFirst(nameElementCssQuery);
         name = nameElement.attr("data-prodname");
         return name;
     }
@@ -49,7 +83,7 @@ public class AlcoholParsing implements ParsingService {
      */
     @Override
     public String parseUrl() {
-        url = productBlock.selectFirst("a").attr("href");
+        url = productBlock.selectFirst(urlElementCssQuery).attr("href");
         return url;
     }
 
@@ -60,7 +94,7 @@ public class AlcoholParsing implements ParsingService {
     @Override
     public String parseImageUrl() {
         try {
-            Element imageElement = leftBlock.selectFirst("a.img-container");
+            Element imageElement = leftBlock.selectFirst(imageUrlElementCssQuery);
             return imageElement.attr("href");
         } catch (NullPointerException ex) {
             log.warn("{}: product's image is not specified", url);
@@ -92,7 +126,7 @@ public class AlcoholParsing implements ParsingService {
     @Override
     public Float parsePrice() {
         try {
-            String priceValue = productBlock.selectFirst(".price").ownText();
+            String priceValue = productBlock.selectFirst(priceElementCssQuery).ownText();
             priceValue = priceValue.replace(" ", "");
             return Float.parseFloat(priceValue);
         } catch (Exception ex) {
@@ -108,7 +142,7 @@ public class AlcoholParsing implements ParsingService {
     @Override
     public Float parseWinestyleRating() {
         try {
-            String rating = infoContainer.selectFirst(".info-container meta[itemprop=ratingValue]").attr("content");
+            String rating = infoContainer.selectFirst(winestyleRatingElementCssQuery).attr("content");
             return Float.parseFloat(rating) / 2.f;
         } catch (Exception ex) {
             log.warn("{}: product's winestyle's rating is not specified", url);
@@ -123,7 +157,7 @@ public class AlcoholParsing implements ParsingService {
     @Override
     public Float parseVolume() {
         try {
-            Element volumeElement = infoContainer.selectFirst("label");
+            Element volumeElement = infoContainer.selectFirst(volumeElementCssQuery);
             String volumeValue = volumeElement.ownText();
             volumeValue = volumeValue.replaceAll("\\s[мл]+", "");
 
@@ -144,7 +178,7 @@ public class AlcoholParsing implements ParsingService {
     @Override
     public String parseManufacturer() {
         try {
-            Element manufacturerElement = listDescription.selectFirst("span:contains(Производитель:)");
+            Element manufacturerElement = listDescription.selectFirst(manufacturerElementCssQuery);
             Element manufacturerParent = manufacturerElement.parent();
             manufacturerElement.remove();
             String manufacturer = manufacturerParent.text();
@@ -163,7 +197,7 @@ public class AlcoholParsing implements ParsingService {
     @Override
     public String parseBrand() {
         try {
-            Element brandElement = listDescription.selectFirst("span:contains(Бренд:)");
+            Element brandElement = listDescription.selectFirst(brandElementCssQuery);
             Element brandParent = brandElement.parent();
             brandElement.remove();
             String brand = brandParent.text();
@@ -182,7 +216,7 @@ public class AlcoholParsing implements ParsingService {
     @Override
     public String parseCountry() {
         try {
-            Element countryElement = listDescription.selectFirst("span:contains(Регион:)");
+            Element countryElement = listDescription.selectFirst(countryElementCssQuery);
             Element countryParent = countryElement.parent();
             countryElement.remove();
             String countryAndRegion = countryParent.text();
@@ -224,7 +258,7 @@ public class AlcoholParsing implements ParsingService {
     @Override
     public Float parseStrength() {
         try {
-            Element strengthElement = listDescription.selectFirst("span:contains(Крепость:)");
+            Element strengthElement = listDescription.selectFirst(strengthElementCssQuery);
             Element strengthParent = strengthElement.parent();
             strengthElement.remove();
             String strength = strengthParent.text();
@@ -243,7 +277,7 @@ public class AlcoholParsing implements ParsingService {
     @Override
     public String parseGrape() {
         try {
-            Element grapeElement = listDescription.selectFirst("span:contains(Сорт винограда:)");
+            Element grapeElement = listDescription.selectFirst(grapeElementCssQuery);
             Element grapeParent = grapeElement.parent();
             grapeElement.remove();
             String grape = grapeParent.text();
@@ -262,7 +296,7 @@ public class AlcoholParsing implements ParsingService {
     @Override
     public String parseType(boolean isSpakrling) {
         try {
-            Element typeAndColorElement = listDescription.selectFirst("span:matches(([Вв]ино)[:/].*)");
+            Element typeAndColorElement = listDescription.selectFirst(typeElementCssQuery);
             Element typeAndColorParent = typeAndColorElement.parent();
             typeAndColorElement.remove();
             String typeColorSugar = typeAndColorParent.text();
@@ -321,7 +355,7 @@ public class AlcoholParsing implements ParsingService {
     @Override
     public String parseTaste() {
         try {
-            Element tasteElement = articlesBlock.selectFirst("span:contains(Вкус)").nextElementSibling();
+            Element tasteElement = articlesBlock.selectFirst(tasteElementCssQuery).nextElementSibling();
             return tasteElement.text();
         } catch (NullPointerException ex) {
             log.warn("{}: product's taste is not specified", url);
@@ -336,7 +370,7 @@ public class AlcoholParsing implements ParsingService {
     @Override
     public String parseAroma() {
         try {
-            Element aromaElement = articlesBlock.selectFirst("span:contains(Аром)").nextElementSibling();
+            Element aromaElement = articlesBlock.selectFirst(aromaElementCssQuery).nextElementSibling();
             return aromaElement.text();
         } catch (NullPointerException ex) {
             log.warn("{}: product's aroma is not specified", url);
@@ -351,7 +385,7 @@ public class AlcoholParsing implements ParsingService {
     @Override
     public String parseFoodPairing() {
         try {
-            Element foodPairingElement = articlesBlock.selectFirst("span:contains(Гаст)").nextElementSibling();
+            Element foodPairingElement = articlesBlock.selectFirst(foodPairingCssQuery).nextElementSibling();
             return foodPairingElement.text();
         } catch (NullPointerException ex) {
             log.warn("{}: product's food pairing is not specified", url);
@@ -366,7 +400,7 @@ public class AlcoholParsing implements ParsingService {
     @Override
     public String parseDescription() {
         try {
-            Element descriptionElement = descriptionBlock.selectFirst(".description-block");
+            Element descriptionElement = descriptionBlock.selectFirst(descriptionCssQuery);
             return descriptionElement.text();
         } catch (NullPointerException ex) {
             log.warn("{}: product's description is not specified", url);
