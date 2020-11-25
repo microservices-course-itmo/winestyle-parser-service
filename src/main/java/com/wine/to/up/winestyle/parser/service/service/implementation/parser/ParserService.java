@@ -40,7 +40,6 @@ public class ParserService implements WinestyleParserService {
     private final RepositoryService alcoholRepositoryService;
     private final ParserDirectorService parserDirectorService;
     private final KafkaMessageSender<ParserApi.WineParsedEvent> kafkaSendMessageService;
-    private final Alcohol.AlcoholBuilder builder = Alcohol.builder();
 
     @Value("${spring.task.execution.pool.size}")
     private int MAX_THREAD_COUNT;
@@ -232,8 +231,7 @@ public class ParserService implements WinestyleParserService {
                         Document product = scrapingService.getJsoupDocument(mainPageUrl + productUrl);
                         segmentationService.setProductDocument(product).setProductMainContent();
                         prepareParsingService();
-                        parserDirectorService.makeAlcohol(builder, alcoholType);
-                        result = builder.url(productUrl).build();
+                        result = parserDirectorService.makeAlcohol(productUrl, alcoholType);
                         alcoholRepositoryService.add(result);
                         scrapingServiceObjectPool.returnObject(scrapingService);
                     }
