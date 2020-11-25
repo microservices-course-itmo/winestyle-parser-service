@@ -42,10 +42,8 @@ public class ParserService implements WinestyleParserService {
     private final KafkaMessageSender<ParserApi.WineParsedEvent> kafkaSendMessageService;
     private final Alcohol.AlcoholBuilder builder = Alcohol.builder();
 
-    @Value("${spring.jsoup.scraping.winestyle-main-spb-url}")
-    private String mainPageUrl;
-
-    private static final int MAX_THREAD_COUNT = 50;
+    @Value("${spring.task.execution.pool.size}")
+    private int MAX_THREAD_COUNT;
 
     private final GenericObjectPoolConfig<ScrapingService> scrapingServiceGenericObjectPoolConfig =
             new GenericObjectPoolConfig<>();
