@@ -260,7 +260,7 @@ public class AlcoholParsing implements ParsingService {
      * @return Тип напитка ИЛИ массив из двух Null, если свойств нет.
      */
     @Override
-    public String parseType(Boolean isSpakrling) {
+    public String parseType(boolean isSpakrling) {
         String type;
         try {
             Element typeAndColorElement = listDescription.selectFirst("span:matches(([Вв]ино)[:/].*)");

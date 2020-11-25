@@ -77,7 +77,7 @@ public class ErrorOnSaving {
     private String volume;
 
     @Column(columnDefinition = "TEXT")
-    private String strength;
+    private Float strength;
 
     @Column(columnDefinition = "TEXT")
     private String sugar;
