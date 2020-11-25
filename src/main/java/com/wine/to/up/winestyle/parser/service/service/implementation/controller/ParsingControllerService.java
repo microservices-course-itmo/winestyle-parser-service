@@ -5,6 +5,7 @@ import com.wine.to.up.winestyle.parser.service.controller.exception.ServiceIsBus
 import com.wine.to.up.winestyle.parser.service.service.WinestyleParserService;
 import com.wine.to.up.winestyle.parser.service.service.implementation.helpers.StatusService;
 import com.wine.to.up.winestyle.parser.service.service.implementation.helpers.enums.AlcoholType;
+import com.wine.to.up.winestyle.parser.service.service.implementation.helpers.enums.City;
 import com.wine.to.up.winestyle.parser.service.service.implementation.helpers.enums.ServiceType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
