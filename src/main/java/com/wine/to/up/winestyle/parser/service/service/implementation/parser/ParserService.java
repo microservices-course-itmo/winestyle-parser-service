@@ -96,7 +96,7 @@ public class ParserService implements WinestyleParserService {
     }
 
     @Override
-    public void parseBuildSave(String alcoholUrlPart, AlcoholType alcoholType) throws InterruptedException {
+    public void parseBuildSave(String mainPageUrl, String alcoholUrlPart, AlcoholType alcoholType) throws InterruptedException {
         renewPools();
 
         LocalDateTime start = LocalDateTime.now();
@@ -183,6 +183,7 @@ public class ParserService implements WinestyleParserService {
     }
 
     private class ProductJob implements Callable<Integer> {
+        String mainPageUrl;
         Document currentDoc;
         AlcoholType alcoholType;
         LocalDateTime start;
@@ -191,7 +192,8 @@ public class ParserService implements WinestyleParserService {
          * @param currentDoc  текущая страница с позициями
          * @param alcoholType тип алкоголя
          */
-        public ProductJob(Document currentDoc, AlcoholType alcoholType, LocalDateTime start) {
+        public ProductJob(String mainPageUrl, Document currentDoc, AlcoholType alcoholType, LocalDateTime start) {
+            this.mainPageUrl = mainPageUrl;
             this.currentDoc = currentDoc;
             this.alcoholType = alcoholType;
             this.start = start;
