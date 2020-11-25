@@ -20,10 +20,14 @@ public class ScrapingService {
     private IWebPageLoader loader;
     private int timeout;
 
-    public ScrapingService() {
-        proxyService = new ProxyService();
-        loader = new SimpleWebPageLoader();
+    public ScrapingService(ProxyService proxyService, IWebPageLoader loader) {
+        this.proxyService = proxyService;
+        this.loader = loader;
         timeout = 0;
+    }
+
+    public ScrapingService() {
+        this(new ProxyService(), new SimpleWebPageLoader());
     }
 
     /**
