@@ -16,7 +16,6 @@ import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
@@ -33,7 +32,7 @@ public class ProxyService {
 
     private List<String> getAllProxies() {
         try {
-            URL url = new URL(Objects.requireNonNull(env.getProperty("proxy.list.url")));
+            URL url = new URL("https://api.proxyscrape.com/?request=getproxies&proxytype=socks5&country=all");
             URLConnection connection = url.openConnection();
             BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
             String inputLine;
