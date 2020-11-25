@@ -128,7 +128,7 @@ public class ErrorOnSaving {
                 .country(alcohol.getCountry())
                 .region(alcohol.getRegion())
                 .volume(alcohol.getVolume() == null ? null : alcohol.getVolume().toString())
-                .strength(alcohol.getStrength() == null ? null : alcohol.getStrength().toString())
+                .strength(alcohol.getStrength())
                 .sugar(alcohol.getSugar())
                 .price(alcohol.getPrice() == null ? null : alcohol.getPrice().toString())
                 .grape(alcohol.getGrape())

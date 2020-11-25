@@ -120,7 +120,7 @@ public class ParserService implements WinestyleParserService {
             while (true) {
                 log.info("Parsing: {}", currentDoc.location());
 
-                parsingThreadPool.execute(new ProductJob(currentDoc, alcoholType, start));
+                unparsedFutures.add(parsingThreadPool.submit(new ProductJob(mainPageUrl, currentDoc, alcoholType, start)));
 
                 if (nextPageNumber > pagesNumber) {
                     break;
