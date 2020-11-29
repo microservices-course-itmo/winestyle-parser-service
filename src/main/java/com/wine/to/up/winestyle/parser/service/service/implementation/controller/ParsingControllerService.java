@@ -51,7 +51,7 @@ public class ParsingControllerService {
     // Start parsing job in a separate thread
     public void startParsingJob(City city, AlcoholType alcoholType) throws ServiceIsBusyException {
         if (statusService.tryBusy(ServiceType.PARSER)) {
-            log.info("Started parsing of {} via /winestyle/api/parse/{}", alcoholType, alcoholType);
+            log.info("Started parsing of {} via /winestyle/api/parse/{}/{}", alcoholType, city, alcoholType);
             new Thread(() -> {
                 try {
                     alcoholParserService.parseBuildSave(SUPPORTED_CITY_URLS.get(city),
