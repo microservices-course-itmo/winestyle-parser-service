@@ -2,7 +2,7 @@ package com.wine.to.up.winestyle.parser.service.service.implementation.controlle
 
 import com.wine.to.up.winestyle.parser.service.controller.exception.*;
 import com.wine.to.up.winestyle.parser.service.domain.entity.Alcohol;
-import com.wine.to.up.winestyle.parser.service.service.implementation.document.ScrapingService;
+import com.wine.to.up.winestyle.parser.service.service.implementation.document.ProxyService;
 import com.wine.to.up.winestyle.parser.service.service.implementation.helpers.StatusService;
 import com.wine.to.up.winestyle.parser.service.service.implementation.helpers.enums.ServiceType;
 import com.wine.to.up.winestyle.parser.service.service.implementation.repository.AlcoholRepositoryService;
@@ -79,10 +79,10 @@ public class MainControllerService {
 
 
     public void startProxiesInitJob(int maxTimeout) throws ServiceIsBusyException {
-        if (statusService.tryBusy(ServiceType.PROXY)) {
+        if (statusService.tryBusy(ServiceType.PROXY) && !statusService.isBusy(ServiceType.PARSER)) {
             new Thread(() -> {
                 try {
-                    scrapingService.initProxies(maxTimeout);
+                    ProxyService.initProxies(maxTimeout);
                 } finally {
                     statusService.release(ServiceType.PROXY);
                 }
