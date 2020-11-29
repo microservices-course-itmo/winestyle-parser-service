@@ -25,12 +25,12 @@ public class ParsingController {
     private final ParsingControllerService parsingControllerService;
 
     /**
-     * @param city город, в котором будет парситься ассортимент
+     * @param city    город, в котором будет парситься ассортимент
      * @param alcohol тип алкоголя для парсинга (wine или sparkling).
      * @return HTTP-статус 200(ОК) и сообщение о начале парсинга в теле ответа.
      * @throws ServiceIsBusyException когда парсинг уже запущен.
      */
-    @PostMapping("/{alcohol}")
+    @PostMapping("/{city}/{alcohol}")
     public ResponseEntity<String> startParsing(@PathVariable City city, @PathVariable AlcoholType alcohol) throws ServiceIsBusyException {
         parsingControllerService.startParsingJob(city, alcohol);
         return new ResponseEntity<>("Parsing job was successfully launched.", HttpStatus.OK);
