@@ -25,26 +25,26 @@ public class ParsingControllerService {
     private final StatusService statusService;
 
     @Value("${spring.jsoup.scraping.winestyle-main-msk-url}")
-    private String MSK_URL;
+    private String mskUrl;
     @Value("${spring.jsoup.scraping.winestyle-main-spb-url}")
-    private String SPB_URL;
+    private String spbUrl;
     @Value("${spring.jsoup.scraping.winestyle-wine-part-url}")
-    private String WINE_URL;
+    private String wineUrl;
     @Value("${spring.jsoup.scraping.winestyle-sparkling-part-url}")
-    private String SPARKLING_URL;
+    private String sparklingUrl;
 
-    private ImmutableMap<City, String> SUPPORTED_CITY_URLS;
-    private ImmutableMap<AlcoholType, String> SUPPORTED_ALCOHOL_URLS;
+    private ImmutableMap<City, String> supportedCityUrls;
+    private ImmutableMap<AlcoholType, String> supportedAlcoholUrls;
 
     @PostConstruct
     private void populateUrl() {
-        SUPPORTED_CITY_URLS = ImmutableMap.<City, String>builder()
-                .put(City.MSK, MSK_URL)
-                .put(City.SPB, SPB_URL)
+        supportedCityUrls = ImmutableMap.<City, String>builder()
+                .put(City.MSK, mskUrl)
+                .put(City.SPB, spbUrl)
                 .build();
-        SUPPORTED_ALCOHOL_URLS = ImmutableMap.<AlcoholType, String>builder()
-                .put(AlcoholType.WINE, WINE_URL)
-                .put(AlcoholType.SPARKLING, SPARKLING_URL)
+        supportedAlcoholUrls = ImmutableMap.<AlcoholType, String>builder()
+                .put(AlcoholType.WINE, wineUrl)
+                .put(AlcoholType.SPARKLING, sparklingUrl)
                 .build();
     }
 
