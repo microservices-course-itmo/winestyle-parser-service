@@ -1,14 +1,18 @@
 package com.wine.to.up.winestyle.parser.service.service.implementation.document;
 
+import com.wine.to.up.winestyle.parser.service.service.UnstableLoader;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.io.IOException;
 import java.net.Proxy;
 
-public class ProxyWebPageLoader implements IUnstableLoader {
+public class ProxyWebPageLoader implements UnstableLoader {
     private final Proxy proxy;
     private int failuresCount;
+    @Value("${spring.jsoup.connection.timeout}")
+    private int timeout;
 
     public ProxyWebPageLoader(Proxy proxy) {
         this.proxy = proxy;
@@ -23,6 +27,7 @@ public class ProxyWebPageLoader implements IUnstableLoader {
                             + "AppleWebKit/537.36 (KHTML, like Gecko) "
                             + "Chrome/85.0.4183.121 "
                             + "Safari/537.36")
+                    .timeout(timeout * 1100)
                     .proxy(proxy)
                     .get();
             failuresCount = 0;
