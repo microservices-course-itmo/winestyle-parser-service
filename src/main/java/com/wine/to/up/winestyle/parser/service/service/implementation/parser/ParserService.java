@@ -42,11 +42,7 @@ public class ParserService implements WinestyleParserService {
     private final KafkaMessageSender<ParserApi.WineParsedEvent> kafkaSendMessageService;
 
     @Value("${spring.task.execution.pool.size}")
-    private int MAX_THREAD_COUNT;
-
-    private final GenericObjectPoolConfig<ScrapingService> scrapingServiceGenericObjectPoolConfig =
-            new GenericObjectPoolConfig<>();
-    private GenericObjectPool<ScrapingService> scrapingServiceObjectPool;
+    private int maxThreadCount;
 
     private final ThreadFactory parsingThreadFactory = new ThreadFactoryBuilder()
             .setNameFormat("Parsing-%d")
@@ -57,21 +53,7 @@ public class ParserService implements WinestyleParserService {
 
     @PostConstruct
     public void initPools() {
-        scrapingServiceGenericObjectPoolConfig.setMaxTotal(MAX_THREAD_COUNT);
-        scrapingServiceGenericObjectPoolConfig.setMaxIdle(MAX_THREAD_COUNT);
-
-        scrapingServiceObjectPool = new GenericObjectPool<>(
-                new ScrapingServicePooledObjectFactory(),
-                scrapingServiceGenericObjectPoolConfig
-        );
-
-        try {
-            scrapingServiceObjectPool.addObjects(MAX_THREAD_COUNT);
-        } catch (Exception e) {
-            log.error("Error on adding new threads to scrapingServiceObjectPool", e);
-        }
-
-        parsingThreadPool = Executors.newFixedThreadPool(MAX_THREAD_COUNT, parsingThreadFactory);
+        parsingThreadPool = Executors.newFixedThreadPool(maxThreadCount, parsingThreadFactory);
     }
 
     public void renewPools() {
@@ -88,7 +70,7 @@ public class ParserService implements WinestyleParserService {
         }
 
         if (parsingThreadPool.isShutdown()) {
-            parsingThreadPool = Executors.newFixedThreadPool(MAX_THREAD_COUNT, parsingThreadFactory);
+            parsingThreadPool = Executors.newFixedThreadPool(maxThreadCount, parsingThreadFactory);
         }
     }
 
