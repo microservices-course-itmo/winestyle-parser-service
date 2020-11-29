@@ -1,12 +1,9 @@
 package com.wine.to.up.winestyle.parser.service.domain.entity;
 
-import com.wine.to.up.parser.common.api.schema.ParserApi;
-import com.wine.to.up.parser.common.api.schema.ParserApi.Wine.Color;
-import com.wine.to.up.parser.common.api.schema.ParserApi.Wine.Sugar;
 import lombok.*;
 
 import javax.persistence.*;
-import java.util.Arrays;
+import javax.validation.constraints.NotNull;
 
 /**
  * <pre>
@@ -46,12 +43,15 @@ public class Alcohol {
     private Long id;
 
     @Column(columnDefinition = "varchar(25)")
+    @NotNull
     private String type;
 
     @Column(columnDefinition = "varchar(130)")
+    @NotNull
     private String name;
 
     @Column(columnDefinition = "varchar(140)")
+    @NotNull
     private String url;
 
     @Column(columnDefinition = "varchar(65)")
