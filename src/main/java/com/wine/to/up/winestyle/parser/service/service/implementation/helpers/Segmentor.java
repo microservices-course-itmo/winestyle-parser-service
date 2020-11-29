@@ -31,15 +31,22 @@ public class Segmentor {
     private Element productMainContent;
     private Element infoContainer;
 
-    /**
-     * Добавление данных
-     *
-     * @return
-     */
-    public SegmentationService setMainMainContent() {
-        mainMainContent = mainDocument.selectFirst(".main-content");
-        return this;
-    }
+    @Value("${spring.jsoup.segmenting.css.query.main-main}")
+    private String mainMainElementCssQuery;
+    @Value("${spring.jsoup.segmenting.css.query.product-main}")
+    private String productMainElementCssQuery;
+    @Value("${spring.jsoup.segmenting.css.query.info}")
+    private String infoElementCssQuery;
+    @Value("${spring.jsoup.segmenting.css.query.list-description}")
+    private String listDescriptionElementCssQuery;
+    @Value("${spring.jsoup.segmenting.css.query.block-description}")
+    private String blockDescriptionElementCssQuery;
+    @Value("${spring.jsoup.segmenting.css.query.left-block}")
+    private String leftBlockElementCssQuery;
+    @Value("${spring.jsoup.segmenting.css.query.articles-block}")
+    private String articlesBlockElementCssQuery;
+    @Value("${spring.jsoup.segmenting.css.class.product}")
+    private String productElementClassName;
 
     public void setProductMainContent() {
         productMainContent = productDocument.selectFirst(".main-content");
@@ -60,7 +67,7 @@ public class Segmentor {
      * @return контейнер с информацией
      */
     public Element getInfoContainer() {
-        infoContainer = productBlock.selectFirst(".info-container");
+        infoContainer = productBlock.selectFirst(infoElementCssQuery);
         return infoContainer;
     }
 
@@ -70,7 +77,7 @@ public class Segmentor {
      * @return из контейнера берется список описаний
      */
     public Element getListDescription() {
-        return infoContainer.selectFirst(".list-description");
+        return infoContainer.selectFirst(listDescriptionElementCssQuery);
     }
 
     /**
@@ -79,7 +86,7 @@ public class Segmentor {
      * @return блок с картинкой
      */
     public Element getLeftBlock() {
-        return productMainContent.selectFirst(".left-aside");
+        return productMainContent.selectFirst(leftBlockElementCssQuery);
     }
 
     /**
@@ -88,7 +95,7 @@ public class Segmentor {
      * @return блок с описанием
      */
     public Element getArticlesBlock() {
-        return productMainContent.selectFirst(".articles-col");
+        return productMainContent.selectFirst(articlesBlockElementCssQuery);
     }
 
     /**
@@ -97,6 +104,6 @@ public class Segmentor {
      * @return описание
      */
     public Element getDescriptionBlock() {
-        return productMainContent.selectFirst(".articles-container.desc");
+        return productMainContent.selectFirst(blockDescriptionElementCssQuery);
     }
 }
