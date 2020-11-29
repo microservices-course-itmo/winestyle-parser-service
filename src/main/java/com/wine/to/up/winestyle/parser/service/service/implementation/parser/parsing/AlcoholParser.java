@@ -456,7 +456,7 @@ public class AlcoholParser implements Parser {
             isSugarPresented = false;
             type = typeColorSugar;
         }
-        if (type.matches("^(?!C|Пол|Р|Б|О|Г|Кра).+")) {
+        if (type.matches("^(?!С|Пол|Р|Б|О|Г|Кра).+")) {
             colorAndSugar = typeColorSugar.substring(indexOfDelim + 2);
             isColorPresented = false;
             return type;
