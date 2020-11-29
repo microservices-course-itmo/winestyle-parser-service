@@ -1,11 +1,12 @@
 package com.wine.to.up.winestyle.parser.service.service.implementation.document;
 
+import com.wine.to.up.winestyle.parser.service.service.WebPageLoader;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
 import java.io.IOException;
 
-public class SimpleWebPageLoader implements IWebPageLoader {
+public class SimpleWebPageLoader implements WebPageLoader {
     @Override
     public Document getDocument(String url) throws IOException {
         return Jsoup.connect(url)
