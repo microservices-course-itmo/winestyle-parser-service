@@ -6,13 +6,17 @@ import lombok.experimental.Accessors;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
 /**
  * Класс, отвечающий за разделение данных со страницы
  */
 @Service
-public class SegmentationService {
+@Scope(BeanDefinition.SCOPE_PROTOTYPE)
+public class Segmentor {
     @Accessors(chain = true)
     @Setter
     private Document mainDocument;

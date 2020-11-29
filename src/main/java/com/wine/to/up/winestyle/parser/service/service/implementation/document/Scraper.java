@@ -1,5 +1,6 @@
 package com.wine.to.up.winestyle.parser.service.service.implementation.document;
 
+import com.wine.to.up.winestyle.parser.service.service.WebPageLoader;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.HttpStatusException;
 import org.jsoup.nodes.Document;
@@ -15,15 +16,12 @@ import java.net.SocketTimeoutException;
  */
 @Service
 @Slf4j
-public class ScrapingService {
-    private final ProxyService proxyService;
-    private IWebPageLoader loader;
-    private int timeout;
+public class Scraper {
+    private int timeout = 0;
+    private final WebPageLoader loader;
 
-    public ScrapingService() {
-        proxyService = new ProxyService();
-        loader = new SimpleWebPageLoader();
-        timeout = 0;
+    public Scraper() {
+        loader = ProxyService.getLoader();
     }
 
     /**
@@ -42,18 +40,13 @@ public class ScrapingService {
                 log.error("Couldn't get a connection to website!", ex);
             } // Берем страничку html
             catch (HttpStatusException e) {
-                log.error("An error occurs whilst fetching the URL!", e);
+                log.error("An error occurs whilst fetching the URL! {} {}", e.getStatusCode(), url, e);
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
         if (timeout > 0) Thread.sleep(timeout);
         return doc;
-    }
-
-
-    public void initProxies(int maxTimeout) {
-        loader = proxyService.getLoader(maxTimeout);
     }
 
     public void setTimeout(int timeout) {

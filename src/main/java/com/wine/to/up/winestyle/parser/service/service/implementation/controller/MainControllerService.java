@@ -28,7 +28,6 @@ import java.util.*;
 public class MainControllerService {
     private final AlcoholRepositoryService alcoholRepositoryService;
     private final StatusService statusService;
-    private final ScrapingService scrapingService;
 
     @SneakyThrows({IntrospectionException.class, InvocationTargetException.class})
     public Map<String, Object> getAlcoholWithFields(long id, String fieldsList)

@@ -53,9 +53,10 @@ public class ParsingControllerService {
         if (statusService.tryBusy(ServiceType.PARSER)) {
             log.info("Started parsing of {} via /winestyle/api/parse/{}/{}", alcoholType, city, alcoholType);
             new Thread(() -> {
+                alcoholParserService.setAlcoholType(alcoholType);
+                alcoholParserService.setMainPageUrl(supportedCityUrls.get(city));
                 try {
-                    alcoholParserService.parseBuildSave(SUPPORTED_CITY_URLS.get(city),
-                            SUPPORTED_ALCOHOL_URLS.get(alcoholType), alcoholType);
+                    alcoholParserService.parseBuildSave(supportedAlcoholUrls.get(alcoholType));
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                 } finally {
