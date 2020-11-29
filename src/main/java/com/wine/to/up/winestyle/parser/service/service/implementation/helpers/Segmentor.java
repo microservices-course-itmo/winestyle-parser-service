@@ -27,7 +27,6 @@ public class Segmentor {
     @Setter
     @Getter
     private Element productBlock;
-    private Element mainMainContent;
     private Element productMainContent;
     private Element infoContainer;
 
@@ -49,16 +48,16 @@ public class Segmentor {
     private String productElementClassName;
 
     public void setProductMainContent() {
-        productMainContent = productDocument.selectFirst(".main-content");
+        productMainContent = productDocument.selectFirst(productMainElementCssQuery);
     }
 
     /**
      * Разделение на элементы
      *
-     * @return
+     * @return Elements, содержащий элементы продуктов
      */
     public Elements breakDocumentIntoProductElements() {
-        return mainMainContent.getElementsByClass("item-block");
+        return mainDocument.selectFirst(mainMainElementCssQuery).getElementsByClass(productElementClassName);
     }
 
     /**
