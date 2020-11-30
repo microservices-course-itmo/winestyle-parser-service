@@ -36,11 +36,11 @@ public class Scraper {
         while (doc == null) {
             try {
                 doc = loader.getDocument(url);
-            } catch (SocketException | SocketTimeoutException | SSLException ex) {
-                log.error("Couldn't get a connection to website!", ex);
+            } catch (SocketException | SocketTimeoutException | SSLException e) {
+                log.error("Couldn't get a connection to website! {}", e.getMessage());
             } // Берем страничку html
             catch (HttpStatusException e) {
-                log.error("An error occurs whilst fetching the URL! {} {}", e.getStatusCode(), url, e);
+                log.error("An error occurs whilst fetching the URL! {} {} {}", e.getMessage(), e.getStatusCode(), url);
             } catch (IOException e) {
                 e.printStackTrace();
             }
