@@ -3,17 +3,20 @@ package com.wine.to.up.winestyle.parser.service.service.implementation.document;
 import com.wine.to.up.winestyle.parser.service.service.WebPageLoader;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 
+@Component
 public class SimpleWebPageLoader implements WebPageLoader {
+    @Value("${spring.jsoup.connection.user-agent}")
+    private String userAgent;
+
     @Override
     public Document getDocument(String url) throws IOException {
         return Jsoup.connect(url)
-                .userAgent("Mozilla/5.0 (Windows NT 6.1; Win64; x64) "
-                        + "AppleWebKit/537.36 (KHTML, like Gecko) "
-                        + "Chrome/85.0.4183.121 "
-                        + "Safari/537.36")
+                .userAgent(userAgent)
                 .get();
     }
 

@@ -13,21 +13,15 @@ public class ProxyWebPageLoader implements UnstableLoader {
     private int failuresCount;
     @Value("${spring.jsoup.connection.timeout}")
     private int timeout;
-
-    public ProxyWebPageLoader(Proxy proxy) {
-        this.proxy = proxy;
-        failuresCount = 0;
-    }
+    @Value("${spring.jsoup.connection.user-agent}")
+    private String userAgent;
 
     @Override
     public Document getDocument(String url) throws IOException {
         try {
             Document document = Jsoup.connect(url)
-                    .userAgent("Mozilla/5.0 (Windows NT 6.1; Win64; x64) "
-                            + "AppleWebKit/537.36 (KHTML, like Gecko) "
-                            + "Chrome/85.0.4183.121 "
-                            + "Safari/537.36")
-                    .timeout(timeout * 1100)
+                    .userAgent(userAgent)
+                    .timeout(timeout * 1500)
                     .proxy(proxy)
                     .get();
             failuresCount = 0;
