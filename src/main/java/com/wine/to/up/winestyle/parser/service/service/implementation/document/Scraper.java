@@ -1,6 +1,7 @@
 package com.wine.to.up.winestyle.parser.service.service.implementation.document;
 
 import com.wine.to.up.winestyle.parser.service.service.WebPageLoader;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.HttpStatusException;
 import org.jsoup.nodes.Document;
@@ -17,6 +18,7 @@ import java.net.SocketTimeoutException;
 @Service
 @Slf4j
 public class Scraper {
+    @Setter
     private int timeout = 0;
     private final WebPageLoader loader;
 
@@ -47,9 +49,5 @@ public class Scraper {
         }
         if (timeout > 0) Thread.sleep(timeout);
         return doc;
-    }
-
-    public void setTimeout(int timeout) {
-        this.timeout = timeout;
     }
 }
