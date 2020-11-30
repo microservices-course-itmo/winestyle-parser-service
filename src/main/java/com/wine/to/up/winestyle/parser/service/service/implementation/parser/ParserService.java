@@ -10,6 +10,7 @@ import com.wine.to.up.winestyle.parser.service.service.Parser;
 import com.wine.to.up.winestyle.parser.service.service.RepositoryService;
 import com.wine.to.up.winestyle.parser.service.service.WinestyleParserService;
 import com.wine.to.up.winestyle.parser.service.service.implementation.document.Scraper;
+import com.wine.to.up.winestyle.parser.service.service.implementation.helpers.ApplicationContextLocator;
 import com.wine.to.up.winestyle.parser.service.service.implementation.helpers.Segmentor;
 import com.wine.to.up.winestyle.parser.service.service.implementation.helpers.enums.AlcoholType;
 import lombok.RequiredArgsConstructor;
@@ -19,7 +20,6 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -35,8 +35,6 @@ import java.util.concurrent.*;
 public class ParserService implements WinestyleParserService {
     private final KafkaMessageSender<ParserApi.WineParsedEvent> kafkaMessageSender;
     private final RepositoryService alcoholRepositoryService;
-    private final ApplicationContext applicationContext;
-    private final Scraper scraper;
 
     @Setter
     private AlcoholType alcoholType;
@@ -71,7 +69,10 @@ public class ParserService implements WinestyleParserService {
         LocalDateTime start = LocalDateTime.now();
         String alcoholUrl = mainPageUrl + alcoholUrlPart;
 
-        Document currentDoc = scraper.getJsoupDocument(alcoholUrl);
+        Scraper mainScraper = new Scraper();
+        Scraper productScraper = new Scraper();
+
+        Document currentDoc = mainScraper.getJsoupDocument(alcoholUrl);
         int pagesNumber = getPagesNumber(currentDoc);
         int nextPageNumber = 2;
 
@@ -83,13 +84,13 @@ public class ParserService implements WinestyleParserService {
             while (true) {
                 log.info("Parsing: {}", currentDoc.location());
 
-                unparsedFutures.add(parsingThreadPool.submit(new MainJob(currentDoc, start, applicationContext.getBean(Segmentor.class))));
+                unparsedFutures.add(parsingThreadPool.submit(new MainJob(currentDoc, start, productScraper)));
 
                 if (nextPageNumber > pagesNumber) {
                     break;
                 }
 
-                currentDoc = scraper.getJsoupDocument(alcoholUrl + "?page=" + nextPageNumber);
+                currentDoc = mainScraper.getJsoupDocument(alcoholUrl + "?page=" + nextPageNumber);
 
                 nextPageNumber++;
             }
@@ -131,7 +132,8 @@ public class ParserService implements WinestyleParserService {
     private class MainJob implements Callable<Integer> {
         private final Document currentDoc;
         private final LocalDateTime start;
-        private final Segmentor segmentor;
+        private final Scraper scraper;
+        private final Segmentor segmentor = ApplicationContextLocator.getApplicationContext().getBean(Segmentor.class);
 
         /**
          * Парсер страницы с позициями
@@ -148,8 +150,7 @@ public class ParserService implements WinestyleParserService {
             List<Future<?>> parsingFutures = new ArrayList<>();
 
             for (Element drink : alcohol) {
-                parsingFutures.add(parsingThreadPool.submit(new ProductJob(drink, new ParserDirector(), new Scraper(),
-                        applicationContext.getBean(Segmentor.class), applicationContext.getBean(Parser.class))));
+                parsingFutures.add(parsingThreadPool.submit(new ProductJob(drink, scraper)));
             }
 
             for (int i = 0; i < alcohol.size(); i++) {
@@ -188,10 +189,10 @@ public class ParserService implements WinestyleParserService {
     @RequiredArgsConstructor
     private class ProductJob implements Runnable {
         private final Element alcohol;
-        private final Director director;
         private final Scraper scraper;
-        private final Segmentor segmentor;
-        private final Parser parser;
+        private final Director director = new ParserDirector();
+        private final Segmentor segmentor = ApplicationContextLocator.getApplicationContext().getBean(Segmentor.class);
+        private final Parser parser = ApplicationContextLocator.getApplicationContext().getBean(Parser.class);
 
         @Override
         public void run() {
