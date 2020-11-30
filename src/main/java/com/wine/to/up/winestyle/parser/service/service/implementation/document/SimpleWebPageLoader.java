@@ -12,11 +12,14 @@ import java.io.IOException;
 public class SimpleWebPageLoader implements WebPageLoader {
     @Value("${spring.jsoup.connection.user-agent}")
     private String userAgent;
+    @Value("${spring.jsoup.connection.timeout}")
+    private int timeout;
 
     @Override
     public Document getDocument(String url) throws IOException {
         return Jsoup.connect(url)
                 .userAgent(userAgent)
+                .timeout(timeout * 1000)
                 .get();
     }
 
