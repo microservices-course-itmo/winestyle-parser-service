@@ -46,7 +46,7 @@ public class KafkaConfiguration {
      */
     @Bean
     KafkaMessageSender<ParserApi.WineParsedEvent> wineStyleKafkaMessageSender(Properties producerProperties,
-                                                                                    ParserCommonApiProperties parserApiProperties, WinestyleParserServiceMetricsCollector metricsCollector) {
+                                                                              ParserCommonApiProperties parserApiProperties, WinestyleParserServiceMetricsCollector metricsCollector) {
         producerProperties.setProperty(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, EventSerializer.class.getName());
         return new KafkaMessageSender<>(new KafkaProducer<>(producerProperties), parserApiProperties.getWineParsedEventsTopicName(), metricsCollector);
     }

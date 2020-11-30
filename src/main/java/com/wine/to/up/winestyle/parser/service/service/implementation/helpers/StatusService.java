@@ -41,4 +41,15 @@ public class StatusService {
                 throw new IllegalArgumentException("Passed service type is unsupported");
         }
     }
+
+    public boolean isBusy(ServiceType serviceType) {
+        switch (serviceType) {
+            case PARSER:
+                return isParserBusy.get();
+            case PROXY:
+                return isProxyInitBusy.get();
+            default:
+                throw new IllegalArgumentException("Passed service type is unsupported");
+        }
+    }
 }

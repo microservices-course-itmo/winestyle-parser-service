@@ -1,5 +1,7 @@
 package com.wine.to.up.winestyle.parser.service.service.implementation.document;
 
+import com.wine.to.up.winestyle.parser.service.service.UnstableLoader;
+import com.wine.to.up.winestyle.parser.service.service.WebPageLoader;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
 import org.springframework.stereotype.Service;
@@ -19,13 +21,20 @@ import java.util.stream.Collectors;
 
 @Service
 @Slf4j
-public class ProxyService {
+public final class ProxyService {
+    private static final List<UnstableLoader> alive = new ArrayList<>();
+    private static WebPageLoader loader = new SimpleWebPageLoader();
+
+    private ProxyService() {
+
+    }
+
     private static Proxy convertProxy(String proxyAddress) {
         String[] addressParts = proxyAddress.split(":");
         return new java.net.Proxy(java.net.Proxy.Type.SOCKS, new InetSocketAddress(addressParts[0], Integer.parseInt(addressParts[1])));
     }
 
-    private List<String> getAllProxies() {
+    private static List<String> getAllProxies() {
         try {
             URL url = new URL("https://api.proxyscrape.com/?request=getproxies&proxytype=socks5&country=all");
             URLConnection connection = url.openConnection();
@@ -42,7 +51,7 @@ public class ProxyService {
         }
     }
 
-    private IUnstableLoader getProxyIfAlive(String proxyAddress, int maxTimeout) {
+    private static UnstableLoader getProxyIfAlive(String proxyAddress, int maxTimeout) {
         Proxy proxy = convertProxy(proxyAddress);
 
         try {
@@ -55,19 +64,19 @@ public class ProxyService {
         }
     }
 
-    public List<IUnstableLoader> getProxyLoaders(int maxTimeout) {
+    public static void initProxies(int maxTimeout) {
         log.info("Getting proxies");
-        List<IUnstableLoader> alive = new ArrayList<>();
 
-        List<Future<IUnstableLoader>> futures;
+        List<Future<UnstableLoader>> futures;
         List<String> proxyAddresses = getAllProxies();
         ExecutorService threadPool = Executors.newFixedThreadPool(proxyAddresses.size());
         log.info("Loaded list of {} proxies. Checking", proxyAddresses.size());
         futures = proxyAddresses.stream().map(proxyAddress -> CompletableFuture.supplyAsync(() -> getProxyIfAlive(proxyAddress, maxTimeout), threadPool)).collect(Collectors.toList());
 
-        for (Future<IUnstableLoader> future : futures) {
+        alive.clear();
+        for (Future<UnstableLoader> future : futures) {
             try {
-                IUnstableLoader proxyResult = future.get();
+                UnstableLoader proxyResult = future.get();
                 if (proxyResult != null) {
                     alive.add(proxyResult);
                 }
@@ -78,13 +87,12 @@ public class ProxyService {
             }
         }
         log.info("Got {} suitable proxies", alive.size());
-
-        return alive;
     }
 
-    public IWebPageLoader getLoader(int maxTimeout) {
-        SimpleWebPageLoader defaultLoader = new SimpleWebPageLoader();
-        List<IUnstableLoader> proxyLoaders = getProxyLoaders(maxTimeout);
-        return new MultiProxyLoader(defaultLoader, proxyLoaders);
+    public static WebPageLoader getLoader() {
+        if (!alive.isEmpty() && !(loader instanceof MultiProxyLoader)) {
+            loader = new MultiProxyLoader(new SimpleWebPageLoader(), alive);
+        }
+        return loader;
     }
 }

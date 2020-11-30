@@ -4,7 +4,6 @@ import com.wine.to.up.winestyle.parser.service.controller.exception.NoEntityExce
 import com.wine.to.up.winestyle.parser.service.domain.entity.Alcohol;
 import com.wine.to.up.winestyle.parser.service.domain.entity.ErrorOnSaving;
 import com.wine.to.up.winestyle.parser.service.repository.AlcoholRepository;
-
 import com.wine.to.up.winestyle.parser.service.repository.ErrorOnSavingRepository;
 import com.wine.to.up.winestyle.parser.service.service.RepositoryService;
 import lombok.RequiredArgsConstructor;

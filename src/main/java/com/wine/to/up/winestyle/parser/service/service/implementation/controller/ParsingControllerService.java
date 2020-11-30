@@ -5,6 +5,7 @@ import com.wine.to.up.winestyle.parser.service.controller.exception.ServiceIsBus
 import com.wine.to.up.winestyle.parser.service.service.WinestyleParserService;
 import com.wine.to.up.winestyle.parser.service.service.implementation.helpers.StatusService;
 import com.wine.to.up.winestyle.parser.service.service.implementation.helpers.enums.AlcoholType;
+import com.wine.to.up.winestyle.parser.service.service.implementation.helpers.enums.City;
 import com.wine.to.up.winestyle.parser.service.service.implementation.helpers.enums.ServiceType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,28 +24,41 @@ public class ParsingControllerService {
     private final WinestyleParserService alcoholParserService;
     private final StatusService statusService;
 
+    @Value("${spring.jsoup.scraping.winestyle-main-msk-url}")
+    private String mskUrl;
+    @Value("${spring.jsoup.scraping.winestyle-main-spb-url}")
+    private String spbUrl;
     @Value("${spring.jsoup.scraping.winestyle-wine-part-url}")
-    private String WINE_URL;
+    private String wineUrl;
     @Value("${spring.jsoup.scraping.winestyle-sparkling-part-url}")
-    private String SPARKLING_URL;
+    private String sparklingUrl;
 
-    private ImmutableMap<AlcoholType, String> SUPPORTED_ALCOHOL_URLS;
+    private ImmutableMap<City, String> supportedCityUrls;
+    private ImmutableMap<AlcoholType, String> supportedAlcoholUrls;
 
     @PostConstruct
     private void populateUrl() {
-        SUPPORTED_ALCOHOL_URLS = ImmutableMap.<AlcoholType, String>builder()
-                .put(AlcoholType.WINE, WINE_URL)
-                .put(AlcoholType.SPARKLING, SPARKLING_URL)
+        supportedCityUrls = ImmutableMap.<City, String>builder()
+                .put(City.MSK, mskUrl)
+                .put(City.SPB, spbUrl)
+                .build();
+        supportedAlcoholUrls = ImmutableMap.<AlcoholType, String>builder()
+                .put(AlcoholType.WINE, wineUrl)
+                .put(AlcoholType.SPARKLING, sparklingUrl)
                 .build();
     }
 
     // Start parsing job in a separate thread
-    public void startParsingJob(AlcoholType alcoholType) throws ServiceIsBusyException {
+    public void startParsingJob(City city, AlcoholType alcoholType) throws ServiceIsBusyException {
         if (statusService.tryBusy(ServiceType.PARSER)) {
-            log.info("Started parsing of {} via /winestyle/api/parse/{}", alcoholType, alcoholType);
+            log.info("Started parsing of {} via /winestyle/api/parse/{}/{}", alcoholType, city, alcoholType);
             new Thread(() -> {
+                alcoholParserService.setAlcoholType(alcoholType);
+                alcoholParserService.setMainPageUrl(supportedCityUrls.get(city));
                 try {
-                    alcoholParserService.parseBuildSave(SUPPORTED_ALCOHOL_URLS.get(alcoholType), alcoholType);
+                    alcoholParserService.parseBuildSave(supportedAlcoholUrls.get(alcoholType));
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
                 } finally {
                     statusService.release(ServiceType.PARSER);
                 }

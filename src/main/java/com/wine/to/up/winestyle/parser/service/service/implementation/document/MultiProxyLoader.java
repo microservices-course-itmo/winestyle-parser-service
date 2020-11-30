@@ -1,24 +1,25 @@
 package com.wine.to.up.winestyle.parser.service.service.implementation.document;
 
+import com.wine.to.up.winestyle.parser.service.service.UnstableLoader;
+import com.wine.to.up.winestyle.parser.service.service.WebPageLoader;
 import org.jsoup.nodes.Document;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.List;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
-public class MultiProxyLoader implements IWebPageLoader {
-    private static Iterator<IUnstableLoader> iterator;
-    private final List<IUnstableLoader> loaderList;
-    private final IWebPageLoader defaultLoader;
+public class MultiProxyLoader implements WebPageLoader {
+    private static Iterator<UnstableLoader> iterator;
+    private final ConcurrentLinkedQueue<UnstableLoader> loaderList;
+    private final WebPageLoader defaultLoader;
 
-    public MultiProxyLoader(IWebPageLoader defaultLoader, Collection<IUnstableLoader> proxyLoaders) {
+    public MultiProxyLoader(WebPageLoader defaultLoader, Collection<UnstableLoader> proxyLoaders) {
         this.defaultLoader = defaultLoader;
-        loaderList = new ArrayList<>(proxyLoaders);
+        loaderList = new ConcurrentLinkedQueue<>(proxyLoaders);
     }
 
-    private synchronized IUnstableLoader getNextProxy() {
+    private synchronized UnstableLoader getNextProxy() {
         if (loaderList.isEmpty()) return null;
         if (iterator == null || !iterator.hasNext()) {
             iterator = loaderList.iterator();
@@ -27,8 +28,8 @@ public class MultiProxyLoader implements IWebPageLoader {
         return iterator.next();
     }
 
-    private synchronized IWebPageLoader getNextWorking() {
-        IUnstableLoader loader;
+    private synchronized WebPageLoader getNextWorking() {
+        UnstableLoader loader;
         while (true) {
             loader = getNextProxy();
             if (loader == null) return defaultLoader;
@@ -39,7 +40,7 @@ public class MultiProxyLoader implements IWebPageLoader {
 
     @Override
     public Document getDocument(String url) throws IOException {
-        IWebPageLoader pageLoader = getNextWorking();
+        WebPageLoader pageLoader = getNextWorking();
         return pageLoader.getDocument(url);
     }
 }

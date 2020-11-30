@@ -4,8 +4,10 @@ import com.wine.to.up.winestyle.parser.service.controller.exception.ServiceIsBus
 import com.wine.to.up.winestyle.parser.service.service.implementation.controller.MainControllerService;
 import com.wine.to.up.winestyle.parser.service.service.implementation.controller.ParsingControllerService;
 import com.wine.to.up.winestyle.parser.service.service.implementation.helpers.enums.AlcoholType;
+import com.wine.to.up.winestyle.parser.service.service.implementation.helpers.enums.City;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -16,30 +18,33 @@ public class AlcoholParsingScheduler {
     private final ParsingControllerService parsingControllerService;
     private final MainControllerService mainControllerService;
 
-    @Scheduled(cron = "${spring.task.scheduling.cron-expression}")
+    @Value("${spring.jsoup.connection.timeout}")
+    private int timeout;
+
+    @Scheduled(cron = "${spring.task.scheduling.rate.parser.cron}")
     public void onScheduleParseWine() throws InterruptedException {
         try {
-            parsingControllerService.startParsingJob(AlcoholType.WINE);
+            parsingControllerService.startParsingJob(City.SPB, AlcoholType.WINE);
         } catch (ServiceIsBusyException e) {
             Thread.sleep(3600000);
             onScheduleParseWine();
         }
     }
 
-    @Scheduled(cron = "${spring.task.scheduling.cron-expression}")
+    @Scheduled(cron = "${spring.task.scheduling.rate.parser.cron}")
     public void onScheduleParseSparkling() throws InterruptedException {
         try {
-            parsingControllerService.startParsingJob(AlcoholType.SPARKLING);
+            parsingControllerService.startParsingJob(City.SPB, AlcoholType.SPARKLING);
         } catch (ServiceIsBusyException e) {
             Thread.sleep(3600000);
             onScheduleParseSparkling();
         }
     }
 
-    @Scheduled(fixedRate = 3600000)
+    @Scheduled(fixedRateString = "${spring.task.scheduling.rate.proxy.fixed}")
     public void onScheduleLoadProxies() {
         try {
-            mainControllerService.startProxiesInitJob(60000);
+            mainControllerService.startProxiesInitJob(timeout * 1000);
         } catch (ServiceIsBusyException e) {
             log.info("Scheduled proxy initialization job is rejected. {}", e.getMessage());
         }

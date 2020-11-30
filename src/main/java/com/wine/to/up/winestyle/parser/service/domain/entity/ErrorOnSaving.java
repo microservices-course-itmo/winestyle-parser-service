@@ -1,6 +1,9 @@
 package com.wine.to.up.winestyle.parser.service.domain.entity;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import javax.persistence.*;
 import java.sql.Timestamp;
@@ -77,7 +80,7 @@ public class ErrorOnSaving {
     private String volume;
 
     @Column(columnDefinition = "TEXT")
-    private String strength;
+    private Float strength;
 
     @Column(columnDefinition = "TEXT")
     private String sugar;
@@ -125,7 +128,7 @@ public class ErrorOnSaving {
                 .country(alcohol.getCountry())
                 .region(alcohol.getRegion())
                 .volume(alcohol.getVolume() == null ? null : alcohol.getVolume().toString())
-                .strength(alcohol.getStrength() == null ? null : alcohol.getStrength().toString())
+                .strength(alcohol.getStrength())
                 .sugar(alcohol.getSugar())
                 .price(alcohol.getPrice() == null ? null : alcohol.getPrice().toString())
                 .grape(alcohol.getGrape())

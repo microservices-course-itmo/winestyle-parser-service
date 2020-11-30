@@ -1,14 +1,20 @@
 package com.wine.to.up.winestyle.parser.service.service.implementation.parser.parsing;
 
-import com.wine.to.up.winestyle.parser.service.service.ParsingService;
+import com.wine.to.up.winestyle.parser.service.service.Parser;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.nodes.Element;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
+
+import java.util.Optional;
 
 @Slf4j
 @Component
-public class AlcoholParsing implements ParsingService {
+@Scope(BeanDefinition.SCOPE_PROTOTYPE)
+public class AlcoholParser implements Parser {
     @Setter
     private Element productBlock;
     @Setter
@@ -21,6 +27,46 @@ public class AlcoholParsing implements ParsingService {
     private Element articlesBlock;
     @Setter
     private Element descriptionBlock;
+
+    @Value("${spring.jsoup.parsing.css.query.name}")
+    private String nameElementCssQuery;
+    @Value("${spring.jsoup.parsing.css.query.url}")
+    private String urlElementCssQuery;
+    @Value("${spring.jsoup.parsing.css.query.image-url}")
+    private String imageUrlElementCssQuery;
+    @Value("${spring.jsoup.parsing.css.query.price}")
+    private String priceElementCssQuery;
+    @Value("${spring.jsoup.parsing.css.query.winestyle-rating}")
+    private String winestyleRatingElementCssQuery;
+    @Value("${spring.jsoup.parsing.css.query.volume}")
+    private String volumeElementCssQuery;
+    @Value("${spring.jsoup.parsing.css.query.manufacturer}")
+    private String manufacturerElementCssQuery;
+    @Value("${spring.jsoup.parsing.css.query.brand}")
+    private String brandElementCssQuery;
+    @Value("${spring.jsoup.parsing.css.query.country}")
+    private String countryElementCssQuery;
+    @Value("${spring.jsoup.parsing.css.query.strength}")
+    private String strengthElementCssQuery;
+    @Value("${spring.jsoup.parsing.css.query.grape}")
+    private String grapeElementCssQuery;
+    @Value("${spring.jsoup.parsing.css.query.type}")
+    private String typeElementCssQuery;
+    @Value("${spring.jsoup.parsing.css.query.taste}")
+    private String tasteElementCssQuery;
+    @Value("${spring.jsoup.parsing.css.query.aroma}")
+    private String aromaElementCssQuery;
+    @Value("${spring.jsoup.parsing.css.query.food-pairing}")
+    private String foodPairingCssQuery;
+    @Value("${spring.jsoup.parsing.css.query.description}")
+    private String descriptionCssQuery;
+
+    @Value("${spring.jsoup.parsing.css.attr.name}")
+    private String namePropertyCssAttr;
+    @Value("${spring.jsoup.parsing.css.attr.image-url}")
+    private String imageUrlPropertyCssAttr;
+    @Value("${spring.jsoup.parsing.css.attr.winestyle-rating}")
+    private String winestyleRatingPropertyCssAttr;
 
     private String name;
     private String url;
@@ -37,8 +83,8 @@ public class AlcoholParsing implements ParsingService {
      */
     @Override
     public String parseName() {
-        Element nameElement = productBlock.selectFirst(".title");
-        name = nameElement.attr("data-prodname");
+        Element nameElement = productBlock.selectFirst(nameElementCssQuery);
+        name = nameElement.attr(namePropertyCssAttr);
         return name;
     }
 
@@ -49,221 +95,8 @@ public class AlcoholParsing implements ParsingService {
      */
     @Override
     public String parseUrl() {
-        url = productBlock.selectFirst("a").attr("href");
+        url = productBlock.selectFirst(urlElementCssQuery).attr("href");
         return url;
-    }
-
-    /**
-     * Парсер картинки.
-     *
-     * @return Ссылка на картинку, которую мы достали или Null, если картинки нет.
-     */
-    @Override
-    public String parseImageUrl() {
-        try {
-            Element imageElement = leftBlock.selectFirst("a.img-container");
-            return imageElement.attr("href");
-        } catch (NullPointerException ex) {
-            log.warn("{}: product's image is not specified", url);
-            return null;
-        }
-    }
-
-    /**
-     * Парсер винограда, свойство: год сбора.
-     *
-     * @return Год сбора ИЛИ null, если его нет.
-     */
-    @Override
-    public Integer parseCropYear() {
-        String[] titleInfo = name.split(",? ");
-        // Checks each word in the name for year format matching
-        for (String word : titleInfo) {
-            if (word.matches("^\\d{4}$")) {
-                return Integer.parseInt(word);
-            }
-        }
-        log.warn("{}: product's crop year is not specified", url);
-        return null;
-    }
-
-    /**
-     * Парсер цены вина.
-     *
-     * @return Стоимость вина ИЛИ null, если её нет.
-     */
-    @Override
-    public Float parsePrice() {
-        try {
-            String priceValue = productBlock.selectFirst(".price").ownText();
-            priceValue = priceValue.replace(" ", "");
-            return Float.parseFloat(priceValue);
-        } catch (Exception ex) {
-            log.warn("{}: product's price is not specified", url);
-            return null;
-        }
-    }
-
-    /**
-     * Парсер рейтинга вина.
-     *
-     * @return Рейтинг вина ИЛИ null, если его нет.
-     */
-    @Override
-    public Float parseWinestyleRating() {
-        try {
-            String rating = infoContainer.selectFirst(".info-container meta[itemprop=ratingValue]").attr("content");
-            return Float.parseFloat(rating) / 2.f;
-        } catch (Exception ex) {
-            log.warn("{}: product's winestyle's rating is not specified", url);
-            return null;
-        }
-    }
-
-    /**
-     * Парсер объема.
-     *
-     * @return Объем в мл ИЛИ null, если его нет.
-     */
-    @Override
-    public Float parseVolume() {
-        try {
-            Element volumeElement = infoContainer.selectFirst("label");
-            String volumeValue = volumeElement.ownText();
-            volumeValue = volumeValue.replaceAll("\\s[мл]+", "");
-
-            float volume = Float.parseFloat(volumeValue);
-            volume = (volume % 1 == 0) ? volume / 1000 : volume;
-
-            return volume;
-        } catch (NullPointerException ex) {
-            log.warn("{}: product's volume is not specified", url);
-            return null;
-        }
-    }
-
-    /**
-     * Парсер производителя вина.
-     *
-     * @return Производитель ИЛИ null, если его нет.
-     */
-    @Override
-    public String parseManufacturer() {
-        try {
-            Element manufacturerElement = listDescription.selectFirst("span:contains(Производитель:)");
-            Element manufacturerParent = manufacturerElement.parent();
-            manufacturerElement.remove();
-            String manufacturer = manufacturerParent.text();
-            manufacturerParent.remove();
-            return manufacturer;
-        } catch (NullPointerException ex) {
-            log.warn("{}: product's manufacturer is not specified", url);
-            return null;
-        }
-    }
-
-    /**
-     * Парсер бренда вина.
-     *
-     * @return Бренд ИЛИ null, если его нет.
-     */
-    @Override
-    public String parseBrand() {
-        try {
-            Element brandElement = listDescription.selectFirst("span:contains(Бренд:)");
-            Element brandParent = brandElement.parent();
-            brandElement.remove();
-            String brand = brandParent.text();
-            brandParent.remove();
-            return brand;
-        } catch (NullPointerException ex) {
-            log.warn("{}: product's brand is not specified", url);
-            return null;
-        }
-    }
-
-    /**
-     * Парсер страны происхождения винограда.
-     *
-     * @return Страна ИЛИ Null, если свойства нет.
-     */
-    @Override
-    public String parseCountry() {
-        try {
-            Element countryElement = listDescription.selectFirst("span:contains(Регион:)");
-            Element countryParent = countryElement.parent();
-            countryElement.remove();
-            String countryAndRegion = countryParent.text();
-            countryParent.remove();
-            int indexOfDelim = countryAndRegion.indexOf(", ");
-            if (indexOfDelim >= 0) {
-                String country = countryAndRegion.substring(0, indexOfDelim);
-                region = countryAndRegion.substring(indexOfDelim + 2);
-                return country;
-            } else {
-                isRegionPresented = false;
-                return countryAndRegion;
-            }
-        } catch (NullPointerException ex) {
-            log.warn("{}: product's country and region are not specified", url);
-            return null;
-        }
-    }
-
-    /**
-     * Парсер регионов происхождения винограда.
-     *
-     * @return Регионы ИЛИ Null, если свойства нет.
-     */
-    @Override
-    public String parseRegion() {
-        if (isRegionPresented) {
-            return region;
-        } else {
-            log.warn("{}: product's region is not specified", url);
-            isRegionPresented = true;
-            return null;
-        }
-    }
-
-    /**
-     * Парсер крепости вина.
-     *
-     * @return Крепость ИЛИ null, если свойства нет.
-     */
-    @Override
-    public Float parseStrength() {
-        try {
-            Element strengthElement = listDescription.selectFirst("span:contains(Крепость:)");
-            Element strengthParent = strengthElement.parent();
-            strengthElement.remove();
-            String strength = strengthParent.text();
-            strengthParent.remove();
-            return Float.parseFloat(strength.substring(0, strength.length() - 1));
-        } catch (Exception ex) {
-            log.warn("{}: product's strength is not specified", url);
-            return null;
-        }
-    }
-
-    /**
-     * Парсер сорта винограда.
-     *
-     * @return Объединенная строка сортов винограда ИЛИ null, если их нет.
-     */
-    @Override
-    public String parseGrape() {
-        try {
-            Element grapeElement = listDescription.selectFirst("span:contains(Сорт винограда:)");
-            Element grapeParent = grapeElement.parent();
-            grapeElement.remove();
-            String grape = grapeParent.text();
-            grapeParent.remove();
-            return grape;
-        } catch (NullPointerException ex) {
-            log.warn("{}: product's grape sort is not specified", url);
-            return null;
-        }
     }
 
     /**
@@ -274,7 +107,7 @@ public class AlcoholParsing implements ParsingService {
     @Override
     public String parseType(boolean isSpakrling) {
         try {
-            Element typeAndColorElement = listDescription.selectFirst("span:matches(([Вв]ино)[:/].*)");
+            Element typeAndColorElement = listDescription.selectFirst(typeElementCssQuery);
             Element typeAndColorParent = typeAndColorElement.parent();
             typeAndColorElement.remove();
             String typeColorSugar = typeAndColorParent.text();
@@ -287,27 +120,250 @@ public class AlcoholParsing implements ParsingService {
         } catch (NullPointerException e) {
             isColorPresented = false;
             isSugarPresented = false;
-            log.warn("{}: product's type, color and sugar are not specified", url);
-            return null;
+
+            log.warn("{}: product's color and sugar are not specified", url);
+
+            if (isSpakrling) {
+                if (region.equals("Шампань")) {
+                    return "Шампанское";
+                } else {
+                    return "Игристое";
+                }
+            } else {
+                return "Вино";
+            }
+        }
+    }
+
+    /**
+     * Парсер картинки.
+     *
+     * @return Ссылка на картинку, которую мы достали или Null, если картинки нет.
+     */
+    @Override
+    public Optional<String> parseImageUrl() {
+        try {
+            Element imageElement = leftBlock.selectFirst(imageUrlElementCssQuery);
+            return Optional.of(imageElement.attr(imageUrlPropertyCssAttr));
+        } catch (NullPointerException ex) {
+            log.warn("{}: product's image is not specified", url);
+            return Optional.empty();
+        }
+    }
+
+    /**
+     * Парсер винограда, свойство: год сбора.
+     *
+     * @return Год сбора ИЛИ null, если его нет.
+     */
+    @Override
+    public Optional<Integer> parseCropYear() {
+        String[] titleInfo = name.split(",? ");
+        // Checks each word in the name for year format matching
+        for (String word : titleInfo) {
+            if (word.matches("^\\d{4}$")) {
+                return Optional.of(Integer.parseInt(word));
+            }
+        }
+        log.warn("{}: product's crop year is not specified", url);
+        return Optional.empty();
+    }
+
+    /**
+     * Парсер цены вина.
+     *
+     * @return Стоимость вина ИЛИ null, если её нет.
+     */
+    @Override
+    public Optional<Float> parsePrice() {
+        try {
+            String priceValue = productBlock.selectFirst(priceElementCssQuery).ownText();
+            priceValue = priceValue.replace(" ", "");
+            return Optional.of(Float.parseFloat(priceValue));
+        } catch (Exception ex) {
+            log.warn("{}: product's price is not specified", url);
+            return Optional.empty();
+        }
+    }
+
+    /**
+     * Парсер рейтинга вина.
+     *
+     * @return Рейтинг вина ИЛИ null, если его нет.
+     */
+    @Override
+    public Optional<Float> parseWinestyleRating() {
+        try {
+            String rating = infoContainer.selectFirst(winestyleRatingElementCssQuery).attr(winestyleRatingPropertyCssAttr);
+            return Optional.of(Float.parseFloat(rating) / 2.f);
+        } catch (Exception ex) {
+            log.warn("{}: product's winestyle's rating is not specified", url);
+            return Optional.empty();
+        }
+    }
+
+    /**
+     * Парсер объема.
+     *
+     * @return Объем в мл ИЛИ null, если его нет.
+     */
+    @Override
+    public Optional<Float> parseVolume() {
+        try {
+            Element volumeElement = infoContainer.selectFirst(volumeElementCssQuery);
+            String volumeValue = volumeElement.ownText();
+            volumeValue = volumeValue.replaceAll("\\s[мл]+", "");
+
+            float volume = Float.parseFloat(volumeValue);
+            volume = (volume % 1 == 0) ? volume / 1000 : volume;
+
+            return Optional.of(volume);
+        } catch (NullPointerException ex) {
+            log.warn("{}: product's volume is not specified", url);
+            return Optional.empty();
+        }
+    }
+
+    /**
+     * Парсер производителя вина.
+     *
+     * @return Производитель ИЛИ null, если его нет.
+     */
+    @Override
+    public Optional<String> parseManufacturer() {
+        try {
+            Element manufacturerElement = listDescription.selectFirst(manufacturerElementCssQuery);
+            Element manufacturerParent = manufacturerElement.parent();
+            manufacturerElement.remove();
+            String manufacturer = manufacturerParent.text();
+            manufacturerParent.remove();
+            return Optional.of(manufacturer);
+        } catch (NullPointerException ex) {
+            log.warn("{}: product's manufacturer is not specified", url);
+            return Optional.empty();
+        }
+    }
+
+    /**
+     * Парсер бренда вина.
+     *
+     * @return Бренд ИЛИ null, если его нет.
+     */
+    @Override
+    public Optional<String> parseBrand() {
+        try {
+            Element brandElement = listDescription.selectFirst(brandElementCssQuery);
+            Element brandParent = brandElement.parent();
+            brandElement.remove();
+            String brand = brandParent.text();
+            brandParent.remove();
+            return Optional.of(brand);
+        } catch (NullPointerException ex) {
+            log.warn("{}: product's brand is not specified", url);
+            return Optional.empty();
+        }
+    }
+
+    /**
+     * Парсер страны происхождения винограда.
+     *
+     * @return Страна ИЛИ Null, если свойства нет.
+     */
+    @Override
+    public Optional<String> parseCountry() {
+        try {
+            Element countryElement = listDescription.selectFirst(countryElementCssQuery);
+            Element countryParent = countryElement.parent();
+            countryElement.remove();
+            String countryAndRegion = countryParent.text();
+            countryParent.remove();
+            int indexOfDelim = countryAndRegion.indexOf(", ");
+            if (indexOfDelim >= 0) {
+                String country = countryAndRegion.substring(0, indexOfDelim);
+                region = countryAndRegion.substring(indexOfDelim + 2);
+                return Optional.of(country);
+            } else {
+                isRegionPresented = false;
+                return Optional.of(countryAndRegion);
+            }
+        } catch (NullPointerException ex) {
+            log.warn("{}: product's country and region are not specified", url);
+            return Optional.empty();
+        }
+    }
+
+    /**
+     * Парсер регионов происхождения винограда.
+     *
+     * @return Регионы ИЛИ Null, если свойства нет.
+     */
+    @Override
+    public Optional<String> parseRegion() {
+        if (isRegionPresented) {
+            return Optional.of(region);
+        } else {
+            log.warn("{}: product's region is not specified", url);
+            isRegionPresented = true;
+            return Optional.empty();
+        }
+    }
+
+    /**
+     * Парсер крепости вина.
+     *
+     * @return Крепость ИЛИ null, если свойства нет.
+     */
+    @Override
+    public Optional<Float> parseStrength() {
+        try {
+            Element strengthElement = listDescription.selectFirst(strengthElementCssQuery);
+            Element strengthParent = strengthElement.parent();
+            strengthElement.remove();
+            String strength = strengthParent.text();
+            strengthParent.remove();
+            return Optional.of(Float.parseFloat(strength.substring(0, strength.length() - 1)));
+        } catch (Exception ex) {
+            log.warn("{}: product's strength is not specified", url);
+            return Optional.empty();
+        }
+    }
+
+    /**
+     * Парсер сорта винограда.
+     *
+     * @return Объединенная строка сортов винограда ИЛИ null, если их нет.
+     */
+    @Override
+    public Optional<String> parseGrape() {
+        try {
+            Element grapeElement = listDescription.selectFirst(grapeElementCssQuery);
+            Element grapeParent = grapeElement.parent();
+            grapeElement.remove();
+            String grape = grapeParent.text();
+            grapeParent.remove();
+            return Optional.of(grape);
+        } catch (NullPointerException ex) {
+            log.warn("{}: product's grape sort is not specified", url);
+            return Optional.empty();
         }
     }
 
     @Override
-    public String parseColor() {
+    public Optional<String> parseColor() {
         if (isColorPresented) {
             int indexOfDelim = colorAndSugar.indexOf(", ");
             if (indexOfDelim >= 0) {
                 String color = colorAndSugar.substring(0, indexOfDelim);
                 colorAndSugar = colorAndSugar.substring(indexOfDelim + 2);
-                return color.substring(0, 1).toUpperCase() + color.substring(1);
+                return Optional.of(color.substring(0, 1).toUpperCase() + color.substring(1));
             } else {
                 isSugarPresented = false;
-                return colorAndSugar.substring(0, 1).toUpperCase() + colorAndSugar.substring(1);
+                return Optional.of(colorAndSugar.substring(0, 1).toUpperCase() + colorAndSugar.substring(1));
             }
         } else {
             log.warn("{}: sparkling's color is not specified", url);
             isColorPresented = true;
-            return null;
+            return Optional.empty();
         }
     }
 
@@ -317,13 +373,13 @@ public class AlcoholParsing implements ParsingService {
      * @return Сладость/сухость ИЛИ Null, если свойства нет.
      */
     @Override
-    public String parseSugar() {
+    public Optional<String> parseSugar() {
         if (isSugarPresented) {
-            return colorAndSugar;
+            return Optional.of(colorAndSugar);
         } else {
             log.warn("{}: product's sugar is not specified", url);
             isSugarPresented = true;
-            return null;
+            return Optional.empty();
         }
     }
 
@@ -333,13 +389,13 @@ public class AlcoholParsing implements ParsingService {
      * @return Вкус вина ИЛИ null, если нет его описания.
      */
     @Override
-    public String parseTaste() {
+    public Optional<String> parseTaste() {
         try {
-            Element tasteElement = articlesBlock.selectFirst("span:contains(Вкус)").nextElementSibling();
-            return tasteElement.text();
+            Element tasteElement = articlesBlock.selectFirst(tasteElementCssQuery).nextElementSibling();
+            return Optional.of(tasteElement.text());
         } catch (NullPointerException ex) {
             log.warn("{}: product's taste is not specified", url);
-            return null;
+            return Optional.empty();
         }
     }
 
@@ -349,13 +405,13 @@ public class AlcoholParsing implements ParsingService {
      * @return Аромат ИЛИ null, если нет его описания.
      */
     @Override
-    public String parseAroma() {
+    public Optional<String> parseAroma() {
         try {
-            Element aromaElement = articlesBlock.selectFirst("span:contains(Аром)").nextElementSibling();
-            return aromaElement.text();
+            Element aromaElement = articlesBlock.selectFirst(aromaElementCssQuery).nextElementSibling();
+            return Optional.of(aromaElement.text());
         } catch (NullPointerException ex) {
             log.warn("{}: product's aroma is not specified", url);
-            return null;
+            return Optional.empty();
         }
     }
 
@@ -365,13 +421,13 @@ public class AlcoholParsing implements ParsingService {
      * @return Строку сочетаний ИЛИ null, если их нет.
      */
     @Override
-    public String parseFoodPairing() {
+    public Optional<String> parseFoodPairing() {
         try {
-            Element foodPairingElement = articlesBlock.selectFirst("span:contains(Гаст)").nextElementSibling();
-            return foodPairingElement.text();
+            Element foodPairingElement = articlesBlock.selectFirst(foodPairingCssQuery).nextElementSibling();
+            return Optional.of(foodPairingElement.text());
         } catch (NullPointerException ex) {
             log.warn("{}: product's food pairing is not specified", url);
-            return null;
+            return Optional.empty();
         }
     }
 
@@ -381,13 +437,13 @@ public class AlcoholParsing implements ParsingService {
      * @return Описание, которое мы достали, ИЛИ Null, если описания нет.
      */
     @Override
-    public String parseDescription() {
+    public Optional<String> parseDescription() {
         try {
-            Element descriptionElement = descriptionBlock.selectFirst(".description-block");
-            return descriptionElement.text();
+            Element descriptionElement = descriptionBlock.selectFirst(descriptionCssQuery);
+            return Optional.of(descriptionElement.text());
         } catch (NullPointerException ex) {
             log.warn("{}: product's description is not specified", url);
-            return null;
+            return Optional.empty();
         }
     }
 
@@ -400,7 +456,7 @@ public class AlcoholParsing implements ParsingService {
             isSugarPresented = false;
             type = typeColorSugar;
         }
-        if (type.matches("^(?!C|Пол|Р|Б|О|Г|Кра).+")) {
+        if (type.matches("^(?!С|Пол|Р|Б|О|Г|Кра).+")) {
             colorAndSugar = typeColorSugar.substring(indexOfDelim + 2);
             isColorPresented = false;
             return type;
