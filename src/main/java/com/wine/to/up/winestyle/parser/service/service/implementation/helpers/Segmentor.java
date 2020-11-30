@@ -6,13 +6,17 @@ import lombok.experimental.Accessors;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
 /**
  * Класс, отвечающий за разделение данных со страницы
  */
 @Service
-public class SegmentationService {
+@Scope(BeanDefinition.SCOPE_PROTOTYPE)
+public class Segmentor {
     @Accessors(chain = true)
     @Setter
     private Document mainDocument;
@@ -23,31 +27,37 @@ public class SegmentationService {
     @Setter
     @Getter
     private Element productBlock;
-    private Element mainMainContent;
     private Element productMainContent;
     private Element infoContainer;
 
-    /**
-     * Добавление данных
-     *
-     * @return
-     */
-    public SegmentationService setMainMainContent() {
-        mainMainContent = mainDocument.selectFirst(".main-content");
-        return this;
-    }
+    @Value("${spring.jsoup.segmenting.css.query.main-main}")
+    private String mainMainElementCssQuery;
+    @Value("${spring.jsoup.segmenting.css.query.product-main}")
+    private String productMainElementCssQuery;
+    @Value("${spring.jsoup.segmenting.css.query.info}")
+    private String infoElementCssQuery;
+    @Value("${spring.jsoup.segmenting.css.query.list-description}")
+    private String listDescriptionElementCssQuery;
+    @Value("${spring.jsoup.segmenting.css.query.block-description}")
+    private String blockDescriptionElementCssQuery;
+    @Value("${spring.jsoup.segmenting.css.query.left-block}")
+    private String leftBlockElementCssQuery;
+    @Value("${spring.jsoup.segmenting.css.query.articles-block}")
+    private String articlesBlockElementCssQuery;
+    @Value("${spring.jsoup.segmenting.css.class.product}")
+    private String productElementClassName;
 
     public void setProductMainContent() {
-        productMainContent = productDocument.selectFirst(".main-content");
+        productMainContent = productDocument.selectFirst(productMainElementCssQuery);
     }
 
     /**
      * Разделение на элементы
      *
-     * @return
+     * @return Elements, содержащий элементы продуктов
      */
     public Elements breakDocumentIntoProductElements() {
-        return mainMainContent.getElementsByClass("item-block");
+        return mainDocument.selectFirst(mainMainElementCssQuery).getElementsByClass(productElementClassName);
     }
 
     /**
@@ -56,7 +66,7 @@ public class SegmentationService {
      * @return контейнер с информацией
      */
     public Element getInfoContainer() {
-        infoContainer = productBlock.selectFirst(".info-container");
+        infoContainer = productBlock.selectFirst(infoElementCssQuery);
         return infoContainer;
     }
 
@@ -66,7 +76,7 @@ public class SegmentationService {
      * @return из контейнера берется список описаний
      */
     public Element getListDescription() {
-        return infoContainer.selectFirst(".list-description");
+        return infoContainer.selectFirst(listDescriptionElementCssQuery);
     }
 
     /**
@@ -75,7 +85,7 @@ public class SegmentationService {
      * @return блок с картинкой
      */
     public Element getLeftBlock() {
-        return productMainContent.selectFirst(".left-aside");
+        return productMainContent.selectFirst(leftBlockElementCssQuery);
     }
 
     /**
@@ -84,7 +94,7 @@ public class SegmentationService {
      * @return блок с описанием
      */
     public Element getArticlesBlock() {
-        return productMainContent.selectFirst(".articles-col");
+        return productMainContent.selectFirst(articlesBlockElementCssQuery);
     }
 
     /**
@@ -93,6 +103,6 @@ public class SegmentationService {
      * @return описание
      */
     public Element getDescriptionBlock() {
-        return productMainContent.selectFirst(".articles-container.desc");
+        return productMainContent.selectFirst(blockDescriptionElementCssQuery);
     }
 }

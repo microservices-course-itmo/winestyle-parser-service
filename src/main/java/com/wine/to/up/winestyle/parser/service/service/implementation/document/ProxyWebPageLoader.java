@@ -1,28 +1,34 @@
 package com.wine.to.up.winestyle.parser.service.service.implementation.document;
 
+import com.wine.to.up.winestyle.parser.service.service.UnstableLoader;
+import lombok.RequiredArgsConstructor;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.net.Proxy;
 
-public class ProxyWebPageLoader implements IUnstableLoader {
+@Component
+@Scope(BeanDefinition.SCOPE_PROTOTYPE)
+@RequiredArgsConstructor
+public class ProxyWebPageLoader implements UnstableLoader {
     private final Proxy proxy;
     private int failuresCount;
-
-    public ProxyWebPageLoader(Proxy proxy) {
-        this.proxy = proxy;
-        failuresCount = 0;
-    }
+    @Value("${spring.jsoup.connection.timeout}")
+    private int timeout;
+    @Value("${spring.jsoup.connection.user-agent}")
+    private String userAgent;
 
     @Override
     public Document getDocument(String url) throws IOException {
         try {
             Document document = Jsoup.connect(url)
-                    .userAgent("Mozilla/5.0 (Windows NT 6.1; Win64; x64) "
-                            + "AppleWebKit/537.36 (KHTML, like Gecko) "
-                            + "Chrome/85.0.4183.121 "
-                            + "Safari/537.36")
+                    .userAgent(userAgent)
+                    .timeout(timeout * 1500)
                     .proxy(proxy)
                     .get();
             failuresCount = 0;
