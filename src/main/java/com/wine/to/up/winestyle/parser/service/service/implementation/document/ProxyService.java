@@ -5,6 +5,8 @@ import com.wine.to.up.winestyle.parser.service.service.WebPageLoader;
 import com.wine.to.up.winestyle.parser.service.service.implementation.helpers.ApplicationContextLocator;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
 import java.io.BufferedReader;
@@ -22,6 +24,7 @@ import java.util.stream.Collectors;
 
 @Service
 @Slf4j
+@Scope(BeanDefinition.SCOPE_PROTOTYPE)
 public final class ProxyService {
     private static final List<UnstableLoader> alive = new ArrayList<>();
     private static WebPageLoader loader = ApplicationContextLocator.getApplicationContext().getBean(SimpleWebPageLoader.class);
@@ -59,8 +62,8 @@ public final class ProxyService {
             Jsoup.connect("https://winestyle.ru/").proxy(proxy).timeout(maxTimeout).get();
 
             log.trace("{} OK", proxyAddress);
-            return new ProxyWebPageLoader(proxy);
-        } catch (Exception e) {
+            return ApplicationContextLocator.getApplicationContext().getBean(ProxyWebPageLoader.class, proxy);
+        } catch (IOException e) {
             return null;
         }
     }
@@ -92,7 +95,7 @@ public final class ProxyService {
 
     public static WebPageLoader getLoader() {
         if (!alive.isEmpty() && !(loader instanceof MultiProxyLoader)) {
-            loader = new MultiProxyLoader(new SimpleWebPageLoader(), alive);
+            loader = new MultiProxyLoader(loader, alive);
         }
         return loader;
     }
