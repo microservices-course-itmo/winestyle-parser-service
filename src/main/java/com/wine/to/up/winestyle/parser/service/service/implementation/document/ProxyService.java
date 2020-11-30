@@ -2,6 +2,7 @@ package com.wine.to.up.winestyle.parser.service.service.implementation.document;
 
 import com.wine.to.up.winestyle.parser.service.service.UnstableLoader;
 import com.wine.to.up.winestyle.parser.service.service.WebPageLoader;
+import com.wine.to.up.winestyle.parser.service.service.implementation.helpers.ApplicationContextLocator;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
 import org.springframework.stereotype.Service;
@@ -23,7 +24,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public final class ProxyService {
     private static final List<UnstableLoader> alive = new ArrayList<>();
-    private static WebPageLoader loader = new SimpleWebPageLoader();
+    private static WebPageLoader loader = ApplicationContextLocator.getApplicationContext().getBean(SimpleWebPageLoader.class);
 
     private ProxyService() {
 
