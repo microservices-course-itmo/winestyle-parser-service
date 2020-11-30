@@ -20,11 +20,7 @@ import java.net.SocketTimeoutException;
 public class Scraper {
     @Setter
     private int timeout = 0;
-    private final WebPageLoader loader;
-
-    public Scraper() {
-        loader = ProxyService.getLoader();
-    }
+    private final WebPageLoader loader = ProxyService.getLoader();
 
     /**
      * Достаем док из ссылки
