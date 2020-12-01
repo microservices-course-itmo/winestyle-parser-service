@@ -19,7 +19,7 @@ public class SimpleWebPageLoader implements WebPageLoader {
     public Document getDocument(String url) throws IOException {
         return Jsoup.connect(url)
                 .userAgent(userAgent)
-                .timeout(timeout * 1000)
+                .timeout(timeout)
                 .get();
     }
 
