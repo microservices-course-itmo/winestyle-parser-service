@@ -105,14 +105,14 @@ public class AlcoholParser implements Parser {
      * @return Тип напитка ИЛИ массив из двух Null, если свойств нет.
      */
     @Override
-    public String parseType(boolean isSpakrling) {
+    public String parseType(boolean isSparkling) {
         try {
             Element typeAndColorElement = listDescription.selectFirst(typeElementCssQuery);
             Element typeAndColorParent = typeAndColorElement.parent();
             typeAndColorElement.remove();
             String typeColorSugar = typeAndColorParent.text();
             typeAndColorParent.remove();
-            if (isSpakrling) {
+            if (isSparkling) {
                 return parseSparklingType(typeColorSugar);
             } else {
                 return parseWineType(typeColorSugar);
@@ -123,7 +123,7 @@ public class AlcoholParser implements Parser {
 
             log.warn("{}: product's color and sugar are not specified", url);
 
-            if (isSpakrling) {
+            if (isSparkling) {
                 if (region.equals("Шампань")) {
                     return "Шампанское";
                 } else {
