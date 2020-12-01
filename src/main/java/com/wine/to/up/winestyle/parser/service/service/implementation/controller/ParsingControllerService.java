@@ -1,6 +1,7 @@
 package com.wine.to.up.winestyle.parser.service.service.implementation.controller;
 
 import com.google.common.collect.ImmutableMap;
+import com.wine.to.up.winestyle.parser.service.components.WinestyleParserServiceMetricsCollector;
 import com.wine.to.up.winestyle.parser.service.controller.exception.ServiceIsBusyException;
 import com.wine.to.up.winestyle.parser.service.service.WinestyleParserService;
 import com.wine.to.up.winestyle.parser.service.service.implementation.helpers.StatusService;
@@ -23,6 +24,9 @@ import javax.annotation.PostConstruct;
 public class ParsingControllerService {
     private final WinestyleParserService alcoholParserService;
     private final StatusService statusService;
+
+    @Value("${spring.kafka.metrics.service-name}")
+    private String parserName;
 
     @Value("${spring.jsoup.scraping.winestyle-main-msk-url}")
     private String mskUrl;
@@ -52,6 +56,7 @@ public class ParsingControllerService {
     public void startParsingJob(City city, AlcoholType alcoholType) throws ServiceIsBusyException {
         if (statusService.tryBusy(ServiceType.PARSER)) {
             log.info("Started parsing of {} via /winestyle/api/parse/{}/{}", alcoholType, city, alcoholType);
+            WinestyleParserServiceMetricsCollector.incParsingStarted(parserName);
             new Thread(() -> {
                 alcoholParserService.setAlcoholType(alcoholType);
                 alcoholParserService.setMainPageUrl(supportedCityUrls.get(city));
@@ -61,6 +66,7 @@ public class ParsingControllerService {
                     Thread.currentThread().interrupt();
                 } finally {
                     statusService.release(ServiceType.PARSER);
+                    WinestyleParserServiceMetricsCollector.incParsingComplete(parserName);
                 }
             }).start();
         } else {

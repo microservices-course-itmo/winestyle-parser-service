@@ -3,6 +3,7 @@ package com.wine.to.up.winestyle.parser.service.service.implementation.parser;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.wine.to.up.commonlib.messaging.KafkaMessageSender;
 import com.wine.to.up.parser.common.api.schema.ParserApi;
+import com.wine.to.up.winestyle.parser.service.components.WinestyleParserServiceMetricsCollector;
 import com.wine.to.up.winestyle.parser.service.controller.exception.NoEntityException;
 import com.wine.to.up.winestyle.parser.service.domain.entity.Alcohol;
 import com.wine.to.up.winestyle.parser.service.service.Director;
@@ -43,6 +44,8 @@ public class ParserService implements WinestyleParserService {
 
     @Value("${spring.task.execution.pool.size}")
     private int maxThreadCount;
+    @Value("${spring.kafka.metrics.service-name}")
+    private String parserName;
 
     private final ThreadFactory parsingThreadFactory = new ThreadFactoryBuilder()
             .setNameFormat("Parsing-%d")
@@ -232,6 +235,7 @@ public class ParserService implements WinestyleParserService {
                                 .addWines(director.getKafkaMessageBuilder())
                                 .build()
                 );
+                WinestyleParserServiceMetricsCollector.incPublished(parserName);
             }
         }
 
