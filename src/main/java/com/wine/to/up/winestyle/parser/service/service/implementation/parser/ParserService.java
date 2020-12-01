@@ -81,13 +81,13 @@ public class ParserService implements WinestyleParserService {
 
         log.warn("Starting parsing of {}", alcoholType);
 
-        List<Future<Integer>> unparsedFutures = new ArrayList<>();
+        List<Future<Integer>> parseFutures = new ArrayList<>();
 
         try {
             while (true) {
                 log.info("Parsing: {}", currentDoc.location());
 
-                unparsedFutures.add(parsingThreadPool.submit(new MainJob(currentDoc, start, productScraper)));
+                parseFutures.add(parsingThreadPool.submit(new MainJob(currentDoc, start, productScraper)));
 
                 if (nextPageNumber > pagesNumber) {
                     break;
@@ -106,9 +106,9 @@ public class ParserService implements WinestyleParserService {
 
             int unparsed = 0;
 
-            for (Future<Integer> unparsedFuture : unparsedFutures) {
+            for (Future<Integer> future : parseFutures) {
                 try {
-                    unparsed += unparsedFuture.get();
+                    unparsed += future.get();
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                 } catch (ExecutionException e) {
