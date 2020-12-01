@@ -44,7 +44,7 @@ public class AlcoholParsingScheduler {
     @Scheduled(fixedRateString = "${spring.task.scheduling.rate.proxy.fixed}")
     public void onScheduleLoadProxies() {
         try {
-            mainControllerService.startProxiesInitJob(timeout * 1000);
+            mainControllerService.startProxiesInitJob(timeout);
         } catch (ServiceIsBusyException e) {
             log.info("Scheduled proxy initialization job is rejected. {}", e.getMessage());
         }
