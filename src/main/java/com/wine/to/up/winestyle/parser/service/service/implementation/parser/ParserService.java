@@ -1,11 +1,14 @@
 package com.wine.to.up.winestyle.parser.service.service.implementation.parser;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import com.wine.to.up.commonlib.annotations.InjectEventLogger;
+import com.wine.to.up.commonlib.logging.EventLogger;
 import com.wine.to.up.commonlib.messaging.KafkaMessageSender;
 import com.wine.to.up.parser.common.api.schema.ParserApi;
 import com.wine.to.up.winestyle.parser.service.components.WinestyleParserServiceMetricsCollector;
 import com.wine.to.up.winestyle.parser.service.controller.exception.NoEntityException;
 import com.wine.to.up.winestyle.parser.service.domain.entity.Alcohol;
+import com.wine.to.up.winestyle.parser.service.logging.NotableEvents;
 import com.wine.to.up.winestyle.parser.service.service.Director;
 import com.wine.to.up.winestyle.parser.service.service.Parser;
 import com.wine.to.up.winestyle.parser.service.service.RepositoryService;
@@ -51,6 +54,10 @@ public class ParserService implements WinestyleParserService {
             .setNameFormat("Parsing-%d")
             .build();
     private ExecutorService parsingThreadPool;
+
+    @SuppressWarnings("unused")
+    @InjectEventLogger
+    private EventLogger eventLogger;
 
     private int parsed = 0;
 
@@ -165,6 +172,7 @@ public class ParserService implements WinestyleParserService {
                 }
             }
 
+            eventLogger.info(NotableEvents.I_WINE_PAGE_PARSED, currentDoc.location());
             countParsed(parsedNow);
             logParsed(alcoholType, start);
             return unparsed;
@@ -235,8 +243,9 @@ public class ParserService implements WinestyleParserService {
                                 .addWines(director.getKafkaMessageBuilder())
                                 .build()
                 );
-                WinestyleParserServiceMetricsCollector.incPublished(parserName);
             }
+            WinestyleParserServiceMetricsCollector.incPublished(parserName);
+            eventLogger.info(NotableEvents.I_WINE_DETAILS_PARSED, mainPageUrl + productUrl);
         }
 
         private void prepareParsingService(Parser parser) {
