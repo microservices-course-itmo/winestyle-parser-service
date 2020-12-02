@@ -1,5 +1,6 @@
 package com.wine.to.up.winestyle.parser.service.service.implementation.document;
 
+import lombok.extern.slf4j.Slf4j;
 import org.jsoup.nodes.Document;
 
 import java.io.IOException;
@@ -8,6 +9,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
+@Slf4j
 public class MultiProxyLoader implements IWebPageLoader {
     private static Iterator<IUnstableLoader> iterator;
     private final List<IUnstableLoader> loaderList;
@@ -31,8 +33,14 @@ public class MultiProxyLoader implements IWebPageLoader {
         IUnstableLoader loader;
         while (true) {
             loader = getNextProxy();
-            if (loader == null) return defaultLoader;
-            if (loader.getFailuresCount() > 2) loaderList.remove(loader);
+            if (loader == null) {
+                log.info("Unable to find working proxy. Returning default loader.");
+                return defaultLoader;
+            }
+            if (loader.getFailuresCount() > 2) {
+                loaderList.remove(loader);
+                log.info("Removing loader form list. " + loaderList.size() + " loaders left.");
+            }
             else return loader;
         }
     }

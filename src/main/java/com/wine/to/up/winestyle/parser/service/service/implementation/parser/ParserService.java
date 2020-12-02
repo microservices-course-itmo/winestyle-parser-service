@@ -9,6 +9,7 @@ import com.wine.to.up.winestyle.parser.service.service.ParserDirectorService;
 import com.wine.to.up.winestyle.parser.service.service.ParsingService;
 import com.wine.to.up.winestyle.parser.service.service.RepositoryService;
 import com.wine.to.up.winestyle.parser.service.service.WinestyleParserService;
+import com.wine.to.up.winestyle.parser.service.service.implementation.document.ProxyService;
 import com.wine.to.up.winestyle.parser.service.service.implementation.document.ScrapingService;
 import com.wine.to.up.winestyle.parser.service.service.implementation.document.ScrapingServicePooledObjectFactory;
 import com.wine.to.up.winestyle.parser.service.service.implementation.helpers.SegmentationService;
@@ -58,7 +59,7 @@ public class ParserService implements WinestyleParserService {
         scrapingServiceGenericObjectPoolConfig.setMaxIdle(MAX_THREAD_COUNT);
 
         scrapingServiceObjectPool = new GenericObjectPool<>(
-                new ScrapingServicePooledObjectFactory(),
+                new ScrapingServicePooledObjectFactory(new ProxyService()),
                 scrapingServiceGenericObjectPoolConfig
         );
 
@@ -74,7 +75,7 @@ public class ParserService implements WinestyleParserService {
     public void poolsRenew() {
         if (scrapingServiceObjectPool.isClosed()) {
             scrapingServiceObjectPool = new GenericObjectPool<>(
-                    new ScrapingServicePooledObjectFactory(),
+                    new ScrapingServicePooledObjectFactory(new ProxyService()),
                     scrapingServiceGenericObjectPoolConfig
             );
             try {
@@ -108,6 +109,8 @@ public class ParserService implements WinestyleParserService {
 
         int pagesNumber = getPagesNumber(currentDoc);
         int nextPageNumber = 2;
+
+        scrapingService.initProxy(10000);
 
         log.warn("Starting parsing of {}", alcoholType);
 
