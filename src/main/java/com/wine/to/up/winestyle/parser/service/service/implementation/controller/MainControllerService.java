@@ -2,10 +2,10 @@ package com.wine.to.up.winestyle.parser.service.service.implementation.controlle
 
 import com.wine.to.up.winestyle.parser.service.controller.exception.*;
 import com.wine.to.up.winestyle.parser.service.domain.entity.Alcohol;
+import com.wine.to.up.winestyle.parser.service.service.RepositoryService;
 import com.wine.to.up.winestyle.parser.service.service.implementation.document.ProxyService;
 import com.wine.to.up.winestyle.parser.service.service.implementation.helpers.StatusService;
 import com.wine.to.up.winestyle.parser.service.service.implementation.helpers.enums.ServiceType;
-import com.wine.to.up.winestyle.parser.service.service.implementation.repository.AlcoholRepositoryService;
 import com.wine.to.up.winestyle.parser.service.utility.CSVUtility;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -26,7 +26,7 @@ import java.util.*;
 @RequiredArgsConstructor
 @Slf4j
 public class MainControllerService {
-    private final AlcoholRepositoryService alcoholRepositoryService;
+    private final RepositoryService repositoryService;
     private final StatusService statusService;
 
     @SneakyThrows({IntrospectionException.class, InvocationTargetException.class})
@@ -43,7 +43,7 @@ public class MainControllerService {
             }
             try {
                 String getterName = "get" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
-                Alcohol alcohol = alcoholRepositoryService.getByID(id);
+                Alcohol alcohol = repositoryService.getByID(id);
                 pd = new PropertyDescriptor(fieldName, Alcohol.class, getterName, null);
                 res.put(fieldName, pd.getReadMethod().invoke(alcohol));
             } catch (IllegalAccessException e) {
@@ -60,7 +60,7 @@ public class MainControllerService {
         File file = new File("data.csv");
         if (!file.exists()) {
             try {
-                CSVUtility.toCsvFile(alcoholRepositoryService);
+                CSVUtility.toCsvFile(repositoryService);
             } catch (IOException e) {
                 log.error("Cannot write database to file (GET /winestyle/api/alcohol/csv)");
                 throw new FileCreationExeption();
