@@ -20,5 +20,4 @@ public class ApplicationContextLocator {
     public void setApplicationContext(ApplicationContext applicationContext) {
         ApplicationContextLocator.applicationContext = applicationContext;
     }
-
 }
