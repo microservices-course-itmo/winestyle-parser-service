@@ -2,8 +2,6 @@ package com.wine.to.up.winestyle.parser.service.service.implementation.document;
 
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
 import java.io.BufferedReader;
@@ -22,9 +20,6 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 public class ProxyService {
-    @Autowired
-    private Environment env;
-
     private static Proxy convertProxy(String proxyAddress) {
         String[] addressParts = proxyAddress.split(":");
         return new java.net.Proxy(java.net.Proxy.Type.SOCKS, new InetSocketAddress(addressParts[0], Integer.parseInt(addressParts[1])));
