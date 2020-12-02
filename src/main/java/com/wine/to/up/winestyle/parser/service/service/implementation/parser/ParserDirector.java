@@ -9,6 +9,7 @@ import lombok.Getter;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
+import java.util.Optional;
 
 @Service
 public class ParserDirector implements Director {
@@ -176,90 +177,39 @@ public class ParserDirector implements Director {
 
         kafkaMessageBuilder.setSparkling(alcoholType == AlcoholType.SPARKLING);
 
-        String imageUrl = source.getImageUrl();
-        if (imageUrl != null) {
-            kafkaMessageBuilder.setImage(imageUrl);
-        }
+        Optional.ofNullable(source.getImageUrl()).ifPresent(kafkaMessageBuilder::setImage);
 
-        Integer cropYear = source.getCropYear();
-        if (cropYear != null) {
-            kafkaMessageBuilder.setYear(cropYear);
-        }
+        Optional.ofNullable(source.getCropYear()).ifPresent(kafkaMessageBuilder::setYear);
 
-        Float price = source.getPrice();
-        if (price != null) {
-            kafkaMessageBuilder.setNewPrice(price);
-        }
+        Optional.ofNullable(source.getPrice()).ifPresent(kafkaMessageBuilder::setNewPrice);
 
-        Float rating = source.getRating();
-        if (rating != null) {
-            kafkaMessageBuilder.setRating(rating);
-        }
+        Optional.ofNullable(source.getRating()).ifPresent(kafkaMessageBuilder::setRating);
 
-        String brand = source.getBrand();
-        if (brand != null) {
-            kafkaMessageBuilder.setBrand(brand);
-        }
+        Optional.ofNullable(source.getBrand()).ifPresent(kafkaMessageBuilder::setBrand);
 
-        String manufacturer = source.getManufacturer();
-        if (manufacturer != null) {
-            kafkaMessageBuilder.setManufacturer(manufacturer);
-        }
+        Optional.ofNullable(source.getManufacturer()).ifPresent(kafkaMessageBuilder::setManufacturer);
 
-        Float volume = source.getVolume();
-        if (volume != null) {
-            kafkaMessageBuilder.setCapacity(volume);
-        }
+        Optional.ofNullable(source.getVolume()).ifPresent(kafkaMessageBuilder::setCapacity);
 
-        Float strength = source.getStrength();
-        if (strength != null) {
-            kafkaMessageBuilder.setStrength(strength);
-        }
+        Optional.ofNullable(source.getStrength()).ifPresent(kafkaMessageBuilder::setStrength);
 
-        String grape = source.getGrape();
-        if (grape != null) {
-            kafkaMessageBuilder.addAllGrapeSort(Arrays.asList(grape.split(", ")));
-        }
+        Optional.ofNullable(source.getGrape()).ifPresent(grape -> kafkaMessageBuilder.addAllGrapeSort(Arrays.asList(grape.split(", "))));
 
-        String country = source.getCountry();
-        if (country != null) {
-            kafkaMessageBuilder.setCountry(country);
-        }
+        Optional.ofNullable(source.getCountry()).ifPresent(kafkaMessageBuilder::setCountry);
 
-        String region = source.getRegion();
-        if (region != null) {
-            kafkaMessageBuilder.addAllRegion(Arrays.asList(region.split(", ")));
-        }
+        Optional.ofNullable(source.getRegion()).ifPresent(region -> kafkaMessageBuilder.addAllRegion(Arrays.asList(region.split(", "))));
 
-        String color = source.getColor();
-        if (color != null) {
-            kafkaMessageBuilder.setColor(matchColorToValue(color));
-        }
+        Optional.ofNullable(source.getColor()).ifPresent(color -> kafkaMessageBuilder.setColor(matchColorToValue(color)));
 
-        String sugar = source.getSugar();
-        if (sugar != null) {
-            kafkaMessageBuilder.setSugar(matchSugarToValue(sugar));
-        }
+        Optional.ofNullable(source.getSugar()).ifPresent(sugar -> kafkaMessageBuilder.setSugar(matchSugarToValue(sugar)));
 
-        String taste = source.getTaste();
-        if (taste != null) {
-            kafkaMessageBuilder.setTaste(taste);
-        }
+        Optional.ofNullable(source.getTaste()).ifPresent(kafkaMessageBuilder::setTaste);
 
-        String aroma = source.getAroma();
-        if (aroma != null) {
-            kafkaMessageBuilder.setFlavor(aroma);
-        }
+        Optional.ofNullable(source.getAroma()).ifPresent(kafkaMessageBuilder::setFlavor);
 
-        String foodPairing = source.getFoodPairing();
-        if (foodPairing != null) {
-            kafkaMessageBuilder.setGastronomy(foodPairing);
-        }
+        Optional.ofNullable(source.getFoodPairing()).ifPresent(kafkaMessageBuilder::setGastronomy);
 
-        String description = source.getDescription();
-        if (description != null) {
-            kafkaMessageBuilder.setDescription(description);
-        }
+        Optional.ofNullable(source.getDescription()).ifPresent(kafkaMessageBuilder::setDescription);
 
         return kafkaMessageBuilder;
     }
