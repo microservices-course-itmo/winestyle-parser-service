@@ -1,4 +1,4 @@
-package com.wine.to.up.winestyle.parser.service;
+package excluded;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
