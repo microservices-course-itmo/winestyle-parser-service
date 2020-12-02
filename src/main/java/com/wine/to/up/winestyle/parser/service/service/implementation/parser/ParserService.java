@@ -197,7 +197,7 @@ public class ParserService implements WinestyleParserService {
             int parsedNow = 0;
             int unparsed = 0;
 
-            List<Pair<Future<?>, String>> parsingFutures = new ArrayList<>();
+            List<Pair<Future<Alcohol>, String>> parsingFutures = new ArrayList<>();
             ProductJob productJob;
             String productUrl;
             for (Element drink : alcohol) {
@@ -211,13 +211,14 @@ public class ParserService implements WinestyleParserService {
                 parsingFutures.add(new Pair<>(productPageParsingThreadPool.submit(productJob), productUrl));
             }
 
-            Pair<Future<?>, String> currentPair;
+            Pair<Future<Alcohol>, String> currentPair;
+            Alcohol result;
             for (int i = 0; i < alcohol.size(); i++) {
                 currentPair = parsingFutures.get(i);
                 productUrl = currentPair.getUrl();
                 try {
-                    currentPair.getParsingFuture().get();
-                    eventLogger.info(NotableEvents.I_WINE_DETAILS_PARSED, productUrl);
+                    result = currentPair.getParsingFuture().get();
+                    eventLogger.info(NotableEvents.I_WINE_DETAILS_PARSED, productUrl, result);
                     parsedNow += 1;
                 } catch (ExecutionException e) {
                     eventLogger.warn(NotableEvents.W_WINE_DETAILS_PARSING_FAILED, productUrl);
@@ -260,7 +261,7 @@ public class ParserService implements WinestyleParserService {
     }
 
     @RequiredArgsConstructor
-    private class ProductJob implements Runnable {
+    private class ProductJob implements Callable<Alcohol> {
         private final Element drink;
         private final Scraper scraper;
         private final Director director = new ParserDirector();
@@ -270,11 +271,13 @@ public class ParserService implements WinestyleParserService {
 
         @Override
         @Timed
-        public void run() {
+        public Alcohol call() {
             log.info("Now parsing url: {}", productUrl);
 
+            Alcohol alcohol;
+
             try {
-                Alcohol alcohol = alcoholRepositoryService.getByUrl(productUrl);
+                alcohol = alcoholRepositoryService.getByUrl(productUrl);
                 alcoholRepositoryService.updatePrice(parser.parsePrice().orElse(null), productUrl);
                 alcoholRepositoryService.updateRating(parser.parseWinestyleRating().orElse(null), productUrl);
 
@@ -296,7 +299,8 @@ public class ParserService implements WinestyleParserService {
 
                 prepareParsingService(product);
 
-                alcoholRepositoryService.add(director.makeAlcohol(parser, mainPageUrl, productUrl, alcoholType));
+                alcohol = director.makeAlcohol(parser, mainPageUrl, productUrl, alcoholType);
+                alcoholRepositoryService.add(alcohol);
 
                 kafkaMessageSender.sendMessage(
                         ParserApi.WineParsedEvent.newBuilder()
@@ -307,6 +311,8 @@ public class ParserService implements WinestyleParserService {
             }
             WinestyleParserServiceMetricsCollector.incPublished(parserName);
             WinestyleParserServiceMetricsCollector.sumDetailsParsing(parserName);
+
+            return alcohol;
         }
 
         private void prepareParsingService(Document doc) {
