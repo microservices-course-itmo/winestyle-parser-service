@@ -5,12 +5,15 @@ import com.wine.to.up.winestyle.parser.service.domain.entity.Alcohol;
 import com.wine.to.up.winestyle.parser.service.domain.entity.ErrorOnSaving;
 import com.wine.to.up.winestyle.parser.service.repository.AlcoholRepository;
 import com.wine.to.up.winestyle.parser.service.repository.ErrorOnSavingRepository;
+import com.wine.to.up.winestyle.parser.service.repository.TimingRepository;
 import com.wine.to.up.winestyle.parser.service.service.RepositoryService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 
@@ -23,6 +26,7 @@ import java.util.List;
 public class ApplicationRepositoryService implements RepositoryService {
     private final AlcoholRepository alcoholRepository;
     private final ErrorOnSavingRepository errorOnSavingRepository;
+    private final TimingRepository timingRepository;
 
     public void updatePrice(Float price, String url) throws NoEntityException {
         Alcohol alcohol = getByUrl(url);
@@ -114,5 +118,9 @@ public class ApplicationRepositoryService implements RepositoryService {
         return alcoholRepository.findById(id).orElseThrow(() ->
                 NoEntityException.createWith(Alcohol.class.getSimpleName().toLowerCase(), id, null)
         );
+    }
+
+    public long sinceLastSucceedParsing() {
+        return Duration.between(timingRepository.findFirstByOrderByLastSucceedDateDesc().getLastSucceedDate(), LocalDateTime.now()).toSeconds();
     }
 }

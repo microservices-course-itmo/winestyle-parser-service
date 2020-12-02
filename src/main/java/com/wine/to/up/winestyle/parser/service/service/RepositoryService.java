@@ -21,4 +21,6 @@ public interface RepositoryService {
     Alcohol getByUrl(String url) throws NoEntityException;
 
     Alcohol getByID(long id) throws NoEntityException;
+
+    long sinceLastSucceedParsing();
 }

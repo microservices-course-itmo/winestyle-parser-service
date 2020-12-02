@@ -19,6 +19,7 @@ import com.wine.to.up.winestyle.parser.service.service.implementation.helpers.Ma
 import com.wine.to.up.winestyle.parser.service.service.implementation.helpers.ProductBlockSegmentor;
 import com.wine.to.up.winestyle.parser.service.service.implementation.helpers.ProductPageSegmentor;
 import com.wine.to.up.winestyle.parser.service.service.implementation.helpers.enums.AlcoholType;
+import io.micrometer.core.annotation.Timed;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -104,6 +105,7 @@ public class ParserService implements WinestyleParserService {
         return Executors.newFixedThreadPool(maxThreadCount, threadFactory);
     }
 
+    @Timed
     @Override
     public void parseBuildSave(String alcoholUrlPart) throws InterruptedException {
         renewPools();
@@ -115,6 +117,7 @@ public class ParserService implements WinestyleParserService {
         Scraper productScraper = new Scraper();
 
         Document currentDoc = mainScraper.getJsoupDocument(alcoholUrl);
+        WinestyleParserServiceMetricsCollector.sumPageFetching(parserName);
         int pagesNumber = getPagesNumber(currentDoc);
         int nextPageNumber = 2;
 
@@ -134,12 +137,14 @@ public class ParserService implements WinestyleParserService {
 
                 currentDoc = mainScraper.getJsoupDocument(alcoholUrl + "?page=" + nextPageNumber);
 
+                WinestyleParserServiceMetricsCollector.sumPageFetching(parserName);
+
                 nextPageNumber++;
             }
         } finally {
             mainPageParsingThreadPool.shutdown();
 
-            mainPageParsingThreadPool.awaitTermination(timeout*1100, TimeUnit.MILLISECONDS);
+            mainPageParsingThreadPool.awaitTermination(timeout, TimeUnit.MILLISECONDS);
 
             log.info("Finished parsing of {} in {}", alcoholType, java.time.Duration.between((start), LocalDateTime.now()));
 
@@ -184,6 +189,7 @@ public class ParserService implements WinestyleParserService {
         /**
          * Парсер страницы с позициями
          */
+        @Timed
         @Override
         public Integer call() throws InterruptedException {
             Elements alcohol = mainPageSegmentor.extractProductElements(currentDoc);
@@ -222,6 +228,7 @@ public class ParserService implements WinestyleParserService {
             countParsed(parsedNow);
             logParsed(alcoholType, start);
             eventLogger.info(NotableEvents.I_WINE_PAGE_PARSED, currentDoc.location());
+            WinestyleParserServiceMetricsCollector.sumPageParsing(parserName);
             return unparsed;
         }
 
@@ -262,6 +269,7 @@ public class ParserService implements WinestyleParserService {
         private String productUrl;
 
         @Override
+        @Timed
         public void run() {
             log.info("Now parsing url: {}", productUrl);
 
@@ -278,12 +286,16 @@ public class ParserService implements WinestyleParserService {
                 );
             } catch (NoEntityException ex) {
                 Document product = null;
+
                 try {
                     product = scraper.getJsoupDocument(mainPageUrl + productUrl);
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                 }
+                WinestyleParserServiceMetricsCollector.sumDetailsFetching(parserName);
+
                 prepareParsingService(product);
+
                 alcoholRepositoryService.add(director.makeAlcohol(parser, mainPageUrl, productUrl, alcoholType));
 
                 kafkaMessageSender.sendMessage(
@@ -294,11 +306,14 @@ public class ParserService implements WinestyleParserService {
                 );
             }
             WinestyleParserServiceMetricsCollector.incPublished(parserName);
+            WinestyleParserServiceMetricsCollector.sumDetailsParsing(parserName);
         }
 
         private void prepareParsingService(Document doc) {
             ProductPageSegmentor productPageSegmentor = ApplicationContextLocator.getApplicationContext().getBean(ProductPageSegmentor.class);
+
             Element productPageMainContent = productPageSegmentor.extractProductPageMainContent(doc);
+
             parser.setListDescription(productBlockSegmentor.extractListDescription(drink));
             parser.setLeftBlock(productPageSegmentor.extractLeftBlock(productPageMainContent));
             parser.setArticlesBlock(productPageSegmentor.extractArticlesBlock(productPageMainContent));
