@@ -33,8 +33,14 @@ public class MultiProxyLoader implements IWebPageLoader {
         IUnstableLoader loader;
         while (true) {
             loader = getNextProxy();
-            if (loader == null) { log.info("Unable to find working proxy. Returning default loader."); return defaultLoader; }
-            if (loader.getFailuresCount() > 2) { loaderList.remove(loader); log.info("Removing loader form list. " + loaderList.size() + " loaders left."); }
+            if (loader == null) {
+                log.info("Unable to find working proxy. Returning default loader.");
+                return defaultLoader;
+            }
+            if (loader.getFailuresCount() > 2) {
+                loaderList.remove(loader);
+                log.info("Removing loader form list. " + loaderList.size() + " loaders left.");
+            }
             else return loader;
         }
     }
