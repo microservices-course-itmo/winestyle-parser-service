@@ -1,119 +1,130 @@
 package com.wine.to.up.winestyle.parser.service.service.implementation.controller;
 
+import com.wine.to.up.winestyle.parser.service.controller.exception.IllegalFieldException;
+import com.wine.to.up.winestyle.parser.service.controller.exception.NoEntityException;
 import com.wine.to.up.winestyle.parser.service.domain.entity.Alcohol;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
+import com.wine.to.up.winestyle.parser.service.service.implementation.repository.AlcoholRepositoryService;
 
-import java.beans.IntrospectionException;
-import java.beans.PropertyDescriptor;
-import java.lang.reflect.InvocationTargetException;
-import java.util.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
+
+import java.util.Map;
+import java.util.HashMap;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class MainControllerServiceTest {
 
-    static long id;
+    @InjectMocks
+    private MainControllerService mainControllerService;
+    @Mock
+    private AlcoholRepositoryService alcoholRepositoryService;
+
     static Alcohol alcohol;
     static String fieldsList;
     static String emptyFieldsList;
     static String wrongFieldsList;
+    static Map<String, Object> expectedFullMap;
 
-    @BeforeAll
-    static void setUp() {
-        id = 1L;
-        alcohol = new Alcohol();
+    @BeforeEach
+    void setUp() {
+        MockitoAnnotations.initMocks(this);
+        alcohol = Alcohol.builder()
+                .id(1L).name("test").type("wine").url("test").imageUrl("test").cropYear(1990)
+                .manufacturer("test").brand("test").color("test").country("test").region("test")
+                .volume(1F).strength(1F).sugar("test").price(1F)
+                .grape("test").taste("test").aroma("test").foodPairing("test")
+                .description("test").rating(1F)
+                .build();
         fieldsList = "id,name,type,url,imageUrl,cropYear,manufacturer,brand,color,country,region,volume" +
                 ",strength,sugar,price,grape,taste,aroma,foodPairing,description,rating";
         emptyFieldsList = "";
         wrongFieldsList = "name,wrong,bad";
+
+        expectedFullMap = new HashMap<>();
+        expectedFullMap.put("id", 1L);
+        expectedFullMap.put("name", "test");
+        expectedFullMap.put("type", "wine");
+        expectedFullMap.put("url", "test");
+        expectedFullMap.put("cropYear", 1990);
+        expectedFullMap.put("manufacturer", "test");
+        expectedFullMap.put("brand", "test");
+        expectedFullMap.put("color", "test");
+        expectedFullMap.put("country", "test");
+        expectedFullMap.put("region", "test");
+        expectedFullMap.put("volume", 1F);
+        expectedFullMap.put("strength", 1F);
+        expectedFullMap.put("sugar", "test");
+        expectedFullMap.put("price", 1F);
+        expectedFullMap.put("imageUrl", "test");
+        expectedFullMap.put("grape", "test");
+        expectedFullMap.put("taste", "test");
+        expectedFullMap.put("aroma", "test");
+        expectedFullMap.put("foodPairing", "test");
+        expectedFullMap.put("description", "test");
+        expectedFullMap.put("rating", 1F);
     }
 
     @Test
     void getAlcoholWithFields() {
-        Set<String> requiredFields = new HashSet<>(Arrays.asList(fieldsList.split(",")));
-        Map<String, Object> res = new HashMap<>();
-        PropertyDescriptor pd;
-        for (String fieldName : requiredFields) {
-            try {
-                Alcohol.class.getDeclaredField(fieldName);
-            } catch (NoSuchFieldException e) {
-                fail();
-            }
-            try {
-                String getterName = "get" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
-                pd = new PropertyDescriptor(fieldName, Alcohol.class, getterName, null);
-                res.put(fieldName, pd.getReadMethod().invoke(alcohol));
-            } catch (IllegalAccessException | IntrospectionException | InvocationTargetException e) {
-                fail();
-            }
+        Map<String, Object> fieldsValue = new HashMap<>();
+
+        try {
+            Mockito.when(alcoholRepositoryService.getByID(1L)).thenReturn(alcohol);
+        } catch (NoEntityException e) {
+            fail("Test failed! Cannot get alcohol by id");
         }
-        assertTrue(res.containsKey("id"));
-        assertTrue(res.containsKey("name"));
-        assertTrue(res.containsKey("type"));
-        assertTrue(res.containsKey("url"));
-        assertTrue(res.containsKey("imageUrl"));
-        assertTrue(res.containsKey("cropYear"));
-        assertTrue(res.containsKey("manufacturer"));
-        assertTrue(res.containsKey("brand"));
-        assertTrue(res.containsKey("color"));
-        assertTrue(res.containsKey("country"));
-        assertTrue(res.containsKey("region"));
-        assertTrue(res.containsKey("volume"));
-        assertTrue(res.containsKey("strength"));
-        assertTrue(res.containsKey("sugar"));
-        assertTrue(res.containsKey("price"));
-        assertTrue(res.containsKey("grape"));
-        assertTrue(res.containsKey("taste"));
-        assertTrue(res.containsKey("aroma"));
-        assertTrue(res.containsKey("foodPairing"));
-        assertTrue(res.containsKey("description"));
-        assertTrue(res.containsKey("rating"));
+
+        try {
+            fieldsValue = mainControllerService.getAlcoholWithFields(1L, fieldsList);
+        } catch (NoEntityException e) {
+            fail("Test failed! wrong entity id");
+        } catch (IllegalFieldException e) {
+            fail("Test failed! wrong fields request: " + fieldsList, e);
+        }
+
+        assertEquals(expectedFullMap, fieldsValue);
     }
 
     @Test
-    void getAlcoholWithOneRightTwoWrongFields() {
-        Set<String> requiredFields = new HashSet<>(Arrays.asList(wrongFieldsList.split(",")));
-        Map<String, Object> res = new HashMap<>();
-        PropertyDescriptor pd;
-        for (String fieldName : requiredFields) {
-            try {
-                Alcohol.class.getDeclaredField(fieldName);
-            } catch (NoSuchFieldException e) {
-                assertTrue(true);
-                continue;
-            }
-            try {
-                String getterName = "get" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
-                pd = new PropertyDescriptor(fieldName, Alcohol.class, getterName, null);
-                res.put(fieldName, pd.getReadMethod().invoke(alcohol));
-            } catch (IllegalAccessException | IntrospectionException | InvocationTargetException e) {
-                fail();
-            }
-            assertEquals("name", fieldName);
+    void getAlcoholWithWrongFields() {
+        Map<String, Object> fieldsValue = new HashMap<>();
+
+        try {
+            Mockito.when(alcoholRepositoryService.getByID(1L)).thenReturn(alcohol);
+        } catch (NoEntityException e) {
+            fail("Test failed! Cannot get alcohol by id");
         }
-        assertEquals(1, res.size());
+
+        try {
+            fieldsValue = mainControllerService.getAlcoholWithFields(1L, wrongFieldsList);
+        } catch (NoEntityException e) {
+            fail("Test failed! wrong entity id");
+        } catch (IllegalFieldException e) {
+            assertEquals(IllegalFieldException.class, e.getClass());
+        }
+        assertEquals(0, fieldsValue.size());
     }
 
     @Test
     void getAlcoholWithNoFields() {
-        Set<String> requiredFields = new HashSet<>(Arrays.asList(emptyFieldsList.split(",")));
-        Map<String, Object> res = new HashMap<>();
-        PropertyDescriptor pd;
-        for (String fieldName : requiredFields) {
-            try {
-                Alcohol.class.getDeclaredField(fieldName);
-            } catch (NoSuchFieldException e) {
-                continue ;
-            }
-            try {
-                String getterName = "get" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
-                pd = new PropertyDescriptor(fieldName, Alcohol.class, getterName, null);
-                res.put(fieldName, pd.getReadMethod().invoke(alcohol));
-            } catch (IllegalAccessException | IntrospectionException | InvocationTargetException e) {
-                fail();
-            }
+        try {
+            Mockito.when(alcoholRepositoryService.getByID(1L)).thenReturn(alcohol);
+        } catch (NoEntityException e) {
+            fail("Test failed! Cannot get alcohol by id");
         }
-        assertEquals(0, res.size());
+
+        try {
+            mainControllerService.getAlcoholWithFields(1L, emptyFieldsList);
+        } catch (NoEntityException e) {
+            fail("Test failed! wrong entity id");
+        } catch (IllegalFieldException e) {
+            assertEquals("The server reported: Alcohol entity has no field called .",
+                    e.getMessage());
+        }
     }
 }
