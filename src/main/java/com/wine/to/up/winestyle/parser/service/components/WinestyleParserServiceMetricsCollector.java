@@ -31,7 +31,7 @@ public final class WinestyleParserServiceMetricsCollector extends CommonMetricsC
 
     public static final String PARSER_NAME_TAG = "winestyle";
 
-    private WinestyleParserServiceMetricsCollector(@Value("${spring.kafka.metrics.service-name}") String serviceName) {
+    public WinestyleParserServiceMetricsCollector(@Value("${spring.kafka.metrics.service-name}") String serviceName) {
         super(serviceName);
     }
 
