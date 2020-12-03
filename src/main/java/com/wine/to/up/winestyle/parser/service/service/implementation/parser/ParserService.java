@@ -49,10 +49,10 @@ public class ParserService implements WinestyleParserService {
     @Setter
     private String mainPageUrl;
 
+    private static final String PARSING_PROCESS_DURATION_SUMMARY = "parsing_process_duration";
+
     @Value("${spring.task.execution.pool.size}")
     private int maxThreadCount;
-    @Value("${spring.kafka.metrics.service-name}")
-    private String parserName;
 
     private final ThreadFactory mainPageParsingThreadFactory = new ThreadFactoryBuilder()
             .setNameFormat("Main_parser-%d")
@@ -82,14 +82,14 @@ public class ParserService implements WinestyleParserService {
 
     @PostConstruct
     private void initPools() {
-        mainPageParsingThreadPool = initPool(maxThreadCount / 20, mainPageParsingThreadFactory);
+        mainPageParsingThreadPool = initPool(maxThreadCount, mainPageParsingThreadFactory);
         productPageParsingThreadPool = initPool(maxThreadCount, productPageParsingThreadFactory);
         urlFetchingThreadPool = initPool(maxThreadCount, urlFetchingThreadFactory);
     }
 
     private void renewPools() {
         if (mainPageParsingThreadPool.isShutdown()) {
-            mainPageParsingThreadPool = initPool(maxThreadCount / 20, mainPageParsingThreadFactory);
+            mainPageParsingThreadPool = initPool(maxThreadCount, mainPageParsingThreadFactory);
         }
 
         if (productPageParsingThreadPool.isShutdown()) {
@@ -105,7 +105,7 @@ public class ParserService implements WinestyleParserService {
         return Executors.newFixedThreadPool(maxThreadCount, threadFactory);
     }
 
-    @Timed
+    @Timed(value = PARSING_PROCESS_DURATION_SUMMARY, longTask = true)
     @Override
     public void parseBuildSave(String alcoholUrlPart) throws InterruptedException {
         renewPools();
@@ -116,8 +116,10 @@ public class ParserService implements WinestyleParserService {
         Scraper mainScraper = new Scraper();
         Scraper productScraper = new Scraper();
 
+        LocalDateTime mainFetchingStart = LocalDateTime.now();
         Document currentDoc = mainScraper.getJsoupDocument(alcoholUrl);
-        WinestyleParserServiceMetricsCollector.sumPageFetching(parserName);
+        WinestyleParserServiceMetricsCollector.sumPageFetchingDuration(mainFetchingStart, LocalDateTime.now());
+
         int pagesNumber = getPagesNumber(currentDoc);
         int nextPageNumber = 2;
 
@@ -135,9 +137,9 @@ public class ParserService implements WinestyleParserService {
                     break;
                 }
 
+                mainFetchingStart = LocalDateTime.now();
                 currentDoc = mainScraper.getJsoupDocument(alcoholUrl + "?page=" + nextPageNumber);
-
-                WinestyleParserServiceMetricsCollector.sumPageFetching(parserName);
+                WinestyleParserServiceMetricsCollector.sumPageFetchingDuration(mainFetchingStart, LocalDateTime.now());
 
                 nextPageNumber++;
             }
@@ -189,9 +191,9 @@ public class ParserService implements WinestyleParserService {
         /**
          * Парсер страницы с позициями
          */
-        @Timed
         @Override
         public Integer call() throws InterruptedException {
+            LocalDateTime mainParsingStart = LocalDateTime.now();
             Elements alcohol = mainPageSegmentor.extractProductElements(currentDoc);
 
             int parsedNow = 0;
@@ -200,6 +202,7 @@ public class ParserService implements WinestyleParserService {
             List<Pair<Future<Alcohol>, String>> parsingFutures = new ArrayList<>();
             ProductJob productJob;
             String productUrl;
+
             for (Element drink : alcohol) {
                 productJob = new ProductJob(drink, scraper);
                 try {
@@ -213,6 +216,7 @@ public class ParserService implements WinestyleParserService {
 
             Pair<Future<Alcohol>, String> currentPair;
             Alcohol result;
+
             for (int i = 0; i < alcohol.size(); i++) {
                 currentPair = parsingFutures.get(i);
                 productUrl = currentPair.getUrl();
@@ -226,10 +230,14 @@ public class ParserService implements WinestyleParserService {
                 }
             }
 
-            countParsed(parsedNow);
-            logParsed(alcoholType, start);
+            WinestyleParserServiceMetricsCollector.sumPageParsingDuration(mainParsingStart, LocalDateTime.now());
+
             eventLogger.info(NotableEvents.I_WINE_PAGE_PARSED, currentDoc.location());
-            WinestyleParserServiceMetricsCollector.sumPageParsing(parserName);
+
+            countParsed(parsedNow);
+
+            logParsed(alcoholType, start);
+
             return unparsed;
         }
 
@@ -270,47 +278,41 @@ public class ParserService implements WinestyleParserService {
         private String productUrl;
 
         @Override
-        @Timed
         public Alcohol call() {
             log.info("Now parsing url: {}", productUrl);
 
+            LocalDateTime productParsingStart = LocalDateTime.now();
+
             Alcohol alcohol;
+            ParserApi.WineParsedEvent.Builder kafkaMessageBuilder = ParserApi.WineParsedEvent.newBuilder().setShopLink(mainPageUrl);
 
             try {
                 alcohol = alcoholRepositoryService.getByUrl(productUrl);
                 alcoholRepositoryService.updatePrice(parser.parsePrice().orElse(null), productUrl);
                 alcoholRepositoryService.updateRating(parser.parseWinestyleRating().orElse(null), productUrl);
 
-                kafkaMessageSender.sendMessage(
-                        ParserApi.WineParsedEvent.newBuilder()
-                                .setShopLink(mainPageUrl)
-                                .addWines(director.fillKafkaMessageBuilder(alcohol, alcoholType))
-                                .build()
-                );
+                kafkaMessageSender.sendMessage(kafkaMessageBuilder.addWines(director.fillKafkaMessageBuilder(alcohol, alcoholType)).build());
             } catch (NoEntityException ex) {
                 Document product = null;
 
+                LocalDateTime detailsFetchingStart = LocalDateTime.now();
                 try {
                     product = scraper.getJsoupDocument(mainPageUrl + productUrl);
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                 }
-                WinestyleParserServiceMetricsCollector.sumDetailsFetching(parserName);
+                WinestyleParserServiceMetricsCollector.sumDetailsFetchingDuration(detailsFetchingStart, LocalDateTime.now());
 
                 prepareParsingService(product);
 
                 alcohol = director.makeAlcohol(parser, mainPageUrl, productUrl, alcoholType);
                 alcoholRepositoryService.add(alcohol);
 
-                kafkaMessageSender.sendMessage(
-                        ParserApi.WineParsedEvent.newBuilder()
-                                .setShopLink(mainPageUrl)
-                                .addWines(director.getKafkaMessageBuilder())
-                                .build()
-                );
+                kafkaMessageSender.sendMessage(kafkaMessageBuilder.addWines(director.getKafkaMessageBuilder()).build());
             }
-            WinestyleParserServiceMetricsCollector.incPublished(parserName);
-            WinestyleParserServiceMetricsCollector.sumDetailsParsing(parserName);
+
+            WinestyleParserServiceMetricsCollector.sumDetailsParsingDuration(productParsingStart, LocalDateTime.now());
+            WinestyleParserServiceMetricsCollector.incPublished();
 
             return alcohol;
         }
