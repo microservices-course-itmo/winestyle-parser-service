@@ -3,6 +3,7 @@ package com.wine.to.up.winestyle.parser.service.service.implementation.repositor
 import com.wine.to.up.winestyle.parser.service.controller.exception.NoEntityException;
 import com.wine.to.up.winestyle.parser.service.domain.entity.Alcohol;
 import com.wine.to.up.winestyle.parser.service.domain.entity.ErrorOnSaving;
+import com.wine.to.up.winestyle.parser.service.domain.entity.Timing;
 import com.wine.to.up.winestyle.parser.service.repository.AlcoholRepository;
 import com.wine.to.up.winestyle.parser.service.repository.ErrorOnSavingRepository;
 import com.wine.to.up.winestyle.parser.service.repository.TimingRepository;
@@ -28,6 +29,7 @@ public class ApplicationRepositoryService implements RepositoryService {
     private final ErrorOnSavingRepository errorOnSavingRepository;
     private final TimingRepository timingRepository;
 
+    @Override
     public void updatePrice(Float price, String url) throws NoEntityException {
         Alcohol alcohol = getByUrl(url);
         alcohol.setPrice(price);
@@ -41,6 +43,7 @@ public class ApplicationRepositoryService implements RepositoryService {
      * @param url    ссылка на напиток, у которого будем обновлять рейтинг
      * @throws NoEntityException при отсутствии сущности
      */
+    @Override
     public void updateRating(Float rating, String url) throws NoEntityException {
         Alcohol alcohol = getByUrl(url);
         alcohol.setRating(rating);
@@ -53,6 +56,7 @@ public class ApplicationRepositoryService implements RepositoryService {
      *
      * @return список напитков
      */
+    @Override
     public List<Alcohol> getAll() {
         return alcoholRepository.findAll();
     }
@@ -62,6 +66,7 @@ public class ApplicationRepositoryService implements RepositoryService {
      *
      * @return список вин
      */
+    @Override
     public List<Alcohol> getAllWines() {
         return alcoholRepository.findAllWines();
     }
@@ -71,6 +76,7 @@ public class ApplicationRepositoryService implements RepositoryService {
      *
      * @return список шампанского
      */
+    @Override
     public List<Alcohol> getAllSparkling() {
         return alcoholRepository.findAllSparkling();
     }
@@ -82,6 +88,7 @@ public class ApplicationRepositoryService implements RepositoryService {
      * @return напиток или NULL, если
      * @throws NoEntityException при отсутствии сущности
      */
+    @Override
     public Alcohol getByUrl(String url) throws NoEntityException {
         return alcoholRepository.findByUrl(url).orElseThrow(() ->
                 NoEntityException.createWith(Alcohol.class.getSimpleName().toLowerCase(), null, url)
@@ -93,6 +100,7 @@ public class ApplicationRepositoryService implements RepositoryService {
      *
      * @param alcohol напиток
      */
+    @Override
     public void add(Alcohol alcohol) {
         try {
             alcoholRepository.save(alcohol);
@@ -114,13 +122,25 @@ public class ApplicationRepositoryService implements RepositoryService {
      * @return напиток
      * @throws NoEntityException Если нет такого, кидаем эксепшен
      */
+    @Override
     public Alcohol getByID(long id) throws NoEntityException {
         return alcoholRepository.findById(id).orElseThrow(() ->
                 NoEntityException.createWith(Alcohol.class.getSimpleName().toLowerCase(), id, null)
         );
     }
 
-    public long sinceLastSucceedParsing() {
-        return Duration.between(timingRepository.findFirstByOrderByLastSucceedDateDesc().getLastSucceedDate(), LocalDateTime.now()).toSeconds();
+    @Override
+    public double sinceLastSucceedParsing() {
+        Timing lastSucceedDate = timingRepository.findFirstByOrderByIdDesc();
+        if(lastSucceedDate == null) {
+            return 0;
+        } else {
+            return Duration.between(lastSucceedDate.getParsingSucceedDate(), LocalDateTime.now()).toNanos() / 1e9d;
+        }
+    }
+
+    @Override
+    public void add(Timing succeedTiming) {
+        timingRepository.save(succeedTiming);
     }
 }

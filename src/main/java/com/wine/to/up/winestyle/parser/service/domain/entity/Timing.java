@@ -15,5 +15,12 @@ public class Timing {
     @Getter
     @NotNull
     @Column(columnDefinition = "TIMESTAMP")
-    private LocalDateTime lastSucceedDate;
+    private LocalDateTime parsingSucceedDate;
+
+    public Timing() {
+    }
+
+    public Timing(LocalDateTime parsingSucceedDate) {
+        this.parsingSucceedDate = parsingSucceedDate;
+    }
 }
