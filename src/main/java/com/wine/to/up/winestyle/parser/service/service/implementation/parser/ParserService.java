@@ -113,11 +113,10 @@ public class ParserService implements WinestyleParserService {
         LocalDateTime start = LocalDateTime.now();
         String alcoholUrl = mainPageUrl + alcoholUrlPart;
 
-        Scraper mainScraper = new Scraper();
-        Scraper productScraper = new Scraper();
+        Scraper scraper = new Scraper();
 
         LocalDateTime mainFetchingStart = LocalDateTime.now();
-        Document currentDoc = mainScraper.getJsoupDocument(alcoholUrl);
+        Document currentDoc = scraper.getJsoupDocument(alcoholUrl);
         WinestyleParserServiceMetricsCollector.sumPageFetchingDuration(mainFetchingStart, LocalDateTime.now());
 
         int pagesNumber = getPagesNumber(currentDoc);
@@ -131,14 +130,14 @@ public class ParserService implements WinestyleParserService {
             while (true) {
                 log.info("Parsing: {}", currentDoc.location());
 
-                parseFutures.add(mainPageParsingThreadPool.submit(new MainJob(currentDoc, start, productScraper)));
+                parseFutures.add(mainPageParsingThreadPool.submit(new MainJob(currentDoc, start, scraper)));
 
                 if (nextPageNumber > pagesNumber) {
                     break;
                 }
 
                 mainFetchingStart = LocalDateTime.now();
-                currentDoc = mainScraper.getJsoupDocument(alcoholUrl + "?page=" + nextPageNumber);
+                currentDoc = scraper.getJsoupDocument(alcoholUrl + "?page=" + nextPageNumber);
                 WinestyleParserServiceMetricsCollector.sumPageFetchingDuration(mainFetchingStart, LocalDateTime.now());
 
                 nextPageNumber++;
