@@ -3,19 +3,20 @@ package com.wine.to.up.winestyle.parser.service.service.implementation.controlle
 import com.google.common.collect.ImmutableMap;
 import com.wine.to.up.winestyle.parser.service.components.WinestyleParserServiceMetricsCollector;
 import com.wine.to.up.winestyle.parser.service.controller.exception.ServiceIsBusyException;
+import com.wine.to.up.winestyle.parser.service.domain.entity.Timing;
 import com.wine.to.up.winestyle.parser.service.service.RepositoryService;
 import com.wine.to.up.winestyle.parser.service.service.WinestyleParserService;
 import com.wine.to.up.winestyle.parser.service.service.implementation.helpers.StatusService;
 import com.wine.to.up.winestyle.parser.service.service.implementation.helpers.enums.AlcoholType;
 import com.wine.to.up.winestyle.parser.service.service.implementation.helpers.enums.City;
 import com.wine.to.up.winestyle.parser.service.service.implementation.helpers.enums.ServiceType;
-import io.micrometer.core.annotation.Timed;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
+import java.time.LocalDateTime;
 
 /**
  * Класс-парсер.
@@ -56,12 +57,11 @@ public class ParsingControllerService {
     }
 
     // Start parsing job in a separate thread
-    @Timed
     public void startParsingJob(City city, AlcoholType alcoholType) throws ServiceIsBusyException {
         if (statusService.tryBusy(ServiceType.PARSER)) {
             log.info("Started parsing of {} via /winestyle/api/parse/{}/{}", alcoholType, city, alcoholType);
-            WinestyleParserServiceMetricsCollector.incParsingStarted(parserName);
-            WinestyleParserServiceMetricsCollector.gaugeInProgress(parserName, 1);
+            WinestyleParserServiceMetricsCollector.incParsingStarted();
+            WinestyleParserServiceMetricsCollector.gaugeInProgress(1);
             new Thread(() -> {
                 alcoholParserService.setAlcoholType(alcoholType);
                 alcoholParserService.setMainPageUrl(supportedCityUrls.get(city));
@@ -70,10 +70,9 @@ public class ParsingControllerService {
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                 } finally {
-                    WinestyleParserServiceMetricsCollector.incParsingComplete(parserName);
-                    WinestyleParserServiceMetricsCollector.gaugeInProgress(parserName, 0);
-                    WinestyleParserServiceMetricsCollector.sumProcessParsing(parserName);
-                    WinestyleParserServiceMetricsCollector.gaugeSinceLastSucceed(parserName, repositoryService.sinceLastSucceedParsing());
+                    repositoryService.add(new Timing(LocalDateTime.now()));
+                    WinestyleParserServiceMetricsCollector.incParsingComplete();
+                    WinestyleParserServiceMetricsCollector.gaugeInProgress(0);
                     statusService.release(ServiceType.PARSER);
                 }
             }).start();
