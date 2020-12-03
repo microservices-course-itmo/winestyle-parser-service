@@ -2,11 +2,14 @@ package com.wine.to.up.winestyle.parser.service.service;
 
 import com.wine.to.up.winestyle.parser.service.controller.exception.NoEntityException;
 import com.wine.to.up.winestyle.parser.service.domain.entity.Alcohol;
+import com.wine.to.up.winestyle.parser.service.domain.entity.Timing;
 
 import java.util.List;
 
 public interface RepositoryService {
     void add(Alcohol alcohol);
+
+    void add(Timing succeedTiming);
 
     void updatePrice(Float price, String url) throws NoEntityException;
 
@@ -22,5 +25,5 @@ public interface RepositoryService {
 
     Alcohol getByID(long id) throws NoEntityException;
 
-    long sinceLastSucceedParsing();
+    double sinceLastSucceedParsing();
 }
