@@ -105,7 +105,7 @@ public class ParserService implements WinestyleParserService {
         return Executors.newFixedThreadPool(maxThreadCount, threadFactory);
     }
 
-    @Timed(value = PARSING_PROCESS_DURATION_SUMMARY, longTask = true)
+    @Timed(PARSING_PROCESS_DURATION_SUMMARY)
     @Override
     public void parseBuildSave(String alcoholUrlPart) throws InterruptedException {
         renewPools();
