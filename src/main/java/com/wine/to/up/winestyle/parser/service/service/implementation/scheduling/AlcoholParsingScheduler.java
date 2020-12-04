@@ -21,7 +21,7 @@ public class AlcoholParsingScheduler {
     @Value("${spring.jsoup.connection.timeout}")
     private int timeout;
 
-    @Scheduled(cron = "${spring.task.scheduling.rate.parser.cron}")
+    @Scheduled(cron = "${spring.task.scheduling.rate.parser.cron}", zone = "EAT")
     public void onScheduleParseWine() throws InterruptedException {
         try {
             parsingControllerService.startParsingJob(City.SPB, AlcoholType.WINE);
@@ -31,7 +31,7 @@ public class AlcoholParsingScheduler {
         }
     }
 
-    @Scheduled(cron = "${spring.task.scheduling.rate.parser.cron}")
+    @Scheduled(cron = "${spring.task.scheduling.rate.parser.cron}", zone = "EAT")
     public void onScheduleParseSparkling() throws InterruptedException {
         try {
             parsingControllerService.startParsingJob(City.SPB, AlcoholType.SPARKLING);
