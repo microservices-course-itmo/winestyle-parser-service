@@ -61,7 +61,7 @@ public class ParsingControllerService {
         if (statusService.tryBusy(ServiceType.PARSER)) {
             log.info("Started parsing of {} via /winestyle/api/parse/{}/{}", alcoholType, city, alcoholType);
             WinestyleParserServiceMetricsCollector.incParsingStarted();
-            WinestyleParserServiceMetricsCollector.gaugeInProgress(1);
+            WinestyleParserServiceMetricsCollector.updateInProgress(1);
             new Thread(() -> {
                 alcoholParserService.setAlcoholType(alcoholType);
                 alcoholParserService.setMainPageUrl(supportedCityUrls.get(city));
@@ -72,7 +72,7 @@ public class ParsingControllerService {
                 } finally {
                     repositoryService.add(new Timing(LocalDateTime.now()));
                     WinestyleParserServiceMetricsCollector.incParsingComplete();
-                    WinestyleParserServiceMetricsCollector.gaugeInProgress(0);
+                    WinestyleParserServiceMetricsCollector.updateInProgress(0);
                     statusService.release(ServiceType.PARSER);
                 }
             }).start();

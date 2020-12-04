@@ -13,6 +13,6 @@ public class AuxiliaryScheduler {
 
     @Scheduled(fixedRateString = "${spring.task.scheduling.rate.auxiliary.fixed}")
     public void onScheduleUpdateLastSucceed() {
-        WinestyleParserServiceMetricsCollector.gaugeSinceLastSucceed(repositoryService.sinceLastSucceedParsing());
+        WinestyleParserServiceMetricsCollector.updateSinceLastSucceed(repositoryService.sinceLastSucceedParsing());
     }
 }
