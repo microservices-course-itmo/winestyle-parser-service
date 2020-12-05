@@ -28,30 +28,54 @@ public class MainController {
     private final MainControllerService mainControllerService;
     private final RepositoryService alcoholRepositoryService;
 
+    /**
+     * Получение списка всего алкоголя.
+     * @return полный список алкоголя.
+     */
     @GetMapping(value = "/alcohol", produces = MediaType.APPLICATION_JSON_VALUE)
     public List<Alcohol> getAlcohol() {
         log.info("Returned all alcohol via GET /winestyle/api/alcohol");
         return alcoholRepositoryService.getAll();
     }
 
+    /**
+     * Получение списка всех вин.
+     * @return полный список вин.
+     */
     @GetMapping(value = "/wines", produces = MediaType.APPLICATION_JSON_VALUE)
     public List<Alcohol> getWines() {
         log.info("Returned all wines via GET /winestyle/api/wines");
         return alcoholRepositoryService.getAllWines();
     }
 
+    /**
+     * Получение списка всего шампанского.
+     * @return полный список шампанского.
+     */
     @GetMapping(value = "/sparkling", produces = MediaType.APPLICATION_JSON_VALUE)
     public List<Alcohol> getSparkling() {
         log.info("Returned all sparkling via GET /winestyle/api/sparkling");
         return alcoholRepositoryService.getAllSparkling();
     }
 
+    /**
+     * Получение алкоголя по url.
+     * @param url ссылка на алкоголь.
+     * @return сущность алкоголя.
+     * @throws NoEntityException 
+     */
     @GetMapping(value = "/alcohol/by-url", produces = MediaType.APPLICATION_JSON_VALUE)
     public Alcohol getAlcoholByUrl(@RequestParam String url) throws NoEntityException {
         log.info("Returned alcohol with url={} via GET /winestyle/api/alcohol/by-url/{}", url, url);
         return alcoholRepositoryService.getByUrl("/products/" + url);
     }
 
+    /**
+     * Получение алкоголя по id.
+     * @param id id нужного алкоголя.
+     * @return сущность алкоголя.
+     * @throws NoEntityException
+     */
     @GetMapping(value = "/alcohol/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public Alcohol getAlcoholById(@PathVariable long id) throws NoEntityException {
         log.info("Returned alcohol with id={} via GET /winestyle/api/alcohol/{}", id, id);
@@ -70,11 +94,21 @@ public class MainController {
         return mainControllerService.getAlcoholWithFields(id, fieldsList);
     }
 
+    /**
+     * Получение csv файла алкоголя.
+     * @param response файл алкоголя.
+     */
     @GetMapping(value = "/alcohol/csv")
     public void getAlcoholFile(HttpServletResponse response) {
         mainControllerService.getAlcoholFile(response);
     }
 
+    /**
+     * Проверка проксей. 
+     * @param maxTimeout максимальное время ожидания прокси.
+     * @return ответ о запуске. 
+     * @throws ServiceIsBusyException
+     */
     @PostMapping("/proxy/init")
     public ResponseEntity<String> initProxies(@RequestParam int maxTimeout) throws ServiceIsBusyException {
         mainControllerService.startProxiesInitJob(maxTimeout);
