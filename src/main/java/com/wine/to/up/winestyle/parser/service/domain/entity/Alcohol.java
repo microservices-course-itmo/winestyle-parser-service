@@ -4,6 +4,7 @@ import lombok.*;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
+import java.time.LocalDateTime;
 
 /**
  * <pre>
@@ -109,4 +110,8 @@ public class Alcohol {
     @Setter
     @Column
     private Float rating;
+
+    @NotNull
+    @Column(columnDefinition = "TIMESTAMP")
+    private LocalDateTime dateAdded;
 }

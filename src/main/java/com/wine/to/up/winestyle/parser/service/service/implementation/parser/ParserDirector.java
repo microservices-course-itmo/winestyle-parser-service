@@ -8,6 +8,7 @@ import com.wine.to.up.winestyle.parser.service.service.implementation.helpers.en
 import lombok.Getter;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Optional;
 
@@ -166,6 +167,8 @@ public class ParserDirector implements Director {
                 },
                 () -> entityBuilder.description(null)
         );
+
+        entityBuilder.dateAdded(LocalDateTime.now());
 
         return entityBuilder.build();
     }
