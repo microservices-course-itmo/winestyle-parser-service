@@ -11,8 +11,9 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
+import java.util.Optional;
+
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 
 class ParserDirectorTest {
@@ -159,6 +160,40 @@ class ParserDirectorTest {
                 .makeAlcohol(parser, "test", "test", AlcoholType.WINE);
         assertEquals(expectedColor, alcohol.getColor());
         assertEquals(expectedSugar, alcohol.getSugar());
+        assertEquals(expectedAlcohol.toString(), alcohol.toString());
+    }
+
+    @Test
+    void makeAlcoholNull() {
+        Mockito.when(parser.parseName()).thenReturn(String.valueOf(Optional.empty()));
+        Mockito.when(parser.parseAroma()).thenReturn(Optional.empty());
+        Mockito.when(parser.parseBrand()).thenReturn(Optional.empty());
+        Mockito.when(parser.parseCountry()).thenReturn(Optional.empty());
+        Mockito.when(parser.parseCropYear()).thenReturn(Optional.empty());
+        Mockito.when(parser.parseDescription()).thenReturn(Optional.empty());
+        Mockito.when(parser.parseFoodPairing()).thenReturn(Optional.empty());
+        Mockito.when(parser.parseGrape()).thenReturn(Optional.empty());
+        Mockito.when(parser.parseImageUrl()).thenReturn(Optional.empty());
+        Mockito.when(parser.parseManufacturer()).thenReturn(Optional.empty());
+        Mockito.when(parser.parsePrice()).thenReturn(Optional.empty());
+        Mockito.when(parser.parseRegion()).thenReturn(Optional.empty());
+        Mockito.when(parser.parseStrength()).thenReturn(Optional.empty());
+        Mockito.when(parser.parseTaste()).thenReturn(Optional.empty());
+        Mockito.when(parser.parseType(false)).thenReturn(String.valueOf(Optional.empty()));
+        Mockito.when(parser.parseUrl()).thenReturn(String.valueOf(Optional.empty()));
+        Mockito.when(parser.parseVolume()).thenReturn(Optional.empty());
+        Mockito.when(parser.parseWinestyleRating()).thenReturn(Optional.empty());
+        Mockito.when(parser.parseSugar()).thenReturn(Optional.empty());
+        Mockito.when(parser.parseColor()).thenReturn(Optional.empty());
+
+        Alcohol expectedAlcohol = Alcohol.builder().name(String.valueOf(Optional.empty()))
+                .type(String.valueOf(Optional.empty()))
+                .url("test").build();
+
+        Alcohol alcohol = parserDirector
+                .makeAlcohol(parser, "test", "test", AlcoholType.WINE);
+        assertEquals(null, alcohol.getColor());
+        assertEquals(null, alcohol.getSugar());
         assertEquals(expectedAlcohol.toString(), alcohol.toString());
     }
 
