@@ -1,24 +1,33 @@
 package com.wine.to.up.winestyle.parser.service.service.implementation.parser;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import com.wine.to.up.commonlib.annotations.InjectEventLogger;
+import com.wine.to.up.commonlib.logging.EventLogger;
 import com.wine.to.up.commonlib.messaging.KafkaMessageSender;
 import com.wine.to.up.parser.common.api.schema.ParserApi;
+import com.wine.to.up.winestyle.parser.service.components.WinestyleParserServiceMetricsCollector;
 import com.wine.to.up.winestyle.parser.service.controller.exception.NoEntityException;
 import com.wine.to.up.winestyle.parser.service.domain.entity.Alcohol;
-import com.wine.to.up.winestyle.parser.service.service.ParserDirectorService;
-import com.wine.to.up.winestyle.parser.service.service.ParsingService;
+import com.wine.to.up.winestyle.parser.service.logging.NotableEvents;
+import com.wine.to.up.winestyle.parser.service.service.Director;
+import com.wine.to.up.winestyle.parser.service.service.Parser;
 import com.wine.to.up.winestyle.parser.service.service.RepositoryService;
 import com.wine.to.up.winestyle.parser.service.service.WinestyleParserService;
-import com.wine.to.up.winestyle.parser.service.service.implementation.document.ScrapingService;
-import com.wine.to.up.winestyle.parser.service.service.implementation.document.ScrapingServicePooledObjectFactory;
-import com.wine.to.up.winestyle.parser.service.service.implementation.helpers.SegmentationService;
+import com.wine.to.up.winestyle.parser.service.service.implementation.document.Scraper;
+import com.wine.to.up.winestyle.parser.service.service.implementation.helpers.ApplicationContextLocator;
+import com.wine.to.up.winestyle.parser.service.service.implementation.helpers.MainPageSegmentor;
+import com.wine.to.up.winestyle.parser.service.service.implementation.helpers.ProductBlockSegmentor;
+import com.wine.to.up.winestyle.parser.service.service.implementation.helpers.ProductPageSegmentor;
+import com.wine.to.up.winestyle.parser.service.service.implementation.helpers.enums.AlcoholType;
+import io.micrometer.core.annotation.Timed;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.pool2.impl.GenericObjectPool;
-import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -26,124 +35,133 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.*;
 
 @Slf4j
 @Component
 @RequiredArgsConstructor
 public class ParserService implements WinestyleParserService {
-    private final ParsingService parsingService;
-    private final SegmentationService segmentationService;
+    private final KafkaMessageSender<ParserApi.WineParsedEvent> kafkaMessageSender;
     private final RepositoryService alcoholRepositoryService;
-    private final ParserDirectorService parserDirectorService;
-    private final KafkaMessageSender<ParserApi.WineParsedEvent> kafkaSendMessageService;
-    private final Alcohol.AlcoholBuilder builder = Alcohol.builder();
 
-    private final int MAX_THREAD_COUNT = 50;
+    @Setter
+    private AlcoholType alcoholType;
+    @Setter
+    private String mainPageUrl;
 
-    private final GenericObjectPoolConfig<ScrapingService> scrapingServiceGenericObjectPoolConfig =
-            new GenericObjectPoolConfig<>();
-    private GenericObjectPool<ScrapingService> scrapingServiceObjectPool;
+    private static final String PARSING_PROCESS_DURATION_SUMMARY = "parsing_process_duration";
 
-    private final ThreadFactory parsingThreadFactory = new ThreadFactoryBuilder()
-            .setNameFormat("Parsing-%d")
+    @Value("${spring.task.execution.pool.size}")
+    private int maxThreadCount;
+
+    private final ThreadFactory mainPageParsingThreadFactory = new ThreadFactoryBuilder()
+            .setNameFormat("Main_parser-%d")
             .build();
-    private ExecutorService parsingThreadPool;
+    private final ThreadFactory productPageParsingThreadFactory = new ThreadFactoryBuilder()
+            .setNameFormat("Prod_parser-%d")
+            .build();
+    private final ThreadFactory urlFetchingThreadFactory = new ThreadFactoryBuilder()
+            .setNameFormat("Url_fetching-%d")
+            .build();
+    private ExecutorService mainPageParsingThreadPool;
+    private ExecutorService productPageParsingThreadPool;
+    private ExecutorService urlFetchingThreadPool;
+
+
+    @SuppressWarnings("unused")
+    @InjectEventLogger
+    private EventLogger eventLogger;
 
     private int parsed = 0;
 
+    @Value("${spring.jsoup.scraping.proxy-timeout}")
+    private int timeout;
+
+    @Value("${spring.jsoup.pagination.css.query.main-bottom}")
+    private String paginationElementCssQuery;
+
     @PostConstruct
-    public void poolsInit() {
-        scrapingServiceGenericObjectPoolConfig.setMaxTotal(MAX_THREAD_COUNT);
-        scrapingServiceGenericObjectPoolConfig.setMaxIdle(MAX_THREAD_COUNT);
-
-        scrapingServiceObjectPool = new GenericObjectPool<>(
-                new ScrapingServicePooledObjectFactory(),
-                scrapingServiceGenericObjectPoolConfig
-        );
-
-        try {
-            scrapingServiceObjectPool.addObjects(MAX_THREAD_COUNT);
-        } catch (Exception e) {
-            log.error("Error on adding new threads to scrapingServiceObjectPool", e);
-        }
-
-        parsingThreadPool = Executors.newFixedThreadPool(MAX_THREAD_COUNT, parsingThreadFactory);
+    private void initPools() {
+        mainPageParsingThreadPool = initPool(maxThreadCount, mainPageParsingThreadFactory);
+        productPageParsingThreadPool = initPool(maxThreadCount, productPageParsingThreadFactory);
+        urlFetchingThreadPool = initPool(maxThreadCount, urlFetchingThreadFactory);
     }
 
-    public void poolsRenew() {
-        if (scrapingServiceObjectPool.isClosed()) {
-            scrapingServiceObjectPool = new GenericObjectPool<>(
-                    new ScrapingServicePooledObjectFactory(),
-                    scrapingServiceGenericObjectPoolConfig
-            );
-            try {
-                scrapingServiceObjectPool.addObjects(MAX_THREAD_COUNT);
-            } catch (Exception e) {
-                log.error("Error on adding new threads to scrapingServiceObjectPool", e);
-            }
+    private void renewPools() {
+        if (mainPageParsingThreadPool.isShutdown()) {
+            mainPageParsingThreadPool = initPool(maxThreadCount, mainPageParsingThreadFactory);
         }
 
-        if (parsingThreadPool.isShutdown()) {
-            parsingThreadPool = Executors.newFixedThreadPool(MAX_THREAD_COUNT, parsingThreadFactory);
+        if (productPageParsingThreadPool.isShutdown()) {
+            productPageParsingThreadPool = initPool(maxThreadCount, productPageParsingThreadFactory);
+        }
+
+        if (urlFetchingThreadPool.isShutdown()) {
+            urlFetchingThreadPool = initPool(maxThreadCount, urlFetchingThreadFactory);
         }
     }
 
+    private ExecutorService initPool(int maxThreadCount, ThreadFactory threadFactory) {
+        return Executors.newFixedThreadPool(maxThreadCount, threadFactory);
+    }
+
+    @Timed(PARSING_PROCESS_DURATION_SUMMARY)
     @Override
-    public void parseBuildSave(String mainUrl, String relativeUrl, String alcoholType) throws InterruptedException {
-        poolsRenew();
+    public void parseBuildSave(String alcoholUrlPart) throws InterruptedException {
+        renewPools();
 
         LocalDateTime start = LocalDateTime.now();
-        String alcoholUrl = mainUrl + relativeUrl;
+        String alcoholUrl = mainPageUrl + alcoholUrlPart;
 
-        ScrapingService scrapingService = null;
-        try {
-            scrapingService = scrapingServiceObjectPool.borrowObject();
-        } catch (Exception e) {
-            log.error("Error on borrowing instance of {} from scrapingServiceObjectPool", ScrapingService.class.getSimpleName(), e);
-        }
-        Document currentDoc = Objects.requireNonNull(scrapingService).getJsoupDocument(alcoholUrl);
+        Scraper scraper = new Scraper();
 
-        scrapingServiceObjectPool.returnObject(scrapingService);
+        LocalDateTime mainFetchingStart = LocalDateTime.now();
+        Document currentDoc = scraper.getJsoupDocument(alcoholUrl);
+        WinestyleParserServiceMetricsCollector.sumPageFetchingDuration(mainFetchingStart, LocalDateTime.now());
 
         int pagesNumber = getPagesNumber(currentDoc);
         int nextPageNumber = 2;
 
         log.warn("Starting parsing of {}", alcoholType);
 
-        List<Future<Integer>> unparsedFutures = new ArrayList<>();
+        List<Future<Integer>> parseFutures = new ArrayList<>();
 
         try {
             while (true) {
                 log.info("Parsing: {}", currentDoc.location());
 
-                unparsedFutures.add(parsingThreadPool.submit(new ProductJob(mainUrl, currentDoc, alcoholType, start)));
+                parseFutures.add(mainPageParsingThreadPool.submit(new MainJob(currentDoc, start, scraper)));
 
                 if (nextPageNumber > pagesNumber) {
                     break;
                 }
 
-                currentDoc = getDocument(nextPageNumber, alcoholUrl);
+                mainFetchingStart = LocalDateTime.now();
+                currentDoc = scraper.getJsoupDocument(alcoholUrl + "?page=" + nextPageNumber);
+                WinestyleParserServiceMetricsCollector.sumPageFetchingDuration(mainFetchingStart, LocalDateTime.now());
 
                 nextPageNumber++;
             }
         } finally {
-            parsingThreadPool.shutdown();
+            mainPageParsingThreadPool.shutdown();
 
-            parsingThreadPool.awaitTermination(10, TimeUnit.SECONDS);
-
-            scrapingServiceObjectPool.close();
+            mainPageParsingThreadPool.awaitTermination(timeout, TimeUnit.MILLISECONDS);
 
             log.info("Finished parsing of {} in {}", alcoholType, java.time.Duration.between((start), LocalDateTime.now()));
 
             int unparsed = 0;
 
-            for (Future<Integer> unparsedFuture : unparsedFutures) {
+            unparsed += productPageParsingThreadPool.shutdownNow().size();
+            mainPageParsingThreadPool.shutdownNow();
+
+            for (int i = 0; i < parseFutures.size() - 1; i++) {
                 try {
-                    unparsed += unparsedFuture.get();
-                } catch (InterruptedException | ExecutionException e) {
-                    unparsed += parsingThreadPool.shutdownNow().size();
+                    unparsed += parseFutures.get(i).get();
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                } catch (ExecutionException e) {
+                    eventLogger.warn(NotableEvents.W_WINE_PAGE_PARSING_FAILED, alcoholUrl + "?page=" + i);
+                    unparsed += 20;
                 }
             }
 
@@ -153,98 +171,72 @@ public class ParserService implements WinestyleParserService {
         }
     }
 
-    public Document getDocument(int pageNumber, String alcoholUrl) throws InterruptedException {
-        ScrapingService scrapingService = null;
-
+    private int getPagesNumber(Document doc) {
         try {
-            scrapingService = scrapingServiceObjectPool.borrowObject();
-        } catch (Exception e) {
-            log.error("Error on borrowing instance of {} from scrapingServiceObjectPool", ScrapingService.class.getSimpleName(), e);
+            return Integer.parseInt(doc.selectFirst(paginationElementCssQuery).text());
+        } catch (NullPointerException ex) {
+            log.info("{} does not contain a pagination element: the number of pages is set to 1", doc.location());
+            return 1;
         }
-
-        Document document = Objects.requireNonNull(scrapingService).getJsoupDocument(alcoholUrl + "?page=" + pageNumber);
-
-        scrapingServiceObjectPool.returnObject(scrapingService);
-        return document;
     }
 
-    private class ProductJob implements Callable<Integer> {
-        String mainUrl;
-        Document currentDoc;
-        String alcoholType;
-        LocalDateTime start;
-
-        /**
-         * @param mainUrl     адрес главной страницы сайта
-         * @param currentDoc  текущая страница с позициями
-         * @param alcoholType тип алкоголя
-         */
-        public ProductJob(String mainUrl, Document currentDoc, String alcoholType, LocalDateTime start) {
-            this.mainUrl = mainUrl;
-            this.currentDoc = currentDoc;
-            this.alcoholType = alcoholType;
-            this.start = start;
-        }
+    @RequiredArgsConstructor
+    private class MainJob implements Callable<Integer> {
+        private final Document currentDoc;
+        private final LocalDateTime start;
+        private final Scraper scraper;
+        private final MainPageSegmentor mainPageSegmentor = ApplicationContextLocator.getApplicationContext().getBean(MainPageSegmentor.class);
 
         /**
          * Парсер страницы с позициями
          */
         @Override
         public Integer call() throws InterruptedException {
-            Elements alcohol = segmentationService
-                    .setMainDocument(currentDoc)
-                    .setMainMainContent()
-                    .breakDocumentIntoProductElements();
+            LocalDateTime mainParsingStart = LocalDateTime.now();
+            Elements alcohol = mainPageSegmentor.extractProductElements(currentDoc);
 
             int parsedNow = 0;
+            int unparsed = 0;
 
-            List<Future<Integer>> parsingFutures = new ArrayList<>();
+            List<Pair<Future<Alcohol>, String>> parsingFutures = new ArrayList<>();
+            ProductJob productJob;
+            String productUrl;
 
             for (Element drink : alcohol) {
-                parsingFutures.add(parsingThreadPool.submit(() -> {
-                    String productUrl;
-
-                    parsingService.setProductBlock(segmentationService.setProductBlock(drink).getProductBlock());
-                    parsingService.setInfoContainer(segmentationService.getInfoContainer());
-
-                    productUrl = parsingService.parseUrl();
-                    log.info("Now parsing url: {}", productUrl);
-
-                    Alcohol result;
-                    try {
-                        alcoholRepositoryService.getByUrl(productUrl);
-                        alcoholRepositoryService.updatePrice(parsingService.parsePrice(), productUrl);
-                        alcoholRepositoryService.updateRating(parsingService.parseWinestyleRating(), productUrl);
-                        result = alcoholRepositoryService.getByUrl(productUrl);
-                    } catch (NoEntityException ex) {
-                        ScrapingService scrapingService = scrapingServiceObjectPool.borrowObject();
-                        Document product = scrapingService.getJsoupDocument(mainUrl + productUrl);
-                        segmentationService.setProductDocument(product).setProductMainContent();
-                        prepareParsingService();
-                        parserDirectorService.makeAlcohol(builder, alcoholType);
-                        result = builder.url(productUrl).build();
-                        alcoholRepositoryService.add(result);
-                        scrapingServiceObjectPool.returnObject(scrapingService);
-                    }
-                    kafkaSendMessageService.sendMessage(
-                            ParserApi.WineParsedEvent.newBuilder()
-                                    .setShopLink(mainUrl)
-                                    .addWines(result.asProduct())
-                                    .build()
-                    );
-                    return 1;
-                }));
-            }
-            int unparsed = 0;
-            for (int i = 0; i < alcohol.size(); i++) {
+                productJob = new ProductJob(drink, scraper);
                 try {
-                    parsedNow += parsingFutures.get(i).get();
+                    productUrl = urlFetchingThreadPool.submit(productJob.new ProductUrlJob()).get();
                 } catch (ExecutionException e) {
+                    log.error("Critical error during execution of url from product block {}", drink.html());
+                    continue;
+                }
+                parsingFutures.add(new Pair<>(productPageParsingThreadPool.submit(productJob), productUrl));
+            }
+
+            Pair<Future<Alcohol>, String> currentPair;
+            Alcohol result;
+
+            for (int i = 0; i < alcohol.size(); i++) {
+                currentPair = parsingFutures.get(i);
+                productUrl = currentPair.getUrl();
+                try {
+                    result = currentPair.getParsingFuture().get();
+                    eventLogger.info(NotableEvents.I_WINE_DETAILS_PARSED, productUrl, result);
+                    parsedNow += 1;
+                } catch (ExecutionException e) {
+                    eventLogger.warn(NotableEvents.W_WINE_DETAILS_PARSING_FAILED, productUrl);
                     unparsed += 1;
                 }
             }
+
+            WinestyleParserServiceMetricsCollector.sumPageParsingDuration(mainParsingStart, LocalDateTime.now());
+
+            eventLogger.info(NotableEvents.I_WINE_PAGE_PARSED, currentDoc.location());
+
             countParsed(parsedNow);
+
             logParsed(alcoholType, start);
+
             return unparsed;
         }
 
@@ -252,7 +244,7 @@ public class ParserService implements WinestyleParserService {
             parsed += parsedNow;
         }
 
-        private void logParsed(String alcoholType, LocalDateTime start) {
+        private void logParsed(AlcoholType alcoholType, LocalDateTime start) {
             long hoursPassed;
             long minutesPart;
             long secondsPart;
@@ -266,21 +258,85 @@ public class ParserService implements WinestyleParserService {
                     alcoholType, parsed, hoursPassed, minutesPart, secondsPart, parsed / (double) timePassed.toSeconds());
         }
 
-        private void prepareParsingService() {
-            parsingService.setListDescription(segmentationService.getListDescription());
-            parsingService.setLeftBlock(segmentationService.getLeftBlock());
-            parsingService.setArticlesBlock(segmentationService.getArticlesBlock());
-            parsingService.setDescriptionBlock(segmentationService.getDescriptionBlock());
+        @RequiredArgsConstructor
+        private class Pair<L, R> {
+            @Getter
+            private final L parsingFuture;
+            @Getter
+            private final R url;
         }
-
     }
 
-    private int getPagesNumber(Document doc) {
-        try {
-            return Integer.parseInt(doc.selectFirst("#CatalogPagingBottom li:last-of-type").text());
-        } catch (NullPointerException ex) {
-            log.info("{} does not contain a pagination element: the number of pages is set to 1", doc.location());
-            return 1;
+    @RequiredArgsConstructor
+    private class ProductJob implements Callable<Alcohol> {
+        private final Element drink;
+        private final Scraper scraper;
+        private final Director director = new ParserDirector();
+        private final ProductBlockSegmentor productBlockSegmentor = ApplicationContextLocator.getApplicationContext().getBean(ProductBlockSegmentor.class);
+        private final Parser parser = ApplicationContextLocator.getApplicationContext().getBean(Parser.class);
+        private String productUrl;
+
+        @Override
+        public Alcohol call() {
+            log.info("Now parsing url: {}", productUrl);
+
+            LocalDateTime productParsingStart = LocalDateTime.now();
+
+            Alcohol alcohol;
+            ParserApi.WineParsedEvent.Builder kafkaMessageBuilder = ParserApi.WineParsedEvent.newBuilder().setShopLink(mainPageUrl);
+
+            try {
+                alcohol = alcoholRepositoryService.getByUrl(productUrl);
+                alcoholRepositoryService.updatePrice(parser.parsePrice().orElse(null), productUrl);
+                alcoholRepositoryService.updateRating(parser.parseWinestyleRating().orElse(null), productUrl);
+
+                kafkaMessageSender.sendMessage(kafkaMessageBuilder.addWines(director.fillKafkaMessageBuilder(alcohol, alcoholType)).build());
+            } catch (NoEntityException ex) {
+                Document product = null;
+
+                LocalDateTime detailsFetchingStart = LocalDateTime.now();
+                try {
+                    product = scraper.getJsoupDocument(mainPageUrl + productUrl);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+                WinestyleParserServiceMetricsCollector.sumDetailsFetchingDuration(detailsFetchingStart, LocalDateTime.now());
+
+                prepareParsingService(product);
+
+                alcohol = director.makeAlcohol(parser, mainPageUrl, productUrl, alcoholType);
+                alcoholRepositoryService.add(alcohol);
+
+                kafkaMessageSender.sendMessage(kafkaMessageBuilder.addWines(director.getKafkaMessageBuilder()).build());
+            }
+
+            WinestyleParserServiceMetricsCollector.sumDetailsParsingDuration(productParsingStart, LocalDateTime.now());
+            WinestyleParserServiceMetricsCollector.incPublished();
+
+            return alcohol;
+        }
+
+        private void prepareParsingService(Document doc) {
+            ProductPageSegmentor productPageSegmentor = ApplicationContextLocator.getApplicationContext().getBean(ProductPageSegmentor.class);
+
+            Element productPageMainContent = productPageSegmentor.extractProductPageMainContent(doc);
+
+            parser.setListDescription(productBlockSegmentor.extractListDescription(drink));
+            parser.setLeftBlock(productPageSegmentor.extractLeftBlock(productPageMainContent));
+            parser.setArticlesBlock(productPageSegmentor.extractArticlesBlock(productPageMainContent));
+            parser.setDescriptionBlock(productPageSegmentor.extractDescriptionBlock(productPageMainContent));
+        }
+
+        @RequiredArgsConstructor
+        private class ProductUrlJob implements Callable<String> {
+            @Override
+            public String call() {
+                parser.setProductBlock(drink);
+                parser.setInfoContainer(productBlockSegmentor.extractInfoContainer(drink));
+
+                productUrl = parser.parseUrl();
+                return productUrl;
+            }
         }
     }
 }

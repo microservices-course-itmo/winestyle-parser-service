@@ -19,16 +19,18 @@ public class NoEntityException extends Exception {
 
     /**
      * Конструктор ошибки отсутсвия сущности
+     *
      * @param entity тип сущности
-     * @param id уникальный номер сущности
+     * @param id     уникальный номер сущности
      * @return ошибка по сущности и номеру
      */
     public static NoEntityException createWith(String entity, Long id, String url) {
         return new NoEntityException(entity, id, url);
     }
-    
+
+    @Override
     public String getMessage() {
-        if(url == null) {
+        if (url == null) {
             return "The server reported: " + entity + " with ID=" + id + " was not found.";
         } else {
             return "The server reported: " + entity + " with URL=" + url + " was not found.";
