@@ -1,0 +1,1 @@
+ALTER TABLE alcohol ADD date_added TIMESTAMP;
