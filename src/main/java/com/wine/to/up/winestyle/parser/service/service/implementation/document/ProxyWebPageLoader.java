@@ -18,7 +18,7 @@ import java.net.Proxy;
 public class ProxyWebPageLoader implements UnstableLoader {
     private final Proxy proxy;
     private int failuresCount;
-    @Value("${spring.jsoup.scraping.proxy-timeout}")
+    @Value("${spring.jsoup.scraping.proxy-timeout.millis}")
     private int timeout;
     @Value("${spring.jsoup.connection.user-agent}")
     private String userAgent;
