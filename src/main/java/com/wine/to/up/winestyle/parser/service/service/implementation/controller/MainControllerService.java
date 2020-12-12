@@ -28,6 +28,7 @@ import java.util.*;
 public class MainControllerService {
     private final RepositoryService repositoryService;
     private final StatusService statusService;
+    private final ProxyService proxyService;
 
     @SneakyThrows({IntrospectionException.class, InvocationTargetException.class})
     public Map<String, Object> getAlcoholWithFields(long id, String fieldsList)
@@ -82,7 +83,7 @@ public class MainControllerService {
         if (statusService.tryBusy(ServiceType.PROXY) && !statusService.isBusy(ServiceType.PARSER)) {
             new Thread(() -> {
                 try {
-                    ProxyService.initProxies(maxTimeout);
+                    proxyService.initProxies(maxTimeout);
                 } finally {
                     statusService.release(ServiceType.PROXY);
                 }

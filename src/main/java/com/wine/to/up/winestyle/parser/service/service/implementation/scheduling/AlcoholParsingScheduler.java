@@ -18,7 +18,7 @@ public class AlcoholParsingScheduler {
     private final ParsingControllerService parsingControllerService;
     private final MainControllerService mainControllerService;
 
-    @Value("${spring.jsoup.connection.timeout}")
+    @Value("${spring.jsoup.connection.timeout.millis}")
     private int timeout;
 
     @Scheduled(cron = "${spring.task.scheduling.rate.parser.cron}", zone = "EAT")
@@ -41,7 +41,7 @@ public class AlcoholParsingScheduler {
         }
     }
 
-    @Scheduled(fixedRateString = "${spring.task.scheduling.rate.proxy.fixed}")
+    @Scheduled(fixedRateString = "${spring.task.scheduling.rate.proxy.fixed.millis}")
     public void onScheduleLoadProxies() {
         try {
             mainControllerService.startProxiesInitJob(timeout);

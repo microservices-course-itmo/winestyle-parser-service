@@ -12,7 +12,7 @@ import java.io.IOException;
 public class SimpleWebPageLoader implements WebPageLoader {
     @Value("${spring.jsoup.connection.user-agent}")
     private String userAgent;
-    @Value("${spring.jsoup.connection.timeout}")
+    @Value("${spring.jsoup.connection.timeout.millis}")
     private int timeout;
 
     @Override

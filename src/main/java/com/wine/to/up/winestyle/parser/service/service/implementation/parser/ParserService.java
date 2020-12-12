@@ -55,7 +55,7 @@ public class ParserService implements WinestyleParserService {
     private int maxThreadCount;
     @Value("${spring.data.postgres.records-update.days}")
     private int daysUntilRecordsUpdate;
-    @Value("${spring.jsoup.scraping.proxy-timeout}")
+    @Value("${spring.jsoup.scraping.proxy-timeout.millis}")
     private int timeout;
     @Value("${spring.jsoup.pagination.css.query.main-bottom}")
     private String paginationElementCssQuery;

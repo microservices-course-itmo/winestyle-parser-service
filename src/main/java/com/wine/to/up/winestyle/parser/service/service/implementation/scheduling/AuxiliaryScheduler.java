@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 public class AuxiliaryScheduler {
     private final RepositoryService repositoryService;
 
-    @Scheduled(fixedRateString = "${spring.task.scheduling.rate.auxiliary.fixed}")
+    @Scheduled(fixedRateString = "${spring.task.scheduling.rate.auxiliary.fixed.millis}")
     public void onScheduleUpdateLastSucceed() {
         WinestyleParserServiceMetricsCollector.updateSinceLastSucceed(repositoryService.sinceLastSucceedParsing());
     }
