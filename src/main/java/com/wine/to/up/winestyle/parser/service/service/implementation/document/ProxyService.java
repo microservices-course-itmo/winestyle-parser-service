@@ -112,7 +112,6 @@ public final class ProxyService {
         socksProxiesToCheckFutures = socksProxiesToCheck.stream().map(proxy -> CompletableFuture.supplyAsync(() -> getProxyIfAlive(proxy, maxTimeout), proxiesCheckThreadPool)).collect(Collectors.toList());
 
         httpProxiesFutures = httpProxies.stream().map(proxy -> CompletableFuture.supplyAsync(() -> getProxyIfAlive(proxy, maxTimeout), proxiesCheckThreadPool)).collect(Collectors.toList());
-        waitForChecking(maxTimeout);
 
         socksProxiesFutures = socksProxies.stream().map(proxy -> CompletableFuture.supplyAsync(() -> getProxyIfAlive(proxy, maxTimeout), proxiesCheckThreadPool)).collect(Collectors.toList());
 
@@ -147,14 +146,6 @@ public final class ProxyService {
             }
         }
         return aliveCounter.get();
-    }
-
-    private void waitForChecking(int timeout) {
-        try {
-            Thread.sleep(timeout);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
     }
 
     public static WebPageLoader getLoader() {
