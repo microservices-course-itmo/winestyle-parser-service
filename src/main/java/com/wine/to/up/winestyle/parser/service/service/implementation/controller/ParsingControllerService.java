@@ -29,9 +29,6 @@ public class ParsingControllerService {
     private final StatusService statusService;
     private final RepositoryService repositoryService;
 
-    @Value("${spring.kafka.metrics.service-name}")
-    private String parserName;
-
     @Value("${spring.jsoup.scraping.winestyle-main-msk-url}")
     private String mskUrl;
     @Value("${spring.jsoup.scraping.winestyle-main-spb-url}")
