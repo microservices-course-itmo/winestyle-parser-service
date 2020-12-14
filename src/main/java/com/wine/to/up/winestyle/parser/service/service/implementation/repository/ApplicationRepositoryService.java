@@ -29,28 +29,6 @@ public class ApplicationRepositoryService implements RepositoryService {
     private final ErrorOnSavingRepository errorOnSavingRepository;
     private final TimingRepository timingRepository;
 
-    @Override
-    public void updatePrice(Float price, String url) throws NoEntityException {
-        Alcohol alcohol = getByUrl(url);
-        alcohol.setPrice(price);
-        alcoholRepository.save(alcohol);
-    }
-
-    /**
-     * Обновление рейтинга
-     *
-     * @param rating новый рейтинг
-     * @param url    ссылка на напиток, у которого будем обновлять рейтинг
-     * @throws NoEntityException при отсутствии сущности
-     */
-    @Override
-    public void updateRating(Float rating, String url) throws NoEntityException {
-        Alcohol alcohol = getByUrl(url);
-        alcohol.setRating(rating);
-        alcoholRepository.save(alcohol);
-    }
-
-
     /**
      * Получение списка напитков
      *
@@ -132,7 +110,7 @@ public class ApplicationRepositoryService implements RepositoryService {
     @Override
     public double sinceLastSucceedParsing() {
         Timing lastSucceedDate = timingRepository.findFirstByOrderByIdDesc();
-        if(lastSucceedDate == null) {
+        if (lastSucceedDate == null) {
             return 0;
         } else {
             return Duration.between(lastSucceedDate.getParsingSucceedDate(), LocalDateTime.now()).toNanos() / 1e9d;

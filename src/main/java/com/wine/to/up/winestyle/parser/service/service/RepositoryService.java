@@ -11,10 +11,6 @@ public interface RepositoryService {
 
     void add(Timing succeedTiming);
 
-    void updatePrice(Float price, String url) throws NoEntityException;
-
-    void updateRating(Float rating, String url) throws NoEntityException;
-
     List<Alcohol> getAll();
 
     List<Alcohol> getAllWines();

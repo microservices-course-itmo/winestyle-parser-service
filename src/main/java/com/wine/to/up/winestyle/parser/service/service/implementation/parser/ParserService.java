@@ -42,7 +42,7 @@ import java.util.concurrent.*;
 @RequiredArgsConstructor
 public class ParserService implements WinestyleParserService {
     private final KafkaMessageSender<ParserApi.WineParsedEvent> kafkaMessageSender;
-    private final RepositoryService alcoholRepositoryService;
+    private final RepositoryService repositoryService;
 
     @Setter
     private AlcoholType alcoholType;
@@ -285,13 +285,14 @@ public class ParserService implements WinestyleParserService {
             ParserApi.WineParsedEvent.Builder kafkaMessageBuilder = ParserApi.WineParsedEvent.newBuilder().setShopLink(mainPageUrl);
 
             try {
-                alcohol = alcoholRepositoryService.getByUrl(productUrl);
+                alcohol = repositoryService.getByUrl(productUrl);
 
                 if (Duration.between(alcohol.getDateAdded(), LocalDateTime.now()).toDays() > daysUntilRecordsUpdate) {
                     alcohol = parseProduct(kafkaMessageBuilder);
                 } else {
-                    alcoholRepositoryService.updatePrice(parser.parsePrice().orElse(null), productUrl);
-                    alcoholRepositoryService.updateRating(parser.parseWinestyleRating().orElse(null), productUrl);
+                    alcohol.setPrice(parser.parsePrice().orElse(null));
+                    alcohol.setRating(parser.parseWinestyleRating().orElse(null));
+                    repositoryService.add(alcohol);
                     kafkaMessageSender.sendMessage(kafkaMessageBuilder.addWines(director.fillKafkaMessageBuilder(alcohol, alcoholType)).build());
                 }
             } catch (NoEntityException ex) {
@@ -319,7 +320,7 @@ public class ParserService implements WinestyleParserService {
 
             Alcohol alcohol = director.makeAlcohol(parser, mainPageUrl, productUrl, alcoholType);
 
-            alcoholRepositoryService.add(alcohol);
+            repositoryService.add(alcohol);
 
             kafkaMessageSender.sendMessage(kafkaMessageBuilder.addWines(director.getKafkaMessageBuilder()).build());
 
