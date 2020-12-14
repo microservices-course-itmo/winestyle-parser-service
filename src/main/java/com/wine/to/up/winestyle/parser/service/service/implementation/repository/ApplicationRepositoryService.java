@@ -8,9 +8,11 @@ import com.wine.to.up.winestyle.parser.service.repository.AlcoholRepository;
 import com.wine.to.up.winestyle.parser.service.repository.ErrorOnSavingRepository;
 import com.wine.to.up.winestyle.parser.service.repository.TimingRepository;
 import com.wine.to.up.winestyle.parser.service.service.RepositoryService;
+import com.wine.to.up.winestyle.parser.service.service.implementation.helpers.enums.AlcoholType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
 import java.time.Duration;
@@ -28,28 +30,6 @@ public class ApplicationRepositoryService implements RepositoryService {
     private final AlcoholRepository alcoholRepository;
     private final ErrorOnSavingRepository errorOnSavingRepository;
     private final TimingRepository timingRepository;
-
-    @Override
-    public void updatePrice(Float price, String url) throws NoEntityException {
-        Alcohol alcohol = getByUrl(url);
-        alcohol.setPrice(price);
-        alcoholRepository.save(alcohol);
-    }
-
-    /**
-     * Обновление рейтинга
-     *
-     * @param rating новый рейтинг
-     * @param url    ссылка на напиток, у которого будем обновлять рейтинг
-     * @throws NoEntityException при отсутствии сущности
-     */
-    @Override
-    public void updateRating(Float rating, String url) throws NoEntityException {
-        Alcohol alcohol = getByUrl(url);
-        alcohol.setRating(rating);
-        alcoholRepository.save(alcohol);
-    }
-
 
     /**
      * Получение списка напитков
@@ -132,7 +112,7 @@ public class ApplicationRepositoryService implements RepositoryService {
     @Override
     public double sinceLastSucceedParsing() {
         Timing lastSucceedDate = timingRepository.findFirstByOrderByIdDesc();
-        if(lastSucceedDate == null) {
+        if (lastSucceedDate == null) {
             return 0;
         } else {
             return Duration.between(lastSucceedDate.getParsingSucceedDate(), LocalDateTime.now()).toNanos() / 1e9d;
@@ -142,5 +122,15 @@ public class ApplicationRepositoryService implements RepositoryService {
     @Override
     public void add(Timing succeedTiming) {
         timingRepository.save(succeedTiming);
+    }
+
+    @Transactional
+    @Override
+    public List<Alcohol> deleteByTypeAndDateAddedDaysAgo(AlcoholType alcoholType, int days) {
+        if (alcoholType == AlcoholType.WINE) {
+            return alcoholRepository.deleteAllWinesByDateAddedDaysAgo(days);
+        } else {
+            return alcoholRepository.deleteAllSparklingByDateAddedDaysAgo(days);
+        }
     }
 }

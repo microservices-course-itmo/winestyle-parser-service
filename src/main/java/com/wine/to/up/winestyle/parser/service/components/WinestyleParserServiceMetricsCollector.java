@@ -28,7 +28,7 @@ public final class WinestyleParserServiceMetricsCollector extends CommonMetricsC
     private static final String PUBLISHED_COUNTER = "wines_published_to_kafka_count";
 
     private static final String IN_PROGRESS_GAUGE = "parsing_in_progress";
-    private static final String TIME_SINCE_LAST_SUCCEED_GAUGE = "time_since_last_succeed_parsing";
+    private static final String TIME_SINCE_LAST_SUCCEED_GAUGE = "time_since_last_succeeded_parsing";
 
     private static final String DETAILS_FETCHING_DURATION_SUMMARY = "wine_details_fetching_duration";
     private static final String PAGE_FETCHING_DURATION_SUMMARY = "wine_page_fetching_duration";
