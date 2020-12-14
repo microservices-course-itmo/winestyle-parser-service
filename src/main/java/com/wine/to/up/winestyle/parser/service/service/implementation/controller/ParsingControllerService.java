@@ -3,6 +3,7 @@ package com.wine.to.up.winestyle.parser.service.service.implementation.controlle
 import com.google.common.collect.ImmutableMap;
 import com.wine.to.up.winestyle.parser.service.components.WinestyleParserServiceMetricsCollector;
 import com.wine.to.up.winestyle.parser.service.controller.exception.ServiceIsBusyException;
+import com.wine.to.up.winestyle.parser.service.domain.entity.Alcohol;
 import com.wine.to.up.winestyle.parser.service.domain.entity.Timing;
 import com.wine.to.up.winestyle.parser.service.service.RepositoryService;
 import com.wine.to.up.winestyle.parser.service.service.WinestyleParserService;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * Класс-парсер.
@@ -37,6 +39,8 @@ public class ParsingControllerService {
     private String wineUrl;
     @Value("${spring.jsoup.scraping.winestyle-sparkling-part-url}")
     private String sparklingUrl;
+    @Value("${spring.data.postgres.records-update.days}")
+    private int daysUntilRecordsUpdate;
 
     private ImmutableMap<City, String> supportedCityUrls;
     private ImmutableMap<AlcoholType, String> supportedAlcoholUrls;
@@ -67,6 +71,8 @@ public class ParsingControllerService {
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                 } finally {
+                    List<Alcohol> outdatedRecords = repositoryService.deleteByTypeAndDateAddedDaysAgo(alcoholType, daysUntilRecordsUpdate);
+                    log.info("{} outdated {} records deleted", outdatedRecords.size(), alcoholType);
                     repositoryService.add(new Timing(LocalDateTime.now()));
                     WinestyleParserServiceMetricsCollector.incParsingComplete();
                     WinestyleParserServiceMetricsCollector.updateInProgress(0);

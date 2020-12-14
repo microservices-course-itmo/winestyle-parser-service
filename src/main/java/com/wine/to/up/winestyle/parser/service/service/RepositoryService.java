@@ -3,6 +3,7 @@ package com.wine.to.up.winestyle.parser.service.service;
 import com.wine.to.up.winestyle.parser.service.controller.exception.NoEntityException;
 import com.wine.to.up.winestyle.parser.service.domain.entity.Alcohol;
 import com.wine.to.up.winestyle.parser.service.domain.entity.Timing;
+import com.wine.to.up.winestyle.parser.service.service.implementation.helpers.enums.AlcoholType;
 
 import java.util.List;
 
@@ -22,4 +23,6 @@ public interface RepositoryService {
     Alcohol getByID(long id) throws NoEntityException;
 
     double sinceLastSucceedParsing();
+
+    List<Alcohol> deleteByTypeAndDateAddedDaysAgo(AlcoholType alcoholType, int days);
 }
