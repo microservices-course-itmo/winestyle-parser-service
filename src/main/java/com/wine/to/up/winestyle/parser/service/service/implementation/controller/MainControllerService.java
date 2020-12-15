@@ -1,6 +1,5 @@
 package com.wine.to.up.winestyle.parser.service.service.implementation.controller;
 
-import com.wine.to.up.winestyle.parser.service.controller.exception.IllegalFieldException;
 import com.wine.to.up.winestyle.parser.service.controller.exception.NoEntityException;
 import com.wine.to.up.winestyle.parser.service.domain.entity.Alcohol;
 import com.wine.to.up.winestyle.parser.service.service.implementation.repository.AlcoholRepositoryService;
@@ -23,7 +22,7 @@ public class MainControllerService {
     private final AlcoholRepositoryService alcoholRepositoryService;
 
     public Map<String, Object> getAlcoholWithFields(long id, String fieldsList)
-            throws NoEntityException, IllegalFieldException {
+            throws NoEntityException {
         Set<String> requiredFields = new HashSet<>(Arrays.asList(fieldsList.split(",")));
         Map<String, Object> res = new HashMap<>();
         Alcohol alcohol = alcoholRepositoryService.getByID(id);
@@ -37,8 +36,6 @@ public class MainControllerService {
                 } catch (IllegalAccessException e) {
                     log.error("Requested {} field is inaccessible", field.getName());
                 }
-            } else {
-                throw IllegalFieldException.createWith("Alcohol", fieldName);
             }
         }
         log.info("Returned alcohol with id={} with requested fields ({}) via GET /winestyle/api/alcohol/with-fields/{}",

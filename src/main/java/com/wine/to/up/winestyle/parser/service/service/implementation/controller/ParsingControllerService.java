@@ -7,6 +7,8 @@ import com.wine.to.up.winestyle.parser.service.service.WinestyleParserService;
 import com.wine.to.up.winestyle.parser.service.service.implementation.helpers.StatusService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 
 /**
@@ -15,6 +17,7 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 @Slf4j
+@ConditionalOnProperty(value="kafka.enabled", havingValue="true", matchIfMissing=true)
 public class ParsingControllerService {
     private final WinestyleParserService alcoholParserService;
     private final StatusService statusService;

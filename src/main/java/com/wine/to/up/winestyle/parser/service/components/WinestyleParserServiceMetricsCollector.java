@@ -1,6 +1,8 @@
 package com.wine.to.up.winestyle.parser.service.components;
 
 import com.wine.to.up.commonlib.metrics.CommonMetricsCollector;
+
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 /**
@@ -9,6 +11,7 @@ import org.springframework.stereotype.Component;
  * Micrometer's metrics exposed at /actuator/prometheus
  * Prometheus' metrics exposed at /metrics-prometheus
  */
+@ConditionalOnProperty(value="kafka.enabled", havingValue="true", matchIfMissing=true)
 @Component
 public class WinestyleParserServiceMetricsCollector extends CommonMetricsCollector {
     private static final String SERVICE_NAME = "winestyle_parser_service";

@@ -4,11 +4,13 @@ import com.wine.to.up.winestyle.parser.service.controller.exception.ServiceIsBus
 import com.wine.to.up.winestyle.parser.service.controller.exception.UnsupportedAlcoholTypeException;
 import com.wine.to.up.winestyle.parser.service.service.implementation.controller.ParsingControllerService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
+@ConditionalOnProperty(value="kafka.enabled", havingValue="true", matchIfMissing=true)
 public class AlcoholParsingScheduler {
     private final ParsingControllerService parsingControllerService;
 

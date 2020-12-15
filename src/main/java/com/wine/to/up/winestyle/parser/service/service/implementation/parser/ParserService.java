@@ -20,6 +20,7 @@ import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -33,6 +34,7 @@ import java.util.concurrent.*;
 @Slf4j
 @Component
 @RequiredArgsConstructor
+@ConditionalOnProperty(value="kafka.enabled", havingValue="true", matchIfMissing=true)
 public class ParserService implements WinestyleParserService {
     private final ParsingService parsingService;
     private final SegmentationService segmentationService;
