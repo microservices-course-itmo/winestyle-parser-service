@@ -43,7 +43,6 @@ public class AlcoholRepositoryService implements RepositoryService {
         alcoholRepository.save(alcohol);
     }
 
-
     /**
      * Получение списка напитков
      *
