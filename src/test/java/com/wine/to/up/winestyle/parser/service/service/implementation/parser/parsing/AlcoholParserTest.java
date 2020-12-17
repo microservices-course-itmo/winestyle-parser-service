@@ -274,13 +274,6 @@ class AlcoholParserTest {
         assertEquals("Сухое", sugar.get());
     }
 
-    @Test //TODO: sparkling
-    void parseSugarWithoutParseColor() {
-        alcoholParser.parseType(false);
-        Optional<String> sugar = alcoholParser.parseSugar();
-        assertEquals("Сухое", sugar.get());
-    }
-
     @Test
     void parseTaste() {
         Optional<String> taste = alcoholParser.parseTaste();
