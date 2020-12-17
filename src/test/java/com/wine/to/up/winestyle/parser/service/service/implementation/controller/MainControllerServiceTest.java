@@ -3,7 +3,7 @@ package com.wine.to.up.winestyle.parser.service.service.implementation.controlle
 import com.wine.to.up.winestyle.parser.service.controller.exception.IllegalFieldException;
 import com.wine.to.up.winestyle.parser.service.controller.exception.NoEntityException;
 import com.wine.to.up.winestyle.parser.service.domain.entity.Alcohol;
-import com.wine.to.up.winestyle.parser.service.service.implementation.repository.AlcoholRepositoryService;
+import com.wine.to.up.winestyle.parser.service.service.implementation.repository.ApplicationRepositoryService;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -22,7 +22,7 @@ class MainControllerServiceTest {
     @InjectMocks
     private MainControllerService mainControllerService;
     @Mock
-    private AlcoholRepositoryService alcoholRepositoryService;
+    private ApplicationRepositoryService ApplicationRepositoryService;
 
     static Alcohol alcohol;
     static String fieldsList;
@@ -74,7 +74,7 @@ class MainControllerServiceTest {
         Map<String, Object> fieldsValue = new HashMap<>();
 
         try {
-            Mockito.when(alcoholRepositoryService.getByID(1L)).thenReturn(alcohol);
+            Mockito.when(ApplicationRepositoryService.getByID(1L)).thenReturn(alcohol);
         } catch (NoEntityException e) {
             fail("Test failed! Cannot get alcohol by id");
         }
@@ -95,7 +95,7 @@ class MainControllerServiceTest {
         Map<String, Object> fieldsValue = new HashMap<>();
 
         try {
-            Mockito.when(alcoholRepositoryService.getByID(1L)).thenReturn(alcohol);
+            Mockito.when(ApplicationRepositoryService.getByID(1L)).thenReturn(alcohol);
         } catch (NoEntityException e) {
             fail("Test failed! Cannot get alcohol by id");
         }
@@ -113,7 +113,7 @@ class MainControllerServiceTest {
     @Test
     void getAlcoholWithNoFields() {
         try {
-            Mockito.when(alcoholRepositoryService.getByID(1L)).thenReturn(alcohol);
+            Mockito.when(ApplicationRepositoryService.getByID(1L)).thenReturn(alcohol);
         } catch (NoEntityException e) {
             fail("Test failed! Cannot get alcohol by id");
         }
