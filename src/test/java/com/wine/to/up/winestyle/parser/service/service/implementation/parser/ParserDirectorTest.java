@@ -10,7 +10,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.springframework.test.util.ReflectionTestUtils;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -66,6 +68,7 @@ class ParserDirectorTest {
 
         Alcohol alcohol = parserDirector
                 .makeAlcohol(parser, "test", "test", AlcoholType.WINE);
+        ReflectionTestUtils.setField(expectedAlcohol, "dateAdded", alcohol.getDateAdded());
         assertEquals(expectedColor, alcohol.getColor());
         assertEquals(expectedSugar, alcohol.getSugar());
         assertEquals(expectedAlcohol.toString(), alcohol.toString());
@@ -89,6 +92,7 @@ class ParserDirectorTest {
 
         Alcohol alcohol = parserDirector
                 .makeAlcohol(parser, "test", "test", AlcoholType.WINE);
+        ReflectionTestUtils.setField(expectedAlcohol, "dateAdded", alcohol.getDateAdded());
         assertEquals(expectedColor, alcohol.getColor());
         assertEquals(expectedSugar, alcohol.getSugar());
         assertEquals(expectedAlcohol.toString(), alcohol.toString());
@@ -112,6 +116,7 @@ class ParserDirectorTest {
 
         Alcohol alcohol = parserDirector
                 .makeAlcohol(parser, "test", "test", AlcoholType.WINE);
+        ReflectionTestUtils.setField(expectedAlcohol, "dateAdded", alcohol.getDateAdded());
         assertEquals(expectedColor, alcohol.getColor());
         assertEquals(expectedSugar, alcohol.getSugar());
         assertEquals(expectedAlcohol.toString(), alcohol.toString());
@@ -135,6 +140,7 @@ class ParserDirectorTest {
 
         Alcohol alcohol = parserDirector
                 .makeAlcohol(parser, "test", "test", AlcoholType.WINE);
+        ReflectionTestUtils.setField(expectedAlcohol, "dateAdded", alcohol.getDateAdded());
         assertEquals(expectedColor, alcohol.getColor());
         assertEquals(expectedSugar, alcohol.getSugar());
         assertEquals(expectedAlcohol.toString(), alcohol.toString());
@@ -158,6 +164,7 @@ class ParserDirectorTest {
 
         Alcohol alcohol = parserDirector
                 .makeAlcohol(parser, "test", "test", AlcoholType.WINE);
+        ReflectionTestUtils.setField(expectedAlcohol, "dateAdded", alcohol.getDateAdded());
         assertEquals(expectedColor, alcohol.getColor());
         assertEquals(expectedSugar, alcohol.getSugar());
         assertEquals(expectedAlcohol.toString(), alcohol.toString());
@@ -192,6 +199,7 @@ class ParserDirectorTest {
 
         Alcohol alcohol = parserDirector
                 .makeAlcohol(parser, "test", "test", AlcoholType.WINE);
+        ReflectionTestUtils.setField(expectedAlcohol, "dateAdded", alcohol.getDateAdded());
         assertEquals(null, alcohol.getColor());
         assertEquals(null, alcohol.getSugar());
         assertEquals(expectedAlcohol.toString(), alcohol.toString());
