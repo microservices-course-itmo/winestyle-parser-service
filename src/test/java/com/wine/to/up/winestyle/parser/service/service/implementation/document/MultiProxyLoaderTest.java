@@ -34,30 +34,6 @@ class MultiProxyLoaderTest {
         loader3 = new ProxyWebPageLoader(proxy);
     }
 
-
-    @Test
-    void getDocumentWithLastFailuresMoreThenTwoInLoaderList() {
-        ReflectionTestUtils.setField(loader1, "failuresCount", 3);
-        ReflectionTestUtils.setField(loader2, "failuresCount", 1);
-        ReflectionTestUtils.setField(loader3, "failuresCount", 4);
-        proxyLoaders = new ArrayList<UnstableLoader>();
-        proxyLoaders.add(loader1);
-        proxyLoaders.add(loader2);
-        proxyLoaders.add(loader3);
-        multiProxyLoader = new MultiProxyLoader(defaultLoader, proxyLoaders);
-        ReflectionTestUtils.setField(multiProxyLoader, "iterator", iterator);
-        try {
-            multiProxyLoader.getDocument("test");
-        } catch (IOException e) {
-            fail("Test failed! smth wrong", e);
-        } catch (IllegalArgumentException ex) {
-            assertEquals("Malformed URL: test", ex.getMessage());
-        }
-        Mockito.verify(iterator, Mockito.times(1)).hasNext();
-        ConcurrentLinkedQueue<UnstableLoader> resultList = (ConcurrentLinkedQueue) ReflectionTestUtils
-                .getField(multiProxyLoader, "loaderList");
-        assertEquals(1, resultList.size());
-    }
     @Test
     void getDocumentWithLastFailuresLessThanThreeInLoaderList() {
         ReflectionTestUtils.setField(loader1, "failuresCount", 3);
