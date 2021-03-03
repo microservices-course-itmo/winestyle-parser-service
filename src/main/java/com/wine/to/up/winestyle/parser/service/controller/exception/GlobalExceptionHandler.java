@@ -1,6 +1,7 @@
 package com.wine.to.up.winestyle.parser.service.controller.exception;
 
 import com.wine.to.up.winestyle.parser.service.domain.ApiError;
+import com.wine.to.up.winestyle.parser.service.service.implementation.helpers.enums.AlcoholType;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -9,10 +10,12 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.util.WebUtils;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Предоставляет обработку исключений контроллеров всему сервису
@@ -61,6 +64,25 @@ public class GlobalExceptionHandler {
     protected ResponseEntity<ApiError> handleUnsupportedAlcoholTypeException(UnsupportedAlcoholTypeException ex,
                                                                              WebRequest request) {
         List<String> errors = Collections.singletonList(ex.getMessage());
+        return handleExceptionInternal(ex, new ApiError(errors), new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
+    }
+
+    /**
+     * Обработчик исключения о неподдерживаемом типе алкоголя
+     *
+     * @param ex      Исключение о неподдерживаемом типе алкоголя
+     * @param request Запрос
+     * @return возвращаемая клиенту ResponseEntity
+     */
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ApiError> handleMethodArgumentTypeMismatchException(MethodArgumentTypeMismatchException ex,
+                                                                              WebRequest request) {
+        List<String> errors;
+        if(Objects.requireNonNull(ex.getRequiredType()).equals(AlcoholType.class)) {
+            errors = Collections.singletonList("The server reported: " + ex.getValue() + " alcohol type is not supported");
+        } else {
+            errors = Collections.singletonList("The server reported: " + ex.getValue() + " city is not supported");
+        }
         return handleExceptionInternal(ex, new ApiError(errors), new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
     }
 

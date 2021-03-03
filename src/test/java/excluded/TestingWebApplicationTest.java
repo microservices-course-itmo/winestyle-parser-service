@@ -1,5 +1,8 @@
-package com.wine.to.up.winestyle.parser.service;
+package excluded;
 
+import com.google.gson.Gson;
+import com.wine.to.up.winestyle.parser.service.domain.entity.Alcohol;
+import com.wine.to.up.winestyle.parser.service.service.implementation.repository.ApplicationRepositoryService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,18 +12,14 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.google.gson.Gson;
-import com.wine.to.up.winestyle.parser.service.domain.entity.Alcohol;
-import com.wine.to.up.winestyle.parser.service.service.implementation.repository.AlcoholRepositoryService;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
 @ComponentScan("com.wine.to.up")
@@ -32,12 +31,12 @@ public class TestingWebApplicationTest {
 	private MockMvc mockMvc;
 
 	@Autowired
-	private AlcoholRepositoryService alcoholRepositoryService;
+	private ApplicationRepositoryService applicationRepositoryService;
 
 	@Test
 	public void alcoholByIDSuccess() throws Exception {
 		int id = 1;
-		Alcohol alcohol = alcoholRepositoryService.getByID(id);
+		Alcohol alcohol = applicationRepositoryService.getByID(id);
 		mockMvc.perform(get("/winestyle/api/alcohol/" + id))
 				.andDo(print())
 				.andExpect(status().isOk())
@@ -72,7 +71,7 @@ public class TestingWebApplicationTest {
 
 	@Test
 	public void getAllWines() throws Exception {
-		List<Alcohol> wines = alcoholRepositoryService.getAllWines();
+		List<Alcohol> wines = applicationRepositoryService.getAllWines();
 		mockMvc.perform(get("/winestyle/api/wines"))
 				.andDo(print())
 				.andExpect(status().isOk())
@@ -81,7 +80,7 @@ public class TestingWebApplicationTest {
 
 	@Test
 	public void getAllSparkling() throws Exception {
-		List<Alcohol> sparkling = alcoholRepositoryService.getAllSparkling();
+		List<Alcohol> sparkling = applicationRepositoryService.getAllSparkling();
 		mockMvc.perform(get("/winestyle/api/sparkling"))
 				.andDo(print())
 				.andExpect(status().isOk())
@@ -92,7 +91,7 @@ public class TestingWebApplicationTest {
 	public void alcoholWithFieldsSuccess() throws Exception {
 		int id = 1;
 		String fields = "name,cropYear";
-		Alcohol alcohol = alcoholRepositoryService.getByID(id);
+		Alcohol alcohol = applicationRepositoryService.getByID(id);
 		Map<String, Object> alco = new HashMap<>();
 		alco.put("name", alcohol.getName());
 		alco.put("cropYear", alcohol.getCropYear());

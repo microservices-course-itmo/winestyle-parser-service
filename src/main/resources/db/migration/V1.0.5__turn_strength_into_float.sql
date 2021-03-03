@@ -1,0 +1,1 @@
+ALTER TABLE alcohol ALTER COLUMN strength TYPE REAL USING strength::REAL;

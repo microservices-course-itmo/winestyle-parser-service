@@ -5,18 +5,15 @@ import com.opencsv.bean.StatefulBeanToCsv;
 import com.opencsv.bean.StatefulBeanToCsvBuilder;
 import com.opencsv.exceptions.CsvDataTypeMismatchException;
 import com.opencsv.exceptions.CsvRequiredFieldEmptyException;
-
 import com.wine.to.up.winestyle.parser.service.domain.entity.Alcohol;
 import com.wine.to.up.winestyle.parser.service.service.RepositoryService;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
 
 /**
  * Класс, сохраняющий все распаршенные вина в csv-файл data.csv.
@@ -24,10 +21,13 @@ import java.io.PrintWriter;
 @UtilityClass
 @Slf4j
 public class CSVUtility {
+    @Value("${spring.data.csv.filename}")
+    private String filename;
+
     public void toCsvFile(RepositoryService repositoryService) throws IOException {
         List<Alcohol> alcohol = repositoryService.getAll();
-        try (OutputStream os = new FileOutputStream("data.csv");
-                PrintWriter writer = new PrintWriter(new OutputStreamWriter(os, "UTF-8"))) {
+        try (OutputStream os = new FileOutputStream(filename);
+             PrintWriter writer = new PrintWriter(new OutputStreamWriter(os, StandardCharsets.UTF_8))) {
             HeaderColumnNameMappingStrategy<Alcohol> strategy = new HeaderColumnNameMappingStrategy<>();
             strategy.setType(Alcohol.class);
             StatefulBeanToCsv<Alcohol> alcoholCsv = new StatefulBeanToCsvBuilder<Alcohol>(writer)
