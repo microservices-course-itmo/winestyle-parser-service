@@ -1,4 +1,4 @@
-package com.wine.to.up.winestyle.parser.service;
+package excluded;
 
 import com.google.gson.Gson;
 import com.wine.to.up.winestyle.parser.service.domain.entity.Alcohol;
