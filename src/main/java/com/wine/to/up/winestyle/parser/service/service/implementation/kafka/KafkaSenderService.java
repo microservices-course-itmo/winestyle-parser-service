@@ -3,6 +3,7 @@ package com.wine.to.up.winestyle.parser.service.service.implementation.kafka;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.wine.to.up.commonlib.messaging.KafkaMessageSender;
 import com.wine.to.up.parser.common.api.schema.ParserApi;
+import com.wine.to.up.winestyle.parser.service.components.WinestyleParserServiceMetricsCollector;
 import com.wine.to.up.winestyle.parser.service.domain.entity.Alcohol;
 import com.wine.to.up.winestyle.parser.service.service.Director;
 import com.wine.to.up.winestyle.parser.service.service.KafkaService;
@@ -154,6 +155,7 @@ public class KafkaSenderService implements KafkaService {
                         .addWines(parserDirector
                                 .fillKafkaMessageBuilder(alcohol, AlcoholType.valueOf(alcohol.getType())))
                         .build());
+                WinestyleParserServiceMetricsCollector.incPublished();
                 sended++;
             } catch (Exception ex) {
                 log.error("Cannot send dataset to Kafka: id:{} {}", alcohol.getId(), alcohol.getType());
