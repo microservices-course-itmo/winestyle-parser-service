@@ -27,7 +27,6 @@ public class KafkaSenderService implements KafkaService {
     private final Director parserDirector;
     private final RepositoryService repositoryService;
     private final KafkaMessageSender<ParserApi.WineParsedEvent> kafkaMessageSender;
-    private final ParserApi.WineParsedEvent.Builder kafkaMessageBuilder;
 
     @Value("${spring.task.execution.pool.size}")
     private int maxThreadCount;
@@ -108,7 +107,7 @@ public class KafkaSenderService implements KafkaService {
 
         try {
             alcoholList.parallelStream().forEach(alcohol -> {
-                sendingFutures.add(kafkaSendAllThreadPool.submit(new KafkaSender(kafkaMessageBuilder, parserDirector, alcohol)));
+                sendingFutures.add(kafkaSendAllThreadPool.submit(new KafkaSender(parserDirector, alcohol)));
             });
         } finally {
             kafkaSendAllThreadPool.shutdown();
@@ -143,9 +142,10 @@ public class KafkaSenderService implements KafkaService {
 
     @RequiredArgsConstructor
     private class KafkaSender implements Callable<Integer> {
-        private final ParserApi.WineParsedEvent.Builder kafkaMessageBuilder;
         private final Director parserDirector;
         private final Alcohol alcohol;
+
+        private ParserApi.WineParsedEvent.Builder kafkaMessageBuilder = ParserApi.WineParsedEvent.newBuilder();
         private Integer sended = 0;
 
         private Integer sendAlcoholToKafka() {
