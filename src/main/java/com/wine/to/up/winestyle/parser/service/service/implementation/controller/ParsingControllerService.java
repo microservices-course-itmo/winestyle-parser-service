@@ -37,8 +37,6 @@ public class ParsingControllerService {
     private String wineUrl;
     @Value("${spring.jsoup.scraping.winestyle-sparkling-part-url}")
     private String sparklingUrl;
-    @Value("${spring.data.postgres.records-update.days}")
-    private int daysUntilRecordsUpdate;
 
     private ImmutableMap<City, String> supportedCityUrls;
     private ImmutableMap<AlcoholType, String> supportedAlcoholUrls;
