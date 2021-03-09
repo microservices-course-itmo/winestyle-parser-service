@@ -184,7 +184,10 @@ public class ParserDirector implements Director {
 
         Optional.ofNullable(source.getCropYear()).ifPresent(kafkaMessageBuilder::setYear);
 
-        Optional.ofNullable(source.getPrice()).ifPresent(kafkaMessageBuilder::setNewPrice);
+        Optional.ofNullable(source.getPrice()).ifPresent((price) -> {
+            kafkaMessageBuilder.setOldPrice(price);
+            kafkaMessageBuilder.setNewPrice(price);
+        });
 
         Optional.ofNullable(source.getRating()).ifPresent(kafkaMessageBuilder::setRating);
 
