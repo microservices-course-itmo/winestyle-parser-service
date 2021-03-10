@@ -31,6 +31,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
+import java.time.DayOfWeek;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -43,6 +44,7 @@ import java.util.concurrent.*;
 public class ParserService implements WinestyleParserService {
     private final KafkaMessageSender<ParserApi.WineParsedEvent> kafkaMessageSender;
     private final RepositoryService repositoryService;
+    private final Scraper scraper;
 
     @Setter
     private AlcoholType alcoholType;
@@ -53,8 +55,6 @@ public class ParserService implements WinestyleParserService {
 
     @Value("${spring.task.execution.pool.size}")
     private int maxThreadCount;
-    @Value("${spring.data.postgres.records-update.days}")
-    private int daysUntilRecordsUpdate;
     @Value("${spring.jsoup.scraping.proxy-timeout.millis}")
     private int timeout;
     @Value("${spring.jsoup.pagination.css.query.main-bottom}")
@@ -111,8 +111,6 @@ public class ParserService implements WinestyleParserService {
 
         LocalDateTime start = LocalDateTime.now();
         String alcoholUrl = mainPageUrl + alcoholUrlPart;
-
-        Scraper scraper = new Scraper();
 
         LocalDateTime mainFetchingStart = LocalDateTime.now();
         Document currentDoc = scraper.getJsoupDocument(alcoholUrl);
@@ -287,7 +285,7 @@ public class ParserService implements WinestyleParserService {
             try {
                 alcohol = repositoryService.getByUrl(productUrl);
 
-                if (Duration.between(alcohol.getDateAdded(), LocalDateTime.now()).toDays() > daysUntilRecordsUpdate) {
+                if (LocalDateTime.now().getDayOfWeek() == DayOfWeek.MONDAY) {
                     alcohol = parseProduct(kafkaMessageBuilder);
                 } else {
                     alcohol.setPrice(parser.parsePrice().orElse(null));
