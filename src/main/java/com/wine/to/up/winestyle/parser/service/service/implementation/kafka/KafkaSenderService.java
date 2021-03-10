@@ -35,7 +35,7 @@ public class KafkaSenderService implements KafkaService {
 
     private ExecutorService kafkaSendAllThreadPool;
     private final ThreadFactory kafkaSendAllThreadFactory = new ThreadFactoryBuilder()
-            .setNameFormat("Kafka-Sender_All-Alcohols-%d")
+            .setNameFormat("Kafka-Sender-%d")
             .build();
 
     private ExecutorService initPool(int maxThreadCount, ThreadFactory threadFactory) {

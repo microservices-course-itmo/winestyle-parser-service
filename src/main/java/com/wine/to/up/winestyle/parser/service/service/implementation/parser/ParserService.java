@@ -44,6 +44,7 @@ import java.util.concurrent.*;
 public class ParserService implements WinestyleParserService {
     private final KafkaMessageSender<ParserApi.WineParsedEvent> kafkaMessageSender;
     private final RepositoryService repositoryService;
+    private final Scraper scraper;
 
     @Setter
     private AlcoholType alcoholType;
@@ -110,8 +111,6 @@ public class ParserService implements WinestyleParserService {
 
         LocalDateTime start = LocalDateTime.now();
         String alcoholUrl = mainPageUrl + alcoholUrlPart;
-
-        Scraper scraper = new Scraper();
 
         LocalDateTime mainFetchingStart = LocalDateTime.now();
         Document currentDoc = scraper.getJsoupDocument(alcoholUrl);
