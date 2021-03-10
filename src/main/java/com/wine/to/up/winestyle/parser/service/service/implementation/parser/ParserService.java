@@ -1,6 +1,5 @@
 package com.wine.to.up.winestyle.parser.service.service.implementation.parser;
 
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.wine.to.up.commonlib.annotations.InjectEventLogger;
 import com.wine.to.up.commonlib.logging.EventLogger;
 import com.wine.to.up.commonlib.messaging.KafkaMessageSender;
@@ -30,13 +29,12 @@ import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
 import java.time.DayOfWeek;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.*;
+import java.util.concurrent.Callable;
 
 @Slf4j
 @Component
@@ -52,25 +50,10 @@ public class ParserService implements WinestyleParserService {
 
     private static final String PARSING_PROCESS_DURATION_SUMMARY = "parsing_process_duration";
 
-    @Value("${spring.task.execution.pool.size}")
-    private int maxThreadCount;
-    @Value("${spring.jsoup.scraping.proxy-timeout.millis}")
+    @Value("${spring.jsoup.scraping.timeout.millis}")
     private int timeout;
     @Value("${spring.jsoup.pagination.css.query.main-bottom}")
     private String paginationElementCssQuery;
-
-    private final ThreadFactory mainPageParsingThreadFactory = new ThreadFactoryBuilder()
-            .setNameFormat("Main_parser-%d")
-            .build();
-    private final ThreadFactory productPageParsingThreadFactory = new ThreadFactoryBuilder()
-            .setNameFormat("Prod_parser-%d")
-            .build();
-    private final ThreadFactory urlFetchingThreadFactory = new ThreadFactoryBuilder()
-            .setNameFormat("Url_fetching-%d")
-            .build();
-    private ExecutorService mainPageParsingThreadPool;
-    private ExecutorService productPageParsingThreadPool;
-    private ExecutorService urlFetchingThreadPool;
 
     @SuppressWarnings("unused")
     @InjectEventLogger
@@ -78,35 +61,9 @@ public class ParserService implements WinestyleParserService {
 
     private int parsed = 0;
 
-    @PostConstruct
-    private void initPools() {
-        mainPageParsingThreadPool = initPool(maxThreadCount, mainPageParsingThreadFactory);
-        productPageParsingThreadPool = initPool(maxThreadCount, productPageParsingThreadFactory);
-        urlFetchingThreadPool = initPool(maxThreadCount, urlFetchingThreadFactory);
-    }
-
-    private void renewPools() {
-        if (mainPageParsingThreadPool.isShutdown()) {
-            mainPageParsingThreadPool = initPool(maxThreadCount, mainPageParsingThreadFactory);
-        }
-
-        if (productPageParsingThreadPool.isShutdown()) {
-            productPageParsingThreadPool = initPool(maxThreadCount, productPageParsingThreadFactory);
-        }
-
-        if (urlFetchingThreadPool.isShutdown()) {
-            urlFetchingThreadPool = initPool(maxThreadCount, urlFetchingThreadFactory);
-        }
-    }
-
-    private ExecutorService initPool(int maxThreadCount, ThreadFactory threadFactory) {
-        return Executors.newFixedThreadPool(maxThreadCount, threadFactory);
-    }
-
     @Timed(PARSING_PROCESS_DURATION_SUMMARY)
     @Override
     public void parseBuildSave(String alcoholUrlPart) throws InterruptedException {
-        renewPools();
 
         LocalDateTime start = LocalDateTime.now();
         String alcoholUrl = mainPageUrl + alcoholUrlPart;
@@ -121,14 +78,20 @@ public class ParserService implements WinestyleParserService {
         int nextPageNumber = 2;
 
         log.warn("Starting parsing of {}", alcoholType);
-
-        List<Future<Integer>> parseFutures = new ArrayList<>();
+        int unparsed = 0;
 
         try {
             while (true) {
                 log.info("Parsing: {}", currentDoc.location());
 
-                parseFutures.add(mainPageParsingThreadPool.submit(new MainJob(currentDoc, start, scraper)));
+                try {
+                    Integer currentUnparsed = new MainJob(currentDoc, start, scraper).call();
+                    unparsed += currentUnparsed;
+                }
+                catch (Exception e) {
+                    eventLogger.warn(NotableEvents.W_WINE_PAGE_PARSING_FAILED, alcoholUrl + "?page=" + (nextPageNumber - 1));
+                    unparsed += 20;
+                }
 
                 if (nextPageNumber > pagesNumber) {
                     break;
@@ -141,27 +104,7 @@ public class ParserService implements WinestyleParserService {
                 nextPageNumber++;
             }
         } finally {
-            mainPageParsingThreadPool.shutdown();
-
-            mainPageParsingThreadPool.awaitTermination(timeout, TimeUnit.MILLISECONDS);
-
             log.info("Finished parsing of {} in {}", alcoholType, java.time.Duration.between((start), LocalDateTime.now()));
-
-            int unparsed = 0;
-
-            unparsed += productPageParsingThreadPool.shutdownNow().size();
-            mainPageParsingThreadPool.shutdownNow();
-
-            for (int i = 0; i < parseFutures.size() - 1; i++) {
-                try {
-                    unparsed += parseFutures.get(i).get();
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                } catch (ExecutionException e) {
-                    eventLogger.warn(NotableEvents.W_WINE_PAGE_PARSING_FAILED, alcoholUrl + "?page=" + i);
-                    unparsed += 20;
-                }
-            }
 
             log.debug("Unparsed {}: {}", alcoholType, unparsed);
 
@@ -196,35 +139,36 @@ public class ParserService implements WinestyleParserService {
             int parsedNow = 0;
             int unparsed = 0;
 
-            List<Pair<Future<Alcohol>, String>> parsingFutures = new ArrayList<>();
+            List<Pair<ProductJob, String>> parsingFutures = new ArrayList<>();
             ProductJob productJob;
             String productUrl;
 
             for (Element productElement : productElements) {
                 productJob = new ProductJob(productElement, scraper);
                 try {
-                    productUrl = urlFetchingThreadPool.submit(productJob.new ProductUrlJob()).get();
-                } catch (ExecutionException e) {
+                    productUrl = productJob.new ProductUrlJob().call();
+                } catch (Exception e) {
                     log.error("Critical error during execution of url from product block {}", productElement.html());
                     continue;
                 }
-                parsingFutures.add(new Pair<>(productPageParsingThreadPool.submit(productJob), productUrl));
+                parsingFutures.add(new Pair<>(productJob, productUrl));
             }
 
-            Pair<Future<Alcohol>, String> currentPair;
+            Pair<ProductJob, String> currentPair;
             Alcohol result;
 
             for (int i = 0; i < productElements.size(); i++) {
                 currentPair = parsingFutures.get(i);
                 productUrl = currentPair.getUrl();
                 try {
-                    result = currentPair.getParsingFuture().get();
+                    result = currentPair.getParsingJob().call();
                     eventLogger.info(NotableEvents.I_WINE_DETAILS_PARSED, productUrl, result);
                     parsedNow += 1;
-                } catch (ExecutionException e) {
+                } catch (Exception e) {
                     eventLogger.warn(NotableEvents.W_WINE_DETAILS_PARSING_FAILED, productUrl);
                     unparsed += 1;
                 }
+                Thread.sleep(timeout);
             }
 
             WinestyleParserServiceMetricsCollector.sumPageParsingDuration(mainParsingStart, LocalDateTime.now());
@@ -259,7 +203,7 @@ public class ParserService implements WinestyleParserService {
         @RequiredArgsConstructor
         private class Pair<L, R> {
             @Getter
-            private final L parsingFuture;
+            private final L parsingJob;
             @Getter
             private final R url;
         }
