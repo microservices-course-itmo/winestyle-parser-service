@@ -31,7 +31,7 @@ public class Scraper {
         Document doc = null;
         while (doc == null) {
             try {
-                doc = ProxyService.getLoader().getDocument(url);
+                doc = LoaderService.getLoader().getDocument(url);
             } catch (SocketException | SocketTimeoutException | SSLException e) {
                 log.error("Couldn't get a connection to website! {}", e.getMessage());
             } // Берем страничку html
