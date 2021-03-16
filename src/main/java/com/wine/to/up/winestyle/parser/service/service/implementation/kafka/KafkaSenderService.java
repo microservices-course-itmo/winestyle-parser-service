@@ -36,7 +36,7 @@ public class KafkaSenderService implements KafkaService {
 
     private ExecutorService kafkaSendAllThreadPool;
     private final ThreadFactory kafkaSendAllThreadFactory = new ThreadFactoryBuilder()
-            .setNameFormat("Kafka-Sender_All-Alcohols-%d")
+            .setNameFormat("Kafka-Sender-%d")
             .build();
 
     private ExecutorService initPool(int maxThreadCount, ThreadFactory threadFactory) {
@@ -65,7 +65,7 @@ public class KafkaSenderService implements KafkaService {
         try {
             totalSended = sendAlcohols(alcohols);
         } catch (InterruptedException e) {
-            log.warn("Sending alcohols process to kafka were interrupted!");
+            log.warn("The process of sending alcohols to kafka was interrupted!");
         }
         logKafkaSended("alcohols", totalSended, startSendingProcess);
     }
@@ -75,13 +75,13 @@ public class KafkaSenderService implements KafkaService {
         List<Alcohol> wines = repositoryService.getAllWines();
 
         LocalDateTime startSendingProcess = LocalDateTime.now();
-        log.info("Start sending data of all alcohols to Kafka at {};", startSendingProcess);
+        log.info("Start sending data of all wines to Kafka at {};", startSendingProcess);
 
         int totalSended = 0;
         try {
             totalSended = sendAlcohols(wines);
         } catch (InterruptedException e) {
-            log.warn("Sending wines process to kafka were interrupted!");
+            log.warn("The process of sending wines to kafka was interrupted!");
         }
         logKafkaSended(AlcoholType.WINE.toString(), totalSended, startSendingProcess);
     }
@@ -91,13 +91,13 @@ public class KafkaSenderService implements KafkaService {
         List<Alcohol> sparkling = repositoryService.getAllSparkling();
 
         LocalDateTime startSendingProcess = LocalDateTime.now();
-        log.info("Start sending data of all alcohols to Kafka at {};", startSendingProcess);
+        log.info("Start sending data of all sparkling to Kafka at {};", startSendingProcess);
 
         int totalSended = 0;
         try {
             totalSended = sendAlcohols(sparkling);
         } catch (InterruptedException e) {
-            log.warn("Sending sparkling process to kafka were interrupted!");
+            log.warn("The process of sending sparkling to kafka was interrupted!");
         }
         logKafkaSended(AlcoholType.SPARKLING.toString(), totalSended, startSendingProcess);
     }

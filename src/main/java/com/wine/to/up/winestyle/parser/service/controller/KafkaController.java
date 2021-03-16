@@ -14,17 +14,17 @@ import org.springframework.web.bind.annotation.RestController;
 public class KafkaController {
     private final KafkaService kafkaSenderService;
 
-    @GetMapping("/alcohol")
+    @GetMapping("/alcohols")
     public void sendAllAlcoholsToKafka() {
         kafkaSenderService.sendAllAlcohols();
     }
 
-    @GetMapping("/alcohol/wines")
+    @GetMapping("/alcohols/wines")
     public void sendAllWinesToKafka() {
         kafkaSenderService.sendAllWines();
     }
 
-    @GetMapping("/alcohol/sparkling")
+    @GetMapping("/alcohols/sparkling")
     public void sendAllSparklingToKafka() {
         kafkaSenderService.sendAllSparkling();
     }
