@@ -50,7 +50,7 @@ public class ParserService implements WinestyleParserService {
 
     private static final String PARSING_PROCESS_DURATION_SUMMARY = "parsing_process_duration";
 
-    @Value("${spring.jsoup.scraping.timeout.millis}")
+    @Value("${spring.jsoup.scraping.interval.millis}")
     private int timeout;
     @Value("${spring.jsoup.pagination.css.query.main-bottom}")
     private String paginationElementCssQuery;
@@ -58,6 +58,8 @@ public class ParserService implements WinestyleParserService {
     @SuppressWarnings("unused")
     @InjectEventLogger
     private EventLogger eventLogger;
+
+    private final Scraper scraper;
 
     private int parsed = 0;
 
@@ -67,8 +69,6 @@ public class ParserService implements WinestyleParserService {
 
         LocalDateTime start = LocalDateTime.now();
         String alcoholUrl = mainPageUrl + alcoholUrlPart;
-
-        Scraper scraper = new Scraper();
 
         LocalDateTime mainFetchingStart = LocalDateTime.now();
         Document currentDoc = scraper.getJsoupDocument(alcoholUrl);

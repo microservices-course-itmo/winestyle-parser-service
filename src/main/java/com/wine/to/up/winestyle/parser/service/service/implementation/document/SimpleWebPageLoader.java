@@ -18,6 +18,7 @@ public class SimpleWebPageLoader implements WebPageLoader {
     @Override
     public Document getDocument(String url) throws IOException {
         return Jsoup.connect(url)
+                .userAgent(userAgent)
                 .timeout(timeout)
                 .get();
     }
