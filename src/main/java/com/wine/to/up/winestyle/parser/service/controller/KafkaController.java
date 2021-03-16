@@ -15,8 +15,8 @@ public class KafkaController {
     private final KafkaService kafkaSenderService;
 
     @PostMapping("/alcohol")
-    public void sendAllAlcoholsToKafka() {
-        kafkaSenderService.sendAllAlcohols();
+    public void sendAllalcoholToKafka() {
+        kafkaSenderService.sendAllalcohol();
     }
 
     @PostMapping("/alcohol/wines")

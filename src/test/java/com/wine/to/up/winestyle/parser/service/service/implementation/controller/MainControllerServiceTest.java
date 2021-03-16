@@ -4,7 +4,6 @@ import com.wine.to.up.winestyle.parser.service.controller.exception.IllegalField
 import com.wine.to.up.winestyle.parser.service.controller.exception.NoEntityException;
 import com.wine.to.up.winestyle.parser.service.controller.exception.ServiceIsBusyException;
 import com.wine.to.up.winestyle.parser.service.domain.entity.Alcohol;
-import com.wine.to.up.winestyle.parser.service.service.RepositoryService;
 import com.wine.to.up.winestyle.parser.service.service.implementation.document.ProxyService;
 import com.wine.to.up.winestyle.parser.service.service.implementation.helpers.StatusService;
 import com.wine.to.up.winestyle.parser.service.service.implementation.helpers.enums.ServiceType;
@@ -25,18 +24,16 @@ class MainControllerServiceTest {
     private MainControllerService mainControllerService;
     @Mock
     private ApplicationRepositoryService ApplicationRepositoryService;
-    @Mock
-    RepositoryService repositoryService;
     @Spy
     StatusService statusService;
     @Mock
     ProxyService proxyService;
 
-    static Alcohol alcohol;
-    static String fieldsList;
-    static String emptyFieldsList;
-    static String wrongFieldsList;
-    static Map<String, Object> expectedFullMap;
+    Alcohol alcohol;
+    String fieldsList;
+    String emptyFieldsList;
+    String wrongFieldsList;
+    Map<String, Object> expectedFullMap;
 
     @BeforeEach
     void setUp() {

@@ -1,7 +1,7 @@
 package com.wine.to.up.winestyle.parser.service.service;
 
 public interface KafkaService {
-    void sendAllAlcohols();
+    void sendAllalcohol();
     void sendAllWines();
     void sendAllSparkling();
 }
