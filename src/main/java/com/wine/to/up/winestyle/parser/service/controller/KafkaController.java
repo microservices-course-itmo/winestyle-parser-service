@@ -3,7 +3,7 @@ package com.wine.to.up.winestyle.parser.service.controller;
 import com.wine.to.up.winestyle.parser.service.service.KafkaService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -14,17 +14,17 @@ import org.springframework.web.bind.annotation.RestController;
 public class KafkaController {
     private final KafkaService kafkaSenderService;
 
-    @GetMapping("/alcohol")
+    @PostMapping("/alcohol")
     public void sendAllAlcoholsToKafka() {
         kafkaSenderService.sendAllAlcohols();
     }
 
-    @GetMapping("/alcohol/wines")
+    @PostMapping("/alcohol/wines")
     public void sendAllWinesToKafka() {
         kafkaSenderService.sendAllWines();
     }
 
-    @GetMapping("/alcohol/sparkling")
+    @PostMapping("/alcohol/sparkling")
     public void sendAllSparklingToKafka() {
         kafkaSenderService.sendAllSparkling();
     }

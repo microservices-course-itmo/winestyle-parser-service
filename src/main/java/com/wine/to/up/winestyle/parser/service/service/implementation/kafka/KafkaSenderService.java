@@ -3,6 +3,7 @@ package com.wine.to.up.winestyle.parser.service.service.implementation.kafka;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.wine.to.up.commonlib.messaging.KafkaMessageSender;
 import com.wine.to.up.parser.common.api.schema.ParserApi;
+import com.wine.to.up.winestyle.parser.service.components.WinestyleParserServiceMetricsCollector;
 import com.wine.to.up.winestyle.parser.service.domain.entity.Alcohol;
 import com.wine.to.up.winestyle.parser.service.service.Director;
 import com.wine.to.up.winestyle.parser.service.service.KafkaService;
@@ -64,7 +65,7 @@ public class KafkaSenderService implements KafkaService {
         try {
             totalSended = sendAlcohols(alcohols);
         } catch (InterruptedException e) {
-            log.warn("Sending alcohols process to kafka were interrupted!");
+            log.warn("The process of sending alcohols to kafka was interrupted!");
         }
         logKafkaSended("alcohols", totalSended, startSendingProcess);
     }
@@ -74,13 +75,13 @@ public class KafkaSenderService implements KafkaService {
         List<Alcohol> wines = repositoryService.getAllWines();
 
         LocalDateTime startSendingProcess = LocalDateTime.now();
-        log.info("Start sending data of all alcohols to Kafka at {};", startSendingProcess);
+        log.info("Start sending data of all wines to Kafka at {};", startSendingProcess);
 
         int totalSended = 0;
         try {
             totalSended = sendAlcohols(wines);
         } catch (InterruptedException e) {
-            log.warn("Sending wines process to kafka were interrupted!");
+            log.warn("The process of sending wines to kafka was interrupted!");
         }
         logKafkaSended(AlcoholType.WINE.toString(), totalSended, startSendingProcess);
     }
@@ -90,13 +91,13 @@ public class KafkaSenderService implements KafkaService {
         List<Alcohol> sparkling = repositoryService.getAllSparkling();
 
         LocalDateTime startSendingProcess = LocalDateTime.now();
-        log.info("Start sending data of all alcohols to Kafka at {};", startSendingProcess);
+        log.info("Start sending data of all sparkling to Kafka at {};", startSendingProcess);
 
         int totalSended = 0;
         try {
             totalSended = sendAlcohols(sparkling);
         } catch (InterruptedException e) {
-            log.warn("Sending sparkling process to kafka were interrupted!");
+            log.warn("The process of sending sparkling to kafka was interrupted!");
         }
         logKafkaSended(AlcoholType.SPARKLING.toString(), totalSended, startSendingProcess);
     }
@@ -154,6 +155,7 @@ public class KafkaSenderService implements KafkaService {
                         .addWines(parserDirector
                                 .fillKafkaMessageBuilder(alcohol, AlcoholType.valueOf(alcohol.getType())))
                         .build());
+                WinestyleParserServiceMetricsCollector.incPublished();
                 sended++;
             } catch (Exception ex) {
                 log.error("Cannot send dataset to Kafka: id:{} {}", alcohol.getId(), alcohol.getType());
