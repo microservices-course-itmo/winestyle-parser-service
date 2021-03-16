@@ -54,20 +54,20 @@ public class KafkaSenderService implements KafkaService {
         kafkaSendAllThreadPool = initPool(maxThreadCount, kafkaSendAllThreadFactory);
     }
 
-    public void sendAllAlcohols() {
+    public void sendAllalcohol() {
         renewPools();
-        List<Alcohol> alcohols = repositoryService.getAll();
+        List<Alcohol> alcohol = repositoryService.getAll();
 
         LocalDateTime startSendingProcess = LocalDateTime.now();
-        log.info("Start sending data of all alcohols to Kafka at {};", startSendingProcess);
+        log.info("Start sending data of all alcohol to Kafka at {};", startSendingProcess);
 
         int totalSended = 0;
         try {
-            totalSended = sendAlcohols(alcohols);
+            totalSended = sendalcohol(alcohol);
         } catch (InterruptedException e) {
-            log.warn("The process of sending alcohols to kafka was interrupted!");
+            log.warn("The process of sending alcohol to kafka was interrupted!");
         }
-        logKafkaSended("alcohols", totalSended, startSendingProcess);
+        logKafkaSended("alcohol", totalSended, startSendingProcess);
     }
 
     public void sendAllWines() {
@@ -79,7 +79,7 @@ public class KafkaSenderService implements KafkaService {
 
         int totalSended = 0;
         try {
-            totalSended = sendAlcohols(wines);
+            totalSended = sendalcohol(wines);
         } catch (InterruptedException e) {
             log.warn("The process of sending wines to kafka was interrupted!");
         }
@@ -95,14 +95,14 @@ public class KafkaSenderService implements KafkaService {
 
         int totalSended = 0;
         try {
-            totalSended = sendAlcohols(sparkling);
+            totalSended = sendalcohol(sparkling);
         } catch (InterruptedException e) {
             log.warn("The process of sending sparkling to kafka was interrupted!");
         }
         logKafkaSended(AlcoholType.SPARKLING.toString(), totalSended, startSendingProcess);
     }
 
-    private Integer sendAlcohols(List<Alcohol> alcoholList) throws InterruptedException {
+    private Integer sendalcohol(List<Alcohol> alcoholList) throws InterruptedException {
         List<Future<Integer>> sendingFutures = new ArrayList<>();
         Integer totalSended = 0;
 
@@ -137,7 +137,7 @@ public class KafkaSenderService implements KafkaService {
         minutesPart = (timePassed.toMinutes() - hoursPassed * 60);
         secondsPart = (timePassed.toSeconds() - hoursPassed * 3600 - minutesPart * 60);
 
-        log.info("Sending {} to kafka: in {} hours {} minutes {} seconds. Total sended {} alcohols",
+        log.info("Sending {} to kafka: in {} hours {} minutes {} seconds. Total sended {} alcohol",
                 alcoholType, hoursPassed, minutesPart, secondsPart, total);
     }
 
