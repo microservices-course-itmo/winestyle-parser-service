@@ -62,8 +62,8 @@ class KafkaSenderServiceTest {
     }
 
     @Test
-    void sendAllAlcohols() throws InterruptedException {
-        kafkaSenderService.sendAllAlcohols();
+    void sendAllalcohol() throws InterruptedException {
+        kafkaSenderService.sendAllalcohol();
         Mockito.verify(kafkaSendAllThreadPool, times(1)).awaitTermination(100, TimeUnit.MILLISECONDS);
     }
 
