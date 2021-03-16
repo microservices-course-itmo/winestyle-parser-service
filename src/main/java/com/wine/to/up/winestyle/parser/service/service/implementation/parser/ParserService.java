@@ -22,6 +22,7 @@ import io.micrometer.core.annotation.Timed;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -34,7 +35,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Callable;
+import java.util.function.Supplier;
 
 @Slf4j
 @Component
@@ -85,7 +86,7 @@ public class ParserService implements WinestyleParserService {
                 log.info("Parsing: {}", currentDoc.location());
 
                 try {
-                    Integer currentUnparsed = new MainJob(currentDoc, start, scraper).call();
+                    Integer currentUnparsed = new MainJob(currentDoc, start, scraper).get();
                     unparsed += currentUnparsed;
                 }
                 catch (Exception e) {
@@ -122,7 +123,7 @@ public class ParserService implements WinestyleParserService {
     }
 
     @RequiredArgsConstructor
-    private class MainJob implements Callable<Integer> {
+    private class MainJob implements Supplier<Integer> {
         private final Document currentDoc;
         private final LocalDateTime start;
         private final Scraper scraper;
@@ -131,37 +132,38 @@ public class ParserService implements WinestyleParserService {
         /**
          * Парсер страницы с позициями
          */
+        @SneakyThrows
         @Override
-        public Integer call() throws InterruptedException {
+        public Integer get() {
             LocalDateTime mainParsingStart = LocalDateTime.now();
             Elements productElements = mainPageSegmentor.extractProductElements(currentDoc);
 
             int parsedNow = 0;
             int unparsed = 0;
 
-            List<Pair<ProductJob, String>> parsingFutures = new ArrayList<>();
+            List<Pair<ProductJob, String>> parsingJobs = new ArrayList<>();
             ProductJob productJob;
             String productUrl;
 
             for (Element productElement : productElements) {
                 productJob = new ProductJob(productElement, scraper);
                 try {
-                    productUrl = productJob.new ProductUrlJob().call();
+                    productUrl = productJob.new ProductUrlJob().get();
                 } catch (Exception e) {
                     log.error("Critical error during execution of url from product block {}", productElement.html());
                     continue;
                 }
-                parsingFutures.add(new Pair<>(productJob, productUrl));
+                parsingJobs.add(new Pair<>(productJob, productUrl));
             }
 
             Pair<ProductJob, String> currentPair;
             Alcohol result;
 
             for (int i = 0; i < productElements.size(); i++) {
-                currentPair = parsingFutures.get(i);
+                currentPair = parsingJobs.get(i);
                 productUrl = currentPair.getUrl();
                 try {
-                    result = currentPair.getParsingJob().call();
+                    result = currentPair.getParsingJob().get();
                     eventLogger.info(NotableEvents.I_WINE_DETAILS_PARSED, productUrl, result);
                     parsedNow += 1;
                 } catch (Exception e) {
@@ -210,7 +212,7 @@ public class ParserService implements WinestyleParserService {
     }
 
     @RequiredArgsConstructor
-    private class ProductJob implements Callable<Alcohol> {
+    private class ProductJob implements Supplier<Alcohol> {
         private final Element productElement;
         private final Scraper scraper;
         private final Director director = new ParserDirector();
@@ -219,7 +221,7 @@ public class ParserService implements WinestyleParserService {
         private String productUrl;
 
         @Override
-        public Alcohol call() {
+        public Alcohol get() {
             log.info("Now parsing url: {}", productUrl);
 
             LocalDateTime productParsingStart = LocalDateTime.now();
@@ -282,9 +284,9 @@ public class ParserService implements WinestyleParserService {
         }
 
         @RequiredArgsConstructor
-        private class ProductUrlJob implements Callable<String> {
+        private class ProductUrlJob implements Supplier<String> {
             @Override
-            public String call() {
+            public String get() {
                 parser.setProductBlock(productElement);
                 parser.setInfoContainer(productBlockSegmentor.extractInfoContainer(productElement));
 
