@@ -39,7 +39,7 @@ class MainControllerTest {
 
     private static Alcohol wine;
     private static Alcohol sparkling;
-    private static final List<Alcohol> alcohols = new ArrayList<>();
+    private static final List<Alcohol> alcohol = new ArrayList<>();
 
     @BeforeEach
     public void setUp() {
@@ -64,9 +64,9 @@ class MainControllerTest {
     @Test
     void getAlcohol() {
         String urlGet = "/winestyle/api/alcohol";
-        alcohols.add(wine);
-        alcohols.add(sparkling);
-        Mockito.when(alcoholRepositoryService.getAll()).thenReturn(alcohols);
+        alcohol.add(wine);
+        alcohol.add(sparkling);
+        Mockito.when(alcoholRepositoryService.getAll()).thenReturn(alcohol);
         MockHttpServletRequestBuilder mockRequest = MockMvcRequestBuilders
                 .get(urlGet).accept(MediaType.APPLICATION_JSON_VALUE);
         try {
@@ -79,14 +79,14 @@ class MainControllerTest {
         } catch (Exception e) {
             fail("Test failed. Can't perform get request on: " + urlGet, e);
         }
-        alcohols.clear();
+        alcohol.clear();
     }
 
     @Test
     void getWines() {
         String urlGet = "/winestyle/api/wines";
-        alcohols.add(wine);
-        Mockito.when(alcoholRepositoryService.getAllWines()).thenReturn(alcohols);
+        alcohol.add(wine);
+        Mockito.when(alcoholRepositoryService.getAllWines()).thenReturn(alcohol);
         MockHttpServletRequestBuilder mockRequest = MockMvcRequestBuilders
                 .get(urlGet).accept(MediaType.APPLICATION_JSON_VALUE);
         try {
@@ -99,14 +99,14 @@ class MainControllerTest {
         } catch (Exception e) {
             fail("Test failed. Can't perform get request on: " + urlGet, e);
         }
-        alcohols.clear();
+        alcohol.clear();
     }
 
     @Test
     void getSparkling() {
         String urlGet = "/winestyle/api/sparkling";
-        alcohols.add(sparkling);
-        Mockito.when(alcoholRepositoryService.getAllSparkling()).thenReturn(alcohols);
+        alcohol.add(sparkling);
+        Mockito.when(alcoholRepositoryService.getAllSparkling()).thenReturn(alcohol);
         MockHttpServletRequestBuilder mockRequest = MockMvcRequestBuilders
                 .get(urlGet).accept(MediaType.APPLICATION_JSON_VALUE);
         try {
@@ -119,7 +119,7 @@ class MainControllerTest {
         } catch (Exception e) {
             fail("Test failed. Can't perform get request on: " + urlGet, e);
         }
-        alcohols.clear();
+        alcohol.clear();
     }
 
     @Test

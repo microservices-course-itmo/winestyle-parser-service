@@ -41,7 +41,7 @@ public class AlcoholParsingScheduler {
         }
     }
 
-    @Scheduled(fixedRateString = "${spring.task.scheduling.rate.proxy.fixed.millis}")
+    //@Scheduled(fixedRateString = "${spring.task.scheduling.rate.proxy.fixed.millis}")
     public void onScheduleLoadProxies() {
         try {
             mainControllerService.startProxiesInitJob(timeout);
