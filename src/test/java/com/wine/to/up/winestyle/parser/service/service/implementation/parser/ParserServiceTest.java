@@ -30,13 +30,7 @@ class ParserServiceTest {
     @InjectMocks
     private ParserService parserService;
     @Mock
-    private KafkaMessageSender<ParserApi.WineParsedEvent> kafkaMessageSender;
-    @Mock
-    private RepositoryService repositoryService;
-    @Mock
     private Scraper scraper;
-    @MockBean
-    private ApplicationContextLocator applicationContextLocator = mock(ApplicationContextLocator.class);
 
     String htmlPage = "div id=\"CatalogPagingBottom\"" +
             "<li>2</li>" +
@@ -45,7 +39,6 @@ class ParserServiceTest {
     @BeforeEach
     void setUp() throws InterruptedException {
         MockitoAnnotations.initMocks(this);
-        ReflectionTestUtils.setField(parserService, "timeout", 10);
         ReflectionTestUtils.setField(parserService, "paginationElementCssQuery", "#CatalogPagingBottom li:last-of-type");
 
         Document document = Jsoup.parse(htmlPage);

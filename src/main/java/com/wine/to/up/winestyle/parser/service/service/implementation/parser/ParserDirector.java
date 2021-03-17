@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Optional;
 
-@Service
+@Service("ParserDirector")
 public class ParserDirector implements Director {
     @Getter
     private final ParserApi.Wine.Builder kafkaMessageBuilder = ParserApi.Wine.newBuilder();
