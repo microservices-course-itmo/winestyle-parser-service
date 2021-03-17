@@ -2,15 +2,16 @@ package com.wine.to.up.winestyle.parser.service.service.implementation.controlle
 
 import com.wine.to.up.winestyle.parser.service.controller.exception.IllegalFieldException;
 import com.wine.to.up.winestyle.parser.service.controller.exception.NoEntityException;
+import com.wine.to.up.winestyle.parser.service.controller.exception.ServiceIsBusyException;
 import com.wine.to.up.winestyle.parser.service.domain.entity.Alcohol;
+import com.wine.to.up.winestyle.parser.service.service.implementation.document.ProxyService;
+import com.wine.to.up.winestyle.parser.service.service.implementation.helpers.StatusService;
+import com.wine.to.up.winestyle.parser.service.service.implementation.helpers.enums.ServiceType;
 import com.wine.to.up.winestyle.parser.service.service.implementation.repository.ApplicationRepositoryService;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
+import org.mockito.*;
 
 import java.util.Map;
 import java.util.HashMap;
@@ -23,12 +24,16 @@ class MainControllerServiceTest {
     private MainControllerService mainControllerService;
     @Mock
     private ApplicationRepositoryService ApplicationRepositoryService;
+    @Spy
+    StatusService statusService;
+    @Mock
+    ProxyService proxyService;
 
-    static Alcohol alcohol;
-    static String fieldsList;
-    static String emptyFieldsList;
-    static String wrongFieldsList;
-    static Map<String, Object> expectedFullMap;
+    Alcohol alcohol;
+    String fieldsList;
+    String emptyFieldsList;
+    String wrongFieldsList;
+    Map<String, Object> expectedFullMap;
 
     @BeforeEach
     void setUp() {
@@ -119,12 +124,25 @@ class MainControllerServiceTest {
         }
 
         try {
+            Thread.sleep(100);
             mainControllerService.getAlcoholWithFields(1L, emptyFieldsList);
         } catch (NoEntityException e) {
             fail("Test failed! wrong entity id");
         } catch (IllegalFieldException e) {
             assertEquals("The server reported: Alcohol entity has no field called .",
                     e.getMessage());
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
+    }
+
+    @Test
+    void startProxyInitJob() throws ServiceIsBusyException, InterruptedException {
+        Mockito.when(statusService.tryBusy(ServiceType.PROXY)).thenReturn(true);
+        Mockito.when(statusService.isBusy(ServiceType.PARSER)).thenReturn(false);
+        Mockito.doNothing().when(proxyService).initProxies(100);
+        mainControllerService.startProxiesInitJob(100);
+        Thread.sleep(100);
+        Mockito.verify(statusService, Mockito.times(1)).release(ServiceType.PROXY);
     }
 }

@@ -1,5 +1,6 @@
 package com.wine.to.up.winestyle.parser.service.service.implementation.document;
 
+import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.HttpStatusException;
@@ -16,9 +17,12 @@ import java.net.SocketTimeoutException;
  */
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class Scraper {
     @Setter
     private int timeout = 0;
+
+    private final SimpleWebPageLoader loader;
 
     /**
      * Достаем док из ссылки
@@ -31,7 +35,7 @@ public class Scraper {
         Document doc = null;
         while (doc == null) {
             try {
-                doc = ProxyService.getLoader().getDocument(url);
+                doc = loader.getDocument(url);
             } catch (SocketException | SocketTimeoutException | SSLException e) {
                 log.error("Couldn't get a connection to website! {}", e.getMessage());
             } // Берем страничку html
