@@ -38,43 +38,19 @@ class ParserServiceTest {
     @MockBean
     private ApplicationContextLocator applicationContextLocator = mock(ApplicationContextLocator.class);
 
-    @Mock
-    ExecutorService mainPageParsingThreadPool;
-    @Spy
-    ExecutorService productPageParsingThreadPool;
-    @Spy
-    ExecutorService urlFetchingThreadPool;
-
-    ThreadFactory mainPageParsingThreadFactory = new ThreadFactoryBuilder()
-            .setNameFormat("Main_parser-%d")
-            .build();
-    ThreadFactory productPageParsingThreadFactory = new ThreadFactoryBuilder()
-            .setNameFormat("Prod_parser-%d")
-            .build();
-    ThreadFactory urlFetchingThreadFactory = new ThreadFactoryBuilder()
-            .setNameFormat("Url_fetching-%d")
-            .build();
-
     String htmlPage = "div id=\"CatalogPagingBottom\"" +
-            "<li>1</li>" +
+            "<li>2</li>" +
             "</div>";
 
     @BeforeEach
-    void setUp() throws InterruptedException, ExecutionException {
+    void setUp() throws InterruptedException {
         MockitoAnnotations.initMocks(this);
-        ReflectionTestUtils.setField(parserService, "maxThreadCount", 2);
         ReflectionTestUtils.setField(parserService, "timeout", 10);
         ReflectionTestUtils.setField(parserService, "paginationElementCssQuery", "#CatalogPagingBottom li:last-of-type");
 
-        mainPageParsingThreadPool = spy(ExecutorService.class);
-        productPageParsingThreadPool = spy(Executors.newFixedThreadPool(2, productPageParsingThreadFactory));
-        urlFetchingThreadPool = spy(Executors.newFixedThreadPool(2, urlFetchingThreadFactory));
-        ReflectionTestUtils.setField(parserService, "mainPageParsingThreadPool", mainPageParsingThreadPool);
-        ReflectionTestUtils.setField(parserService, "productPageParsingThreadPool", productPageParsingThreadPool);
-        ReflectionTestUtils.setField(parserService, "urlFetchingThreadPool", urlFetchingThreadPool);
-
         Document document = Jsoup.parse(htmlPage);
         Mockito.when(scraper.getJsoupDocument("test/test")).thenReturn(document);
+        Mockito.when(scraper.getJsoupDocument("test/test?page=2")).thenReturn(document);
     }
 
     @Test
@@ -86,7 +62,7 @@ class ParserServiceTest {
         } catch (NullPointerException ex) {
             log.warn("Cannot execute MainJob inner class. Ok.");
         }
-        Mockito.verify(mainPageParsingThreadPool, times(1)).shutdownNow();
+        Mockito.verify(scraper, times(1)).getJsoupDocument("test/test");
     }
 
     @Test
