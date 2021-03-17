@@ -61,8 +61,6 @@ public class ParserService implements WinestyleParserService {
     @InjectEventLogger
     private EventLogger eventLogger;
 
-    private final Scraper scraper;
-
     private int parsed = 0;
 
     @Timed(PARSING_PROCESS_DURATION_SUMMARY)
