@@ -107,6 +107,12 @@
             <version>${parser.common.api.version}</version>
         </dependency>
 
+        <!-- Eureka -->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
+        </dependency>
+
         <!-- testing dependency -->
         <dependency>
             <groupId>com.google.code.gson</groupId>
