@@ -60,8 +60,6 @@ public class ParsingControllerService {
             WinestyleParserServiceMetricsCollector.incParsingStarted();
             WinestyleParserServiceMetricsCollector.updateInProgress(1);
             new Thread(() -> {
-                alcoholParserService.setAlcoholType(alcoholType);
-                alcoholParserService.setMainPageUrl(supportedCityUrls.get(city));
                 try {
                     alcoholParserService.parseBuildSave(supportedAlcoholUrls.get(alcoholType));
                 } catch (InterruptedException e) {

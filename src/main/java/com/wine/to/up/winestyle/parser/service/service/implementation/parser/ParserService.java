@@ -10,7 +10,6 @@ import com.wine.to.up.winestyle.parser.service.service.implementation.helpers.en
 import com.wine.to.up.winestyle.parser.service.service.implementation.parser.job.MainJob;
 import io.micrometer.core.annotation.Timed;
 import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.nodes.Document;
 import org.springframework.beans.factory.annotation.Value;
@@ -24,13 +23,8 @@ public class ParserService implements WinestyleParserService {
     private final MainJob mainJob;
     private final Scraper scraper;
 
-    @Setter
-    private AlcoholType alcoholType;
-    @Setter
-    private String mainPageUrl;
-
     private static final String PARSING_PROCESS_DURATION_SUMMARY = "parsing_process_duration";
-
+    
     @Value("${spring.jsoup.pagination.css.query.main-bottom}")
     private String paginationElementCssQuery;
 
