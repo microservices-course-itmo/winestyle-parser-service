@@ -9,13 +9,11 @@ import com.wine.to.up.winestyle.parser.service.service.Director;
 import com.wine.to.up.winestyle.parser.service.service.Parser;
 import com.wine.to.up.winestyle.parser.service.service.RepositoryService;
 import com.wine.to.up.winestyle.parser.service.service.implementation.document.Scraper;
-import com.wine.to.up.winestyle.parser.service.service.implementation.helpers.ApplicationContextLocator;
 import com.wine.to.up.winestyle.parser.service.service.implementation.helpers.ProductBlockSegmentor;
 import com.wine.to.up.winestyle.parser.service.service.implementation.helpers.ProductPageSegmentor;
 import com.wine.to.up.winestyle.parser.service.service.implementation.helpers.enums.AlcoholType;
-import com.wine.to.up.winestyle.parser.service.service.implementation.parser.ParserDirector;
+import com.wine.to.up.winestyle.parser.service.service.implementation.helpers.enums.City;
 import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -29,7 +27,8 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 @Component
 public class ProductJob {
-    @Qualifier("ParserDirector") private final Director director;
+    @Qualifier("ParserDirector")
+    private final Director director;
     private final KafkaMessageSender<ParserApi.WineParsedEvent> kafkaMessageSender;
     private final RepositoryService repositoryService;
     private final Scraper scraper;
@@ -41,7 +40,7 @@ public class ProductJob {
     private AlcoholType alcoholType;
     private Parser parser;
 
-    public Alcohol getParsedAlcohol(Parser parser, String mainPageUrl, String productUrl, Element productElement, AlcoholType alcoholType) {
+    public Alcohol getParsedAlcohol(Parser parser, String mainPageUrl, String productUrl, Element productElement, AlcoholType alcoholType, City city) {
         this.mainPageUrl = mainPageUrl;
         this.productUrl = productUrl;
         this.alcoholType = alcoholType;
@@ -58,7 +57,7 @@ public class ProductJob {
             alcohol = repositoryService.getByUrl(productUrl);
 
             if (LocalDateTime.now().getDayOfWeek() == DayOfWeek.MONDAY) {
-                alcohol = parseProduct(productElement, kafkaMessageBuilder);
+                alcohol = parseProduct(productElement, kafkaMessageBuilder, city);
             } else {
                 alcohol.setPrice(parser.parsePrice().orElse(null));
                 alcohol.setRating(parser.parseWinestyleRating().orElse(null));
@@ -66,7 +65,7 @@ public class ProductJob {
                 kafkaMessageSender.sendMessage(kafkaMessageBuilder.addWines(director.fillKafkaMessageBuilder(alcohol, alcoholType)).build());
             }
         } catch (NoEntityException ex) {
-            alcohol = parseProduct(productElement, kafkaMessageBuilder);
+            alcohol = parseProduct(productElement, kafkaMessageBuilder, city);
         }
 
         WinestyleParserServiceMetricsCollector.sumDetailsParsingDuration(productParsingStart, LocalDateTime.now());
