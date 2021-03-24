@@ -1,6 +1,5 @@
 package com.wine.to.up.winestyle.parser.service.service.implementation.controller;
 
-import com.google.common.collect.ImmutableMap;
 import com.wine.to.up.winestyle.parser.service.components.WinestyleParserServiceMetricsCollector;
 import com.wine.to.up.winestyle.parser.service.controller.exception.ServiceIsBusyException;
 import com.wine.to.up.winestyle.parser.service.domain.entity.Timing;
@@ -12,10 +11,8 @@ import com.wine.to.up.winestyle.parser.service.service.implementation.helpers.en
 import com.wine.to.up.winestyle.parser.service.service.implementation.helpers.enums.ServiceType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.PostConstruct;
 import java.time.LocalDateTime;
 
 /**
@@ -29,30 +26,6 @@ public class ParsingControllerService {
     private final StatusService statusService;
     private final RepositoryService repositoryService;
 
-    @Value("${spring.jsoup.scraping.winestyle-main-msk-url}")
-    private String mskUrl;
-    @Value("${spring.jsoup.scraping.winestyle-main-spb-url}")
-    private String spbUrl;
-    @Value("${spring.jsoup.scraping.winestyle-wine-part-url}")
-    private String wineUrl;
-    @Value("${spring.jsoup.scraping.winestyle-sparkling-part-url}")
-    private String sparklingUrl;
-
-    private ImmutableMap<City, String> supportedCityUrls;
-    private ImmutableMap<AlcoholType, String> supportedAlcoholUrls;
-
-    @PostConstruct
-    private void populateUrl() {
-        supportedCityUrls = ImmutableMap.<City, String>builder()
-                .put(City.MSK, mskUrl)
-                .put(City.SPB, spbUrl)
-                .build();
-        supportedAlcoholUrls = ImmutableMap.<AlcoholType, String>builder()
-                .put(AlcoholType.WINE, wineUrl)
-                .put(AlcoholType.SPARKLING, sparklingUrl)
-                .build();
-    }
-
     // Start parsing job in a separate thread
     public void startParsingJob(City city, AlcoholType alcoholType) throws ServiceIsBusyException {
         if (statusService.tryBusy(ServiceType.PARSER)) {
@@ -60,10 +33,8 @@ public class ParsingControllerService {
             WinestyleParserServiceMetricsCollector.incParsingStarted();
             WinestyleParserServiceMetricsCollector.updateInProgress(1);
             new Thread(() -> {
-                alcoholParserService.setAlcoholType(alcoholType);
-                alcoholParserService.setMainPageUrl(supportedCityUrls.get(city));
                 try {
-                    alcoholParserService.parseBuildSave(supportedAlcoholUrls.get(alcoholType));
+                    alcoholParserService.parseBuildSave(alcoholType, city);
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                 } finally {

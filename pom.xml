@@ -18,7 +18,7 @@
         <current-version>0.6.0</current-version>
 
         <service.commonlib.version>0.2.3-SNAPSHOT</service.commonlib.version>
-        <parser.common.api.version>0.2.3-SNAPSHOT</parser.common.api.version>
+        <parser.common.api.version>0.2.5-SNAPSHOT</parser.common.api.version>
 
         <jsoup.version>1.13.1</jsoup.version>
         <opencsv.version>5.2</opencsv.version>
