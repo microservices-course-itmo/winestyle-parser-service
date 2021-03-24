@@ -17,7 +17,7 @@ public class KafkaSender {
     private final KafkaMessageSender<ParserApi.WineParsedEvent> kafkaMessageSender;
     private final Director parserDirector;
 
-    private ParserApi.WineParsedEvent.Builder kafkaMessageBuilder = ParserApi.WineParsedEvent.newBuilder();
+    private final ParserApi.WineParsedEvent.Builder kafkaMessageBuilder = ParserApi.WineParsedEvent.newBuilder();
     private Integer sended = 0;
 
     public Integer sendAlcoholToKafka(Alcohol alcohol) {
