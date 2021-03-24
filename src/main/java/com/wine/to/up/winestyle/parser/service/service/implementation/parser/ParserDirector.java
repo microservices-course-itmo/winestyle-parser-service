@@ -5,6 +5,7 @@ import com.wine.to.up.winestyle.parser.service.domain.entity.Alcohol;
 import com.wine.to.up.winestyle.parser.service.service.Director;
 import com.wine.to.up.winestyle.parser.service.service.Parser;
 import com.wine.to.up.winestyle.parser.service.service.implementation.helpers.enums.AlcoholType;
+import com.wine.to.up.winestyle.parser.service.service.implementation.helpers.enums.City;
 import lombok.Getter;
 import org.springframework.stereotype.Service;
 
@@ -18,7 +19,7 @@ public class ParserDirector implements Director {
     private final ParserApi.Wine.Builder kafkaMessageBuilder = ParserApi.Wine.newBuilder();
 
     @Override
-    public Alcohol makeAlcohol(Parser parser, String mainPageUrl, String productUrl, AlcoholType alcoholType) {
+    public Alcohol makeAlcohol(Parser parser, String mainPageUrl, String productUrl, AlcoholType alcoholType, City city) {
         Alcohol.AlcoholBuilder entityBuilder = Alcohol.builder();
 
         String name = parser.parseName();
@@ -27,6 +28,9 @@ public class ParserDirector implements Director {
 
         entityBuilder.url(productUrl);
         kafkaMessageBuilder.setLink(productUrl);
+
+        entityBuilder.city(city);
+        kafkaMessageBuilder.setCity(city.toString());
 
         boolean isSparkling = alcoholType == AlcoholType.SPARKLING;
         entityBuilder.type(parser.parseType(isSparkling));
@@ -177,6 +181,8 @@ public class ParserDirector implements Director {
         kafkaMessageBuilder.setName(source.getName());
 
         kafkaMessageBuilder.setLink(source.getUrl());
+
+        kafkaMessageBuilder.setCity(source.getCity().toString());
 
         kafkaMessageBuilder.setSparkling(alcoholType == AlcoholType.SPARKLING);
 

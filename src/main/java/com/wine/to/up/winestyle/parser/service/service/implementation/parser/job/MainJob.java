@@ -8,6 +8,7 @@ import com.wine.to.up.winestyle.parser.service.logging.NotableEvents;
 import com.wine.to.up.winestyle.parser.service.service.Parser;
 import com.wine.to.up.winestyle.parser.service.service.implementation.helpers.MainPageSegmentor;
 import com.wine.to.up.winestyle.parser.service.service.implementation.helpers.enums.AlcoholType;
+import com.wine.to.up.winestyle.parser.service.service.implementation.helpers.enums.City;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.SneakyThrows;
@@ -43,7 +44,7 @@ public class MainJob {
      * Парсер страницы с позициями
      */
     @SneakyThrows
-    public Integer get(Document currentDoc, AlcoholType alcoholType, String mainPageUrl, LocalDateTime start) {
+    public Integer get(Document currentDoc, AlcoholType alcoholType, String mainPageUrl, LocalDateTime start, City city) {
         LocalDateTime mainParsingStart = LocalDateTime.now();
         Elements productElements = mainPageSegmentor.extractProductElements(currentDoc);
 
@@ -57,7 +58,7 @@ public class MainJob {
             try {
                 productUrl = productUrlJob.get(parser, productElement);
                 try {
-                    result = productJob.getParsedAlcohol(parser, mainPageUrl, productUrl, productElement, alcoholType);
+                    result = productJob.getParsedAlcohol(parser, mainPageUrl, productUrl, productElement, alcoholType, city);
                     eventLogger.info(NotableEvents.I_WINE_DETAILS_PARSED, productUrl, result);
                     parsedNow += 1;
                 } catch (Exception e) {

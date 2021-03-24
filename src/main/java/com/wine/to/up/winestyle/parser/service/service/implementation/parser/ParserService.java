@@ -85,10 +85,9 @@ public class ParserService implements WinestyleParserService {
                 log.info("Parsing: {}", currentDoc.location());
 
                 try {
-                    Integer currentUnparsed = mainJob.get(currentDoc, alcoholType, mainPageUrl, start);
+                    Integer currentUnparsed = mainJob.get(currentDoc, alcoholType, mainPageUrl, start, city);
                     unparsed += currentUnparsed;
-                }
-                catch (Exception e) {
+                } catch (Exception e) {
                     eventLogger.warn(NotableEvents.W_WINE_PAGE_PARSING_FAILED, alcoholUrl + "?page=" + (nextPageNumber - 1));
                     unparsed += 20;
                 }

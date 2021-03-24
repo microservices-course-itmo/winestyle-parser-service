@@ -75,7 +75,7 @@ public class ProductJob {
         return alcohol;
     }
 
-    private Alcohol parseProduct(Element productElement, ParserApi.WineParsedEvent.Builder kafkaMessageBuilder) {
+    private Alcohol parseProduct(Element productElement, ParserApi.WineParsedEvent.Builder kafkaMessageBuilder, City city) {
         Document product = null;
 
         LocalDateTime detailsFetchingStart = LocalDateTime.now();
@@ -88,7 +88,7 @@ public class ProductJob {
 
         prepareParsingService(product, productElement);
 
-        Alcohol alcohol = director.makeAlcohol(parser, mainPageUrl, productUrl, alcoholType);
+        Alcohol alcohol = director.makeAlcohol(parser, mainPageUrl, productUrl, alcoholType, city);
 
         repositoryService.add(alcohol);
 
