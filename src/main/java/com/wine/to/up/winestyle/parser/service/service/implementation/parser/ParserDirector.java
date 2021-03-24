@@ -55,6 +55,7 @@ public class ParserDirector implements Director {
         parser.parsePrice().ifPresentOrElse(
                 value -> {
                     entityBuilder.price(value);
+                    kafkaMessageBuilder.setOldPrice(value);
                     kafkaMessageBuilder.setNewPrice(value);
                 },
                 () -> entityBuilder.price(null)
