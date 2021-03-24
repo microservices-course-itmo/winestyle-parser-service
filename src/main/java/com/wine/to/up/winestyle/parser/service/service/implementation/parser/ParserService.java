@@ -1,5 +1,6 @@
 package com.wine.to.up.winestyle.parser.service.service.implementation.parser;
 
+import com.google.common.collect.ImmutableMap;
 import com.wine.to.up.commonlib.annotations.InjectEventLogger;
 import com.wine.to.up.commonlib.logging.EventLogger;
 import com.wine.to.up.winestyle.parser.service.components.WinestyleParserServiceMetricsCollector;
@@ -7,6 +8,7 @@ import com.wine.to.up.winestyle.parser.service.logging.NotableEvents;
 import com.wine.to.up.winestyle.parser.service.service.WinestyleParserService;
 import com.wine.to.up.winestyle.parser.service.service.implementation.document.Scraper;
 import com.wine.to.up.winestyle.parser.service.service.implementation.helpers.enums.AlcoholType;
+import com.wine.to.up.winestyle.parser.service.service.implementation.helpers.enums.City;
 import com.wine.to.up.winestyle.parser.service.service.implementation.parser.job.MainJob;
 import io.micrometer.core.annotation.Timed;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +16,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.jsoup.nodes.Document;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+
+import javax.annotation.PostConstruct;
 import java.time.LocalDateTime;
 
 @Slf4j
@@ -28,15 +32,42 @@ public class ParserService implements WinestyleParserService {
     @Value("${spring.jsoup.pagination.css.query.main-bottom}")
     private String paginationElementCssQuery;
 
+    @Value("${spring.jsoup.scraping.winestyle-main-msk-url}")
+    private String mskUrl;
+    @Value("${spring.jsoup.scraping.winestyle-main-spb-url}")
+    private String spbUrl;
+    @Value("${spring.jsoup.scraping.winestyle-wine-part-url}")
+    private String wineUrl;
+    @Value("${spring.jsoup.scraping.winestyle-sparkling-part-url}")
+    private String sparklingUrl;
+
+    private ImmutableMap<City, String> supportedCityUrls;
+    private ImmutableMap<AlcoholType, String> supportedAlcoholUrls;
+
     @SuppressWarnings("unused")
     @InjectEventLogger
     private EventLogger eventLogger;
 
+    @PostConstruct
+    private void populateUrl() {
+        supportedCityUrls = ImmutableMap.<City, String>builder()
+                .put(City.MSK, mskUrl)
+                .put(City.SPB, spbUrl)
+                .build();
+        supportedAlcoholUrls = ImmutableMap.<AlcoholType, String>builder()
+                .put(AlcoholType.WINE, wineUrl)
+                .put(AlcoholType.SPARKLING, sparklingUrl)
+                .build();
+    }
+
     @Timed(PARSING_PROCESS_DURATION_SUMMARY)
     @Override
-    public void parseBuildSave(String alcoholUrlPart) throws InterruptedException {
+    public void parseBuildSave(AlcoholType alcoholType, City city) throws InterruptedException {
 
         LocalDateTime start = LocalDateTime.now();
+        
+        String mainPageUrl = supportedCityUrls.get(city);
+        String alcoholUrlPart = supportedAlcoholUrls.get(alcoholType);
         String alcoholUrl = mainPageUrl + alcoholUrlPart;
 
         LocalDateTime mainFetchingStart = LocalDateTime.now();
