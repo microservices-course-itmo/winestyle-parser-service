@@ -223,7 +223,7 @@ public class ParserDirector implements Director {
 
         Optional.ofNullable(source.getSugar()).ifPresent(sugar -> kafkaMessageBuilder.setSugar(matchSugarToValue(sugar)));
 
-        Optional.ofNullable(source.getAvailability() ? 0 : 1).ifPresent(kafkaMessageBuilder::setInStock);
+        Optional.ofNullable(source.getAvailability()).ifPresent(availability -> kafkaMessageBuilder.setInStock(availability ? 1 : 0));
 
         Optional.ofNullable(source.getTaste()).ifPresent(kafkaMessageBuilder::setTaste);
 
