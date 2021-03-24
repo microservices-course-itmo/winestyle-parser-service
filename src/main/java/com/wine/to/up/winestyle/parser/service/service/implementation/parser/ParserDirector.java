@@ -140,6 +140,14 @@ public class ParserDirector implements Director {
                 () -> entityBuilder.sugar(null)
         );
 
+        parser.parseAvailability().ifPresentOrElse(
+                value -> {
+                    entityBuilder.availability(value);
+                    kafkaMessageBuilder.setInStock(value ? 1 : 0);
+                },
+                () -> entityBuilder.availability(null)
+        );
+
         parser.parseTaste().ifPresentOrElse(
                 value -> {
                     entityBuilder.taste(value);
@@ -214,6 +222,8 @@ public class ParserDirector implements Director {
         Optional.ofNullable(source.getColor()).ifPresent(color -> kafkaMessageBuilder.setColor(matchColorToValue(color)));
 
         Optional.ofNullable(source.getSugar()).ifPresent(sugar -> kafkaMessageBuilder.setSugar(matchSugarToValue(sugar)));
+
+        Optional.ofNullable(source.getAvailability() ? 0 : 1).ifPresent(kafkaMessageBuilder::setInStock);
 
         Optional.ofNullable(source.getTaste()).ifPresent(kafkaMessageBuilder::setTaste);
 

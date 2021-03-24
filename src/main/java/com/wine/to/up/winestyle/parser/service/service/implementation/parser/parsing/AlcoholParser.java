@@ -52,6 +52,8 @@ public class AlcoholParser implements Parser {
     private String grapeElementCssQuery;
     @Value("${spring.jsoup.parsing.css.query.type}")
     private String typeElementCssQuery;
+    @Value("${spring.jsoup.parsing.css.query.availability}")
+    private String availabilityElementCssQuery;
     @Value("${spring.jsoup.parsing.css.query.taste}")
     private String tasteElementCssQuery;
     @Value("${spring.jsoup.parsing.css.query.aroma}")
@@ -67,6 +69,8 @@ public class AlcoholParser implements Parser {
     private String imageUrlPropertyCssAttr;
     @Value("${spring.jsoup.parsing.css.attr.winestyle-rating}")
     private String winestyleRatingPropertyCssAttr;
+    @Value("${spring.jsoup.parsing.css.attr.availability}")
+    private String availabilityPropertyCssAttr;
 
     private String name;
     private String url;
@@ -379,6 +383,19 @@ public class AlcoholParser implements Parser {
         } else {
             log.warn("{}: product's sugar is not specified", url);
             isSugarPresented = true;
+            return Optional.empty();
+        }
+    }
+
+    @Override
+    public Optional<Boolean> parseAvailability() {
+        try {
+            Element availabilityElement = productBlock.selectFirst(availabilityElementCssQuery);
+            String availabilityAttr = availabilityElement.attr(availabilityPropertyCssAttr);
+            String availabilityValue = availabilityAttr.substring(availabilityAttr.length() - 1) ;
+            return Optional.of(availabilityValue.matches("[13]"));
+        } catch (Exception ex) {
+            log.warn("{}: product's in stock availability is not specified", url);
             return Optional.empty();
         }
     }
