@@ -5,6 +5,7 @@ import com.wine.to.up.winestyle.parser.service.domain.entity.Alcohol;
 import com.wine.to.up.winestyle.parser.service.service.Director;
 import com.wine.to.up.winestyle.parser.service.service.Parser;
 import com.wine.to.up.winestyle.parser.service.service.implementation.helpers.enums.AlcoholType;
+import com.wine.to.up.winestyle.parser.service.service.implementation.helpers.enums.City;
 import lombok.Getter;
 import org.springframework.stereotype.Service;
 
@@ -18,7 +19,7 @@ public class ParserDirector implements Director {
     private final ParserApi.Wine.Builder kafkaMessageBuilder = ParserApi.Wine.newBuilder();
 
     @Override
-    public Alcohol makeAlcohol(Parser parser, String mainPageUrl, String productUrl, AlcoholType alcoholType) {
+    public Alcohol makeAlcohol(Parser parser, String mainPageUrl, String productUrl, AlcoholType alcoholType, City city) {
         Alcohol.AlcoholBuilder entityBuilder = Alcohol.builder();
 
         String name = parser.parseName();
@@ -27,6 +28,9 @@ public class ParserDirector implements Director {
 
         entityBuilder.url(productUrl);
         kafkaMessageBuilder.setLink(productUrl);
+
+        entityBuilder.city(city);
+        kafkaMessageBuilder.setCity(city.toString());
 
         boolean isSparkling = alcoholType == AlcoholType.SPARKLING;
         entityBuilder.type(parser.parseType(isSparkling));
@@ -51,6 +55,7 @@ public class ParserDirector implements Director {
         parser.parsePrice().ifPresentOrElse(
                 value -> {
                     entityBuilder.price(value);
+                    kafkaMessageBuilder.setOldPrice(value);
                     kafkaMessageBuilder.setNewPrice(value);
                 },
                 () -> entityBuilder.price(null)
@@ -136,6 +141,14 @@ public class ParserDirector implements Director {
                 () -> entityBuilder.sugar(null)
         );
 
+        parser.parseAvailability().ifPresentOrElse(
+                value -> {
+                    entityBuilder.availability(value);
+                    kafkaMessageBuilder.setInStock(value ? 1 : 0);
+                },
+                () -> entityBuilder.availability(null)
+        );
+
         parser.parseTaste().ifPresentOrElse(
                 value -> {
                     entityBuilder.taste(value);
@@ -178,6 +191,8 @@ public class ParserDirector implements Director {
 
         kafkaMessageBuilder.setLink(source.getUrl());
 
+        kafkaMessageBuilder.setCity(source.getCity().toString());
+
         kafkaMessageBuilder.setSparkling(alcoholType == AlcoholType.SPARKLING);
 
         Optional.ofNullable(source.getImageUrl()).ifPresent(kafkaMessageBuilder::setImage);
@@ -208,6 +223,8 @@ public class ParserDirector implements Director {
         Optional.ofNullable(source.getColor()).ifPresent(color -> kafkaMessageBuilder.setColor(matchColorToValue(color)));
 
         Optional.ofNullable(source.getSugar()).ifPresent(sugar -> kafkaMessageBuilder.setSugar(matchSugarToValue(sugar)));
+
+        Optional.ofNullable(source.getAvailability()).ifPresent(availability -> kafkaMessageBuilder.setInStock(availability ? 1 : 0));
 
         Optional.ofNullable(source.getTaste()).ifPresent(kafkaMessageBuilder::setTaste);
 

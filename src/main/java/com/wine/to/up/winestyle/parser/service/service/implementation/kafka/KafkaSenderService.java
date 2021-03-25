@@ -1,7 +1,6 @@
 package com.wine.to.up.winestyle.parser.service.service.implementation.kafka;
 
 import com.wine.to.up.winestyle.parser.service.domain.entity.Alcohol;
-import com.wine.to.up.winestyle.parser.service.service.Director;
 import com.wine.to.up.winestyle.parser.service.service.KafkaService;
 import com.wine.to.up.winestyle.parser.service.service.RepositoryService;
 import com.wine.to.up.winestyle.parser.service.service.implementation.helpers.enums.AlcoholType;

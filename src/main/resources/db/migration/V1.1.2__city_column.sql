@@ -1,0 +1,1 @@
+ALTER TABLE alcohol ADD city VARCHAR(20);

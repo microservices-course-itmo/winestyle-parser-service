@@ -1,5 +1,6 @@
 package com.wine.to.up.winestyle.parser.service.domain.entity;
 
+import com.wine.to.up.winestyle.parser.service.service.implementation.helpers.enums.City;
 import lombok.*;
 
 import javax.persistence.*;
@@ -17,96 +18,153 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class Alcohol {
 
-    /**Поле id - уникальный номер*/
+    /**
+     * Поле id - уникальный номер
+     */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    /**Поле type - тип (Вино/Шампанское/Игристое)*/
-    @Column(columnDefinition = "varchar(25)")
+    /**
+     * Поле type - тип (Вино/Шампанское/Игристое)
+     */
+    @Column(columnDefinition = "VARCHAR(25)")
     @NotNull
     private String type;
 
-    /**Поле name - название напитка*/
-    @Column(columnDefinition = "varchar(130)")
+    /**
+     * Поле name - название напитка
+     */
+    @Column(columnDefinition = "VARCHAR(130)")
     @NotNull
     private String name;
 
-    /**Поле url - ссылка на страницу напитка*/
-    @Column(columnDefinition = "varchar(140)")
+    /**
+     * Поле url - ссылка на страницу напитка
+     */
+    @Column(columnDefinition = "VARCHAR(140)")
     @NotNull
     private String url;
 
-    /**Поле imageUrl - ссылка на изображение напитка*/
-    @Column(columnDefinition = "varchar(65)")
+    /**
+     * Поле city - enum с указанием города, откуда была спаршена позиция
+     */
+    @Column(columnDefinition = "VARCHAR(20)")
+    @Enumerated(EnumType.STRING)
+    private City city;
+
+    /**
+     * Поле imageUrl - ссылка на изображение напитка
+     */
+    @Column(columnDefinition = "VARCHAR(65)")
     private String imageUrl;
 
-    /**Поле image - изображение напитка*/
+    /**
+     * Поле image - изображение напитка
+     */
     @OneToOne(mappedBy = "alcohol", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Image image;
 
-    /**Поле cropYear - год сбора*/
+    /**
+     * Поле cropYear - год сбора
+     */
     @Column
     private Integer cropYear;
 
-    /**Поле manufacturer - производитель*/
-    @Column(columnDefinition = "varchar(65)")
+    /**
+     * Поле manufacturer - производитель
+     */
+    @Column(columnDefinition = "VARCHAR(65)")
     private String manufacturer;
 
-    /**Поле brand - бренд*/
-    @Column(columnDefinition = "varchar(50)")
+    /**
+     * Поле brand - бренд
+     */
+    @Column(columnDefinition = "VARCHAR(50)")
     private String brand;
 
-    /**Поле color - оттенок*/
-    @Column(columnDefinition = "varchar(10)")
+    /**
+     * Поле color - оттенок
+     */
+    @Column(columnDefinition = "VARCHAR(10)")
     private String color;
 
-    /**Поле country - страна происхождения винограда*/
-    @Column(columnDefinition = "varchar(15)")
+    /**
+     * Поле country - страна происхождения винограда
+     */
+    @Column(columnDefinition = "VARCHAR(15)")
     private String country;
 
-    /**Поле region - регион винограда*/
-    @Column(columnDefinition = "varchar(70)")
+    /**
+     * Поле region - регион винограда
+     */
+    @Column(columnDefinition = "VARCHAR(70)")
     private String region;
 
-    /**Поле volume - обьем*/
+    /**
+     * Поле volume - обьем
+     */
     @Column
     private Float volume;
 
-    /**Поле strength - крепость*/
-    @Column(columnDefinition = "varchar(25)")
+    /**
+     * Поле strength - крепость
+     */
+    @Column(columnDefinition = "VARCHAR(25)")
     private Float strength;
 
-    /**Поле sugar - сладость/сухость*/
-    @Column(columnDefinition = "varchar(20)")
+    /**
+     * Поле sugar - сладость/сухость
+     */
+    @Column(columnDefinition = "VARCHAR(20)")
     private String sugar;
 
-    /**Поле price - цена в рублях*/
+    /**
+     * Поле price - цена в рублях
+     */
     @Setter
     @Column
     private Float price;
 
-    /**Поле grape - сорт винограда*/
-    @Column(columnDefinition = "varchar(125)")
+    /**
+     * Поле grape - сорт винограда
+     */
+    @Column(columnDefinition = "VARCHAR(125)")
     private String grape;
 
-    /**Поле taste - вкус*/
+    /**
+     * Поле availability - наличие в продаже
+     */
+    @Column(columnDefinition = "BOOL")
+    private Boolean availability;
+
+    /**
+     * Поле taste - вкус
+     */
     @Column(columnDefinition = "TEXT")
     private String taste;
 
-    /**Поле aroma - аромат*/
+    /**
+     * Поле aroma - аромат
+     */
     @Column(columnDefinition = "TEXT")
     private String aroma;
 
-    /**Поле foodPairing - сочетания с блюдами*/
+    /**
+     * Поле foodPairing - сочетания с блюдами
+     */
     @Column(columnDefinition = "TEXT")
     private String foodPairing;
 
-    /**Поле description - описание напитка*/
+    /**
+     * Поле description - описание напитка
+     */
     @Column(columnDefinition = "TEXT")
     private String description;
 
-    /**Поле rating - рейтинг*/
+    /**
+     * Поле rating - рейтинг
+     */
     @Setter
     @Column
     private Float rating;
