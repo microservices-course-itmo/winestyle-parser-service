@@ -68,20 +68,23 @@ public class ParserDirector implements Director {
                 () -> entityBuilder.rating(null)
         );
 
-        parser.parseBrand().ifPresentOrElse(
-                value -> {
-                    entityBuilder.brand(value);
-                    kafkaMessageBuilder.setBrand(value);
-                },
-                () -> entityBuilder.brand(null)
-        );
-
         parser.parseManufacturer().ifPresentOrElse(
                 value -> {
                     entityBuilder.manufacturer(value);
                     kafkaMessageBuilder.setManufacturer(value);
                 },
                 () -> entityBuilder.manufacturer(null)
+        );
+
+        parser.parseBrand().ifPresentOrElse(
+                value -> {
+                    entityBuilder.brand(value);
+                    kafkaMessageBuilder.setBrand(value);
+                },
+                () -> {
+                    entityBuilder.brand(kafkaMessageBuilder.getManufacturer());
+                    kafkaMessageBuilder.setBrand(kafkaMessageBuilder.getManufacturer());
+                }
         );
 
         parser.parseVolume().ifPresentOrElse(
