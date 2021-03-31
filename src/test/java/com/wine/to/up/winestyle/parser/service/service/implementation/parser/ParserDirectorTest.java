@@ -205,4 +205,29 @@ class ParserDirectorTest {
         assertNull(alcohol.getSugar());
         assertEquals(expectedAlcohol.toString(), alcohol.toString());
     }
+
+    @Test
+    void fillKafkaMessageBuilder() {
+        ParserApi.Wine.Builder kafkaMessageBuilder = ParserApi.Wine.newBuilder();
+        ReflectionTestUtils.setField(parserDirector, "kafkaMessageBuilder", kafkaMessageBuilder);
+        Alcohol expectedAlcohol = Alcohol.builder()
+                .id(null).name("test").type(AlcoholType.WINE.toString()).url("url").imageUrl("imageUrl").cropYear(1990)
+                .manufacturer("manufacturer").brand("brand").country("country").region("region")
+                .volume(1F).strength(2F).price(3F).city(City.SPB)
+                .grape("grape").taste("taste").aroma("aroma").foodPairing("foodPairing")
+                .description("description").rating(4F)
+                .build();
+        ParserApi.Wine.Builder actualKafkaMessageBuilder = parserDirector.fillKafkaMessageBuilder(expectedAlcohol, AlcoholType.WINE);
+        assertEquals(expectedAlcohol.getManufacturer(), actualKafkaMessageBuilder.getManufacturer());
+        assertEquals(expectedAlcohol.getName(), actualKafkaMessageBuilder.getName());
+        assertEquals(expectedAlcohol.getBrand(), actualKafkaMessageBuilder.getBrand());
+        assertEquals(expectedAlcohol.getCity().toString(), actualKafkaMessageBuilder.getCity());
+        assertEquals(expectedAlcohol.getCountry(), actualKafkaMessageBuilder.getCountry());
+        assertEquals(expectedAlcohol.getDescription(), actualKafkaMessageBuilder.getDescription());
+        assertEquals(expectedAlcohol.getRating(), actualKafkaMessageBuilder.getRating());
+        assertEquals(expectedAlcohol.getStrength(), actualKafkaMessageBuilder.getStrength());
+        assertEquals(expectedAlcohol.getUrl(), actualKafkaMessageBuilder.getLink());
+        assertEquals(expectedAlcohol.getCropYear(), actualKafkaMessageBuilder.getYear());
+        assertEquals(expectedAlcohol.getVolume(), actualKafkaMessageBuilder.getCapacity());
+    }
 }

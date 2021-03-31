@@ -1,12 +1,7 @@
 package com.wine.to.up.winestyle.parser.service.service.implementation.parser;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
-import com.wine.to.up.commonlib.messaging.KafkaMessageSender;
-import com.wine.to.up.parser.common.api.schema.ParserApi;
-import com.wine.to.up.winestyle.parser.service.service.RepositoryService;
 import com.wine.to.up.winestyle.parser.service.service.implementation.document.Scraper;
-import com.wine.to.up.winestyle.parser.service.service.implementation.helpers.ApplicationContextLocator;
 import com.wine.to.up.winestyle.parser.service.service.implementation.helpers.enums.AlcoholType;
 import com.wine.to.up.winestyle.parser.service.service.implementation.helpers.enums.City;
 import com.wine.to.up.winestyle.parser.service.service.implementation.parser.job.MainJob;
@@ -20,6 +15,8 @@ import org.junit.runner.RunWith;
 import org.mockito.*;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.util.ReflectionTestUtils;
+
+import java.sql.Ref;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -77,5 +74,11 @@ class ParserServiceTest {
         parserService.parseBuildSave(AlcoholType.SPARKLING, City.MSK);
         Mockito.verify(scraper, times(1)).getJsoupDocument(mskUrl + sparklingUrl);
         Mockito.verify(mainJob, times(1)).setParsed(0);
+    }
+    @Test
+    void populateUrl() {
+        ReflectionTestUtils.invokeMethod(parserService, "populateUrl");
+        assertEquals(supportedCityUrls, ReflectionTestUtils.getField(parserService, "supportedCityUrls"));
+        assertEquals(supportedAlcoholUrls, ReflectionTestUtils.getField(parserService, "supportedAlcoholUrls"));
     }
 }
