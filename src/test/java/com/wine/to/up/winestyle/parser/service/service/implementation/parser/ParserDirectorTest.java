@@ -4,6 +4,7 @@ import com.wine.to.up.parser.common.api.schema.ParserApi;
 import com.wine.to.up.winestyle.parser.service.domain.entity.Alcohol;
 import com.wine.to.up.winestyle.parser.service.service.Parser;
 import com.wine.to.up.winestyle.parser.service.service.implementation.helpers.enums.AlcoholType;
+import com.wine.to.up.winestyle.parser.service.service.implementation.helpers.enums.City;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -58,7 +59,7 @@ class ParserDirectorTest {
         Alcohol expectedAlcohol = Alcohol.builder()
                 .id(null).name("test").type("test").url("test").imageUrl("test").cropYear(1990)
                 .manufacturer("test").brand("test").color(expectedColor).country("test").region("test")
-                .volume(1F).strength(1F).sugar(expectedSugar).price(1F)
+                .volume(1F).strength(1F).sugar(expectedSugar).price(1F).city(City.SPB)
                 .grape("test").taste("test").aroma("test").foodPairing("test")
                 .description("test").rating(1F)
                 .build();
@@ -67,7 +68,7 @@ class ParserDirectorTest {
         Mockito.when(parser.parseColor()).thenReturn(java.util.Optional.of(expectedColor));
 
         Alcohol alcohol = parserDirector
-                .makeAlcohol(parser, "test", "test", AlcoholType.WINE);
+                .makeAlcohol(parser, "test", "test", AlcoholType.WINE, City.SPB);
         ReflectionTestUtils.setField(expectedAlcohol, "dateAdded", alcohol.getDateAdded());
         assertEquals(expectedColor, alcohol.getColor());
         assertEquals(expectedSugar, alcohol.getSugar());
@@ -82,7 +83,7 @@ class ParserDirectorTest {
         Alcohol expectedAlcohol = Alcohol.builder()
                 .id(null).name("test").type("test").url("test").imageUrl("test").cropYear(1990)
                 .manufacturer("test").brand("test").color(expectedColor).country("test").region("test")
-                .volume(1F).strength(1F).sugar(expectedSugar).price(1F)
+                .volume(1F).strength(1F).sugar(expectedSugar).price(1F).city(City.SPB)
                 .grape("test").taste("test").aroma("test").foodPairing("test")
                 .description("test").rating(1F)
                 .build();
@@ -91,7 +92,7 @@ class ParserDirectorTest {
         Mockito.when(parser.parseColor()).thenReturn(java.util.Optional.of(expectedColor));
 
         Alcohol alcohol = parserDirector
-                .makeAlcohol(parser, "test", "test", AlcoholType.WINE);
+                .makeAlcohol(parser, "test", "test", AlcoholType.WINE, City.SPB);
         ReflectionTestUtils.setField(expectedAlcohol, "dateAdded", alcohol.getDateAdded());
         assertEquals(expectedColor, alcohol.getColor());
         assertEquals(expectedSugar, alcohol.getSugar());
@@ -104,9 +105,9 @@ class ParserDirectorTest {
         String expectedSugar = "Полусухое";
 
         Alcohol expectedAlcohol = Alcohol.builder()
-                .id(null).name("test").type("test").url("test").imageUrl("test").cropYear(1990)
+                .id(null).name("test").type("test").url("test").imageUrl("test").cropYear(1990).city(City.SPB)
                 .manufacturer("test").brand("test").color(expectedColor).country("test").region("test")
-                .volume(1F).strength(1F).sugar(expectedSugar).price(1F)
+                .volume(1F).strength(1F).sugar(expectedSugar).price(1F).city(City.SPB)
                 .grape("test").taste("test").aroma("test").foodPairing("test")
                 .description("test").rating(1F)
                 .build();
@@ -115,7 +116,7 @@ class ParserDirectorTest {
         Mockito.when(parser.parseColor()).thenReturn(java.util.Optional.of(expectedColor));
 
         Alcohol alcohol = parserDirector
-                .makeAlcohol(parser, "test", "test", AlcoholType.WINE);
+                .makeAlcohol(parser, "test", "test", AlcoholType.WINE, City.SPB);
         ReflectionTestUtils.setField(expectedAlcohol, "dateAdded", alcohol.getDateAdded());
         assertEquals(expectedColor, alcohol.getColor());
         assertEquals(expectedSugar, alcohol.getSugar());
@@ -130,7 +131,7 @@ class ParserDirectorTest {
         Alcohol expectedAlcohol = Alcohol.builder()
                 .id(null).name("test").type("test").url("test").imageUrl("test").cropYear(1990)
                 .manufacturer("test").brand("test").color(expectedColor).country("test").region("test")
-                .volume(1F).strength(1F).sugar(expectedSugar).price(1F)
+                .volume(1F).strength(1F).sugar(expectedSugar).price(1F).city(City.MSK)
                 .grape("test").taste("test").aroma("test").foodPairing("test")
                 .description("test").rating(1F)
                 .build();
@@ -139,7 +140,7 @@ class ParserDirectorTest {
         Mockito.when(parser.parseColor()).thenReturn(java.util.Optional.of(expectedColor));
 
         Alcohol alcohol = parserDirector
-                .makeAlcohol(parser, "test", "test", AlcoholType.WINE);
+                .makeAlcohol(parser, "test", "test", AlcoholType.WINE, City.MSK);
         ReflectionTestUtils.setField(expectedAlcohol, "dateAdded", alcohol.getDateAdded());
         assertEquals(expectedColor, alcohol.getColor());
         assertEquals(expectedSugar, alcohol.getSugar());
@@ -154,7 +155,7 @@ class ParserDirectorTest {
         Alcohol expectedAlcohol = Alcohol.builder()
                 .id(null).name("test").type("test").url("test").imageUrl("test").cropYear(1990)
                 .manufacturer("test").brand("test").color(expectedColor).country("test").region("test")
-                .volume(1F).strength(1F).sugar(expectedSugar).price(1F)
+                .volume(1F).strength(1F).sugar(expectedSugar).price(1F).city(City.SPB)
                 .grape("test").taste("test").aroma("test").foodPairing("test")
                 .description("test").rating(1F)
                 .build();
@@ -163,7 +164,7 @@ class ParserDirectorTest {
         Mockito.when(parser.parseColor()).thenReturn(java.util.Optional.of(expectedColor));
 
         Alcohol alcohol = parserDirector
-                .makeAlcohol(parser, "test", "test", AlcoholType.WINE);
+                .makeAlcohol(parser, "test", "test", AlcoholType.WINE, City.SPB);
         ReflectionTestUtils.setField(expectedAlcohol, "dateAdded", alcohol.getDateAdded());
         assertEquals(expectedColor, alcohol.getColor());
         assertEquals(expectedSugar, alcohol.getSugar());
@@ -171,8 +172,9 @@ class ParserDirectorTest {
     }
 
     @Test
-    void makeAlcoholNull() {
+    void makeAlcoholBrandAsManufacturer() {
         Mockito.when(parser.parseName()).thenReturn(String.valueOf(Optional.empty()));
+        Mockito.when(parser.parseManufacturer()).thenReturn(Optional.of("brand"));
         Mockito.when(parser.parseAroma()).thenReturn(Optional.empty());
         Mockito.when(parser.parseBrand()).thenReturn(Optional.empty());
         Mockito.when(parser.parseCountry()).thenReturn(Optional.empty());
@@ -181,7 +183,6 @@ class ParserDirectorTest {
         Mockito.when(parser.parseFoodPairing()).thenReturn(Optional.empty());
         Mockito.when(parser.parseGrape()).thenReturn(Optional.empty());
         Mockito.when(parser.parseImageUrl()).thenReturn(Optional.empty());
-        Mockito.when(parser.parseManufacturer()).thenReturn(Optional.empty());
         Mockito.when(parser.parsePrice()).thenReturn(Optional.empty());
         Mockito.when(parser.parseRegion()).thenReturn(Optional.empty());
         Mockito.when(parser.parseStrength()).thenReturn(Optional.empty());
@@ -194,15 +195,39 @@ class ParserDirectorTest {
         Mockito.when(parser.parseColor()).thenReturn(Optional.empty());
 
         Alcohol expectedAlcohol = Alcohol.builder().name(String.valueOf(Optional.empty()))
-                .type(String.valueOf(Optional.empty()))
-                .url("test").build();
+                .type(String.valueOf(Optional.empty())).city(City.SPB).manufacturer("brand")
+                .brand("brand").url("test").build();
 
         Alcohol alcohol = parserDirector
-                .makeAlcohol(parser, "test", "test", AlcoholType.WINE);
+                .makeAlcohol(parser, "test", "test", AlcoholType.WINE, City.SPB);
         ReflectionTestUtils.setField(expectedAlcohol, "dateAdded", alcohol.getDateAdded());
-        assertEquals(null, alcohol.getColor());
-        assertEquals(null, alcohol.getSugar());
+        assertNull(alcohol.getColor());
+        assertNull(alcohol.getSugar());
         assertEquals(expectedAlcohol.toString(), alcohol.toString());
     }
 
+    @Test
+    void fillKafkaMessageBuilder() {
+        ParserApi.Wine.Builder kafkaMessageBuilder = ParserApi.Wine.newBuilder();
+        ReflectionTestUtils.setField(parserDirector, "kafkaMessageBuilder", kafkaMessageBuilder);
+        Alcohol expectedAlcohol = Alcohol.builder()
+                .id(null).name("test").type(AlcoholType.WINE.toString()).url("url").imageUrl("imageUrl").cropYear(1990)
+                .manufacturer("manufacturer").brand("brand").country("country").region("region")
+                .volume(1F).strength(2F).price(3F).city(City.SPB)
+                .grape("grape").taste("taste").aroma("aroma").foodPairing("foodPairing")
+                .description("description").rating(4F)
+                .build();
+        ParserApi.Wine.Builder actualKafkaMessageBuilder = parserDirector.fillKafkaMessageBuilder(expectedAlcohol, AlcoholType.WINE);
+        assertEquals(expectedAlcohol.getManufacturer(), actualKafkaMessageBuilder.getManufacturer());
+        assertEquals(expectedAlcohol.getName(), actualKafkaMessageBuilder.getName());
+        assertEquals(expectedAlcohol.getBrand(), actualKafkaMessageBuilder.getBrand());
+        assertEquals(expectedAlcohol.getCity().toString(), actualKafkaMessageBuilder.getCity());
+        assertEquals(expectedAlcohol.getCountry(), actualKafkaMessageBuilder.getCountry());
+        assertEquals(expectedAlcohol.getDescription(), actualKafkaMessageBuilder.getDescription());
+        assertEquals(expectedAlcohol.getRating(), actualKafkaMessageBuilder.getRating());
+        assertEquals(expectedAlcohol.getStrength(), actualKafkaMessageBuilder.getStrength());
+        assertEquals(expectedAlcohol.getUrl(), actualKafkaMessageBuilder.getLink());
+        assertEquals(expectedAlcohol.getCropYear(), actualKafkaMessageBuilder.getYear());
+        assertEquals(expectedAlcohol.getVolume(), actualKafkaMessageBuilder.getCapacity());
+    }
 }

@@ -135,6 +135,7 @@ public class Alcohol {
     /**
      * Поле availability - наличие в продаже
      */
+    @Setter
     @Column(columnDefinition = "BOOL")
     private Boolean availability;
 

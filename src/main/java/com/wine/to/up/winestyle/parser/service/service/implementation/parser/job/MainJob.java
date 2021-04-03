@@ -73,7 +73,7 @@ public class MainJob {
 
         WinestyleParserServiceMetricsCollector.sumPageParsingDuration(mainParsingStart, LocalDateTime.now());
 
-        eventLogger.info(NotableEvents.I_WINE_PAGE_PARSED, currentDoc.location());
+        eventLogger.info(NotableEvents.I_WINES_PAGE_PARSED, currentDoc.location());
 
         countParsed(parsedNow);
 

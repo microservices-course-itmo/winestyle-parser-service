@@ -59,6 +59,7 @@ public class ProductJob {
             if (LocalDateTime.now().getDayOfWeek() == DayOfWeek.MONDAY) {
                 alcohol = parseProduct(productElement, kafkaMessageBuilder, city);
             } else {
+                alcohol.setAvailability(parser.parseAvailability().orElse(null));
                 alcohol.setPrice(parser.parsePrice().orElse(null));
                 alcohol.setRating(parser.parseWinestyleRating().orElse(null));
                 repositoryService.add(alcohol);
