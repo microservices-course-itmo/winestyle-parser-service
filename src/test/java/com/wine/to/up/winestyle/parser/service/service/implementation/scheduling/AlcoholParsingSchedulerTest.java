@@ -19,8 +19,6 @@ class AlcoholParsingSchedulerTest {
     private AlcoholParsingScheduler alcoholParsingScheduler;
     @Mock
     private ParsingControllerService parsingControllerService;
-    @Mock
-    private MainControllerService mainControllerService;
 
     @BeforeEach
     void setUp() {
@@ -28,10 +26,10 @@ class AlcoholParsingSchedulerTest {
     }
 
     @Test
-    void onScheduleParseWine() {
+    void onScheduleParseSpbWine() {
         try {
             Mockito.doNothing().when(parsingControllerService).startParsingJob(City.SPB, AlcoholType.WINE);
-            alcoholParsingScheduler.onScheduleParseWine();
+            alcoholParsingScheduler.onScheduleParseAlcoholSpbWine();
             Mockito.verify(parsingControllerService, Mockito.times(1))
                     .startParsingJob(City.SPB, AlcoholType.WINE);
         } catch (InterruptedException | ServiceIsBusyException e) {
@@ -40,10 +38,22 @@ class AlcoholParsingSchedulerTest {
     }
 
     @Test
-    void onScheduleParseSparkling() {
+    void onScheduleParseMskWine() {
+        try {
+            Mockito.doNothing().when(parsingControllerService).startParsingJob(City.MSK, AlcoholType.WINE);
+            alcoholParsingScheduler.onScheduleParseAlcoholMskWine();
+            Mockito.verify(parsingControllerService, Mockito.times(1))
+                    .startParsingJob(City.MSK, AlcoholType.WINE);
+        } catch (InterruptedException | ServiceIsBusyException e) {
+            fail("Test failed!", e);
+        }
+    }
+
+    @Test
+    void onScheduleParseSpbSparkling() {
         try {
             Mockito.doNothing().when(parsingControllerService).startParsingJob(City.SPB, AlcoholType.SPARKLING);
-            alcoholParsingScheduler.onScheduleParseSparkling();
+            alcoholParsingScheduler.onScheduleParseAlcoholSpbSparkling();
             Mockito.verify(parsingControllerService, Mockito.times(1))
                     .startParsingJob(City.SPB, AlcoholType.SPARKLING);
         } catch (InterruptedException | ServiceIsBusyException e) {
@@ -52,11 +62,13 @@ class AlcoholParsingSchedulerTest {
     }
 
     @Test
-    void onScheduleLoadProxies() {
+    void onScheduleParseMskSparkling() {
         try {
-            Mockito.doNothing().when(mainControllerService).startProxiesInitJob(1);
-            alcoholParsingScheduler.onScheduleLoadProxies();
-        } catch (ServiceIsBusyException e) {
+            Mockito.doNothing().when(parsingControllerService).startParsingJob(City.MSK, AlcoholType.SPARKLING);
+            alcoholParsingScheduler.onScheduleParseAlcoholMskSparkling();
+            Mockito.verify(parsingControllerService, Mockito.times(1))
+                    .startParsingJob(City.MSK, AlcoholType.SPARKLING);
+        } catch (InterruptedException | ServiceIsBusyException e) {
             fail("Test failed!", e);
         }
     }
