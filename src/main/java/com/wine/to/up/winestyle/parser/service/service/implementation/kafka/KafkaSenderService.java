@@ -12,6 +12,9 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 
+/**
+ * Сервис, отвечающий за процесс отправки в кафку
+ */
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -21,6 +24,21 @@ public class KafkaSenderService implements KafkaService {
 
     private Integer totalSended = 0;
 
+    /**
+     * отправить алкоголь конкретного типа
+     * @param alcoholType - тип алкоголя
+     */
+    public void sendAllAlcohol(AlcoholType alcoholType) {
+        if (AlcoholType.WINE.toString().equals(alcoholType.toString())) {
+            sendAllWines();
+        } else if (AlcoholType.SPARKLING.toString().equals(alcoholType.toString())) {
+            sendAllSparkling();
+        }
+    }
+
+    /**
+     * отправить все позиции алкоголя
+     */
     public void sendAllAlcohol() {
         List<Alcohol> alcohol = repositoryService.getAll();
 
@@ -32,7 +50,7 @@ public class KafkaSenderService implements KafkaService {
         totalSended = 0;
     }
 
-    public void sendAllWines() {
+    private void sendAllWines() {
         List<Alcohol> wines = repositoryService.getAllWines();
 
         LocalDateTime startSendingProcess = LocalDateTime.now();
@@ -42,7 +60,7 @@ public class KafkaSenderService implements KafkaService {
         totalSended = 0;
     }
 
-    public void sendAllSparkling() {
+    private void sendAllSparkling() {
         List<Alcohol> sparkling = repositoryService.getAllSparkling();
 
         LocalDateTime startSendingProcess = LocalDateTime.now();
