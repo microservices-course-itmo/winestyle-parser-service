@@ -21,7 +21,6 @@ public class KafkaSender {
     private final Director parserDirector;
 
     private final ParserApi.WineParsedEvent.Builder kafkaMessageBuilder = ParserApi.WineParsedEvent.newBuilder();
-    private Integer sended = 0;
 
     /**
      * отправление алкоголя в Кафку
@@ -29,15 +28,18 @@ public class KafkaSender {
      * @return отправленное количество алкоголя
      */
     public Integer sendAlcoholToKafka(Alcohol alcohol) {
-        try {
-            kafkaMessageSender.sendMessage(kafkaMessageBuilder
-                    .addWines(parserDirector
-                            .fillKafkaMessageBuilder(alcohol, AlcoholType.valueOf(alcohol.getType())))
-                    .build());
-            WinestyleParserServiceMetricsCollector.incPublished();
-            sended++;
-        } catch (Exception ex) {
-            log.error("Cannot send dataset to Kafka: id:{} {}", alcohol.getId(), alcohol.getType());
+        int sended = 0;
+        if (alcohol.getPrice() != null && alcohol.getBrand() != null && alcohol.getManufacturer() != null && alcohol.getName() != null) {
+            try {
+                kafkaMessageSender.sendMessage(kafkaMessageBuilder
+                        .addWines(parserDirector
+                                .fillKafkaMessageBuilder(alcohol, AlcoholType.valueOf(alcohol.getType())))
+                        .build());
+                WinestyleParserServiceMetricsCollector.incPublished();
+                sended++;
+            } catch (Exception ex) {
+                log.error("Cannot send dataset to Kafka: id:{} {}", alcohol.getId(), alcohol.getType());
+            }
         }
         return sended;
     }
