@@ -1,0 +1,1 @@
+ALTER TABLE alcohol ALTER COLUMN availability TYPE VARCHAR(20) USING availability::VARCHAR(20);

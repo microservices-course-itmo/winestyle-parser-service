@@ -10,7 +10,6 @@ import lombok.Getter;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.Arrays;
 import java.util.Optional;
 
 @Service("ParserDirector")
@@ -107,7 +106,7 @@ public class ParserDirector implements Director {
         parser.parseGrape().ifPresentOrElse(
                 value -> {
                     entityBuilder.grape(value);
-                    kafkaMessageBuilder.addAllGrapeSort(Arrays.asList(value.split(", ")));
+                    kafkaMessageBuilder.addGrapeSort(value);
                 },
                 () -> entityBuilder.volume(null)
         );
@@ -123,7 +122,7 @@ public class ParserDirector implements Director {
         parser.parseRegion().ifPresentOrElse(
                 value -> {
                     entityBuilder.region(value);
-                    kafkaMessageBuilder.addAllRegion(Arrays.asList(value.split(", ")));
+                    kafkaMessageBuilder.addRegion(value);
                 },
                 () -> entityBuilder.region(null)
         );
@@ -147,7 +146,7 @@ public class ParserDirector implements Director {
         parser.parseAvailability().ifPresentOrElse(
                 value -> {
                     entityBuilder.availability(value);
-                    kafkaMessageBuilder.setInStock(value ? 1 : 0);
+                    kafkaMessageBuilder.setInStock(value);
                 },
                 () -> entityBuilder.availability(null)
         );
@@ -217,17 +216,17 @@ public class ParserDirector implements Director {
 
         Optional.ofNullable(source.getStrength()).ifPresent(kafkaMessageBuilder::setStrength);
 
-        Optional.ofNullable(source.getGrape()).ifPresent(grape -> kafkaMessageBuilder.addAllGrapeSort(Arrays.asList(grape.split(", "))));
+        Optional.ofNullable(source.getGrape()).ifPresent(kafkaMessageBuilder::addGrapeSort);
 
         Optional.ofNullable(source.getCountry()).ifPresent(kafkaMessageBuilder::setCountry);
 
-        Optional.ofNullable(source.getRegion()).ifPresent(region -> kafkaMessageBuilder.addAllRegion(Arrays.asList(region.split(", "))));
+        Optional.ofNullable(source.getRegion()).ifPresent(kafkaMessageBuilder::addRegion);
 
         Optional.ofNullable(source.getColor()).ifPresent(color -> kafkaMessageBuilder.setColor(matchColorToValue(color)));
 
         Optional.ofNullable(source.getSugar()).ifPresent(sugar -> kafkaMessageBuilder.setSugar(matchSugarToValue(sugar)));
 
-        Optional.ofNullable(source.getAvailability()).ifPresent(availability -> kafkaMessageBuilder.setInStock(availability ? 1 : 0));
+        Optional.ofNullable(source.getAvailability()).ifPresent(kafkaMessageBuilder::setInStock);
 
         Optional.ofNullable(source.getTaste()).ifPresent(kafkaMessageBuilder::setTaste);
 

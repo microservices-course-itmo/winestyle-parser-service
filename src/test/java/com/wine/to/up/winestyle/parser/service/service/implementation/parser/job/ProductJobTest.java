@@ -78,7 +78,7 @@ class ProductJobTest {
             fail("Cannot stub");
         }
 
-        Mockito.when(parser.parseAvailability()).thenReturn(Optional.of(true));
+        Mockito.when(parser.parseAvailability()).thenReturn(Optional.of("Available"));
         Mockito.when(parser.parsePrice()).thenReturn(Optional.of(100F));
         Mockito.when(parser.parseWinestyleRating()).thenReturn(Optional.of(10F));
 

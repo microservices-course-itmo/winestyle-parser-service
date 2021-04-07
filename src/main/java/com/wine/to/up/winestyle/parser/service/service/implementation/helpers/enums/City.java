@@ -7,8 +7,8 @@ public enum City {
     @Override
     public String toString() {
         switch(this) {
-            case MSK: return "msk";
-            case SPB: return "spb";
+            case MSK: return "Москва";
+            case SPB: return "Санкт-Петербург";
             default: throw new IllegalArgumentException();
         }
     }

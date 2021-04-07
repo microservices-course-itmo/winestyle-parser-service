@@ -388,12 +388,22 @@ public class AlcoholParser implements Parser {
     }
 
     @Override
-    public Optional<Boolean> parseAvailability() {
+    public Optional<String> parseAvailability() {
         try {
             Element availabilityElement = productBlock.selectFirst(availabilityElementCssQuery);
             String availabilityAttr = availabilityElement.attr(availabilityPropertyCssAttr);
             String availabilityValue = availabilityAttr.substring(availabilityAttr.length() - 1) ;
-            return Optional.of(availabilityValue.matches("[13]"));
+
+            switch (availabilityValue) {
+                case "1":
+                    return Optional.of("Available");
+                case "3":
+                    return Optional.of("Limited availability");
+                case "5":
+                    return Optional.of("On order");
+                default:
+                    return Optional.of("Not available");
+            }
         } catch (Exception ex) {
             log.warn("{}: product's in stock availability is not specified", url);
             return Optional.empty();

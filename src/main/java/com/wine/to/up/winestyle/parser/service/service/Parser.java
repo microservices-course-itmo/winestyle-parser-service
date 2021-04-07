@@ -37,7 +37,7 @@ public interface Parser {
 
     Optional<String> parseSugar();
 
-    Optional<Boolean> parseAvailability();
+    Optional<String> parseAvailability();
 
     Optional<String> parseTaste();
 
