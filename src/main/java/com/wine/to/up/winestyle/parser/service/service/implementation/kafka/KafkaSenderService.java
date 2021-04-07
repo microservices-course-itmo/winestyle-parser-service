@@ -22,16 +22,14 @@ public class KafkaSenderService implements KafkaService {
     private final RepositoryService repositoryService;
     private final KafkaSender kafkaSender;
 
-    private Integer totalSended = 0;
-
     /**
      * отправить алкоголь конкретного типа
      * @param alcoholType - тип алкоголя
      */
     public void sendAllAlcohol(AlcoholType alcoholType) {
-        if (AlcoholType.WINE.toString().equals(alcoholType.toString())) {
+        if (AlcoholType.WINE == alcoholType) {
             sendAllWines();
-        } else if (AlcoholType.SPARKLING.toString().equals(alcoholType.toString())) {
+        } else if (AlcoholType.SPARKLING == alcoholType) {
             sendAllSparkling();
         }
     }
@@ -45,9 +43,8 @@ public class KafkaSenderService implements KafkaService {
         LocalDateTime startSendingProcess = LocalDateTime.now();
         log.info("Start sending data of all alcohol to Kafka at {};", startSendingProcess);
 
-        sendAlcohol(alcohol);
+        int totalSended = sendAlcohol(alcohol);
         logKafkaSended("alcohol", totalSended, startSendingProcess);
-        totalSended = 0;
     }
 
     private void sendAllWines() {
@@ -55,9 +52,8 @@ public class KafkaSenderService implements KafkaService {
 
         LocalDateTime startSendingProcess = LocalDateTime.now();
         log.info("Start sending data of all wines to Kafka at {};", startSendingProcess);
-        sendAlcohol(wines);
+        int totalSended = sendAlcohol(wines);
         logKafkaSended(AlcoholType.WINE.toString(), totalSended, startSendingProcess);
-        totalSended = 0;
     }
 
     private void sendAllSparkling() {
@@ -66,13 +62,12 @@ public class KafkaSenderService implements KafkaService {
         LocalDateTime startSendingProcess = LocalDateTime.now();
         log.info("Start sending data of all sparkling to Kafka at {};", startSendingProcess);
 
-        sendAlcohol(sparkling);
+        int totalSended = sendAlcohol(sparkling);
         logKafkaSended(AlcoholType.SPARKLING.toString(), totalSended, startSendingProcess);
-        totalSended = 0;
     }
 
-    private void sendAlcohol(List<Alcohol> alcoholList) {
-        alcoholList.forEach(alcohol -> totalSended += kafkaSender.sendAlcoholToKafka(alcohol));
+    private int sendAlcohol(List<Alcohol> alcoholList) {
+        return alcoholList.stream().mapToInt(kafkaSender::sendAlcoholToKafka).sum();
     }
 
     private void logKafkaSended(String alcoholType, Integer total, LocalDateTime startTime) {

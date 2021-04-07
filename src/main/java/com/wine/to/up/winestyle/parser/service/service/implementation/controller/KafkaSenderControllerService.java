@@ -19,8 +19,11 @@ public class KafkaSenderControllerService {
     public void startSendingAlcohol() throws ServiceIsBusyException {
         if (statusService.tryBusy(ServiceType.KAFKASENDER)) {
             new Thread(() -> {
-                kafkaService.sendAllAlcohol();
-                statusService.release(ServiceType.KAFKASENDER);
+                try{
+                    kafkaService.sendAllAlcohol();
+                } finally {
+                    statusService.release(ServiceType.KAFKASENDER);
+                }
             }).start();
         } else {
             throw ServiceIsBusyException.createWith("Sending process alcohol to kafka in progress already");
@@ -30,8 +33,11 @@ public class KafkaSenderControllerService {
     public void startSendingAlcohol(AlcoholType alcoholType) throws ServiceIsBusyException {
         if (statusService.tryBusy(ServiceType.KAFKASENDER)) {
             new Thread(() -> {
-                kafkaService.sendAllAlcohol(alcoholType);
-                statusService.release(ServiceType.KAFKASENDER);
+                try {
+                    kafkaService.sendAllAlcohol(alcoholType);
+                } finally {
+                    statusService.release(ServiceType.KAFKASENDER);
+                }
             }).start();
         } else {
             throw ServiceIsBusyException.createWith("Sending process alcohol to kafka in progress already");

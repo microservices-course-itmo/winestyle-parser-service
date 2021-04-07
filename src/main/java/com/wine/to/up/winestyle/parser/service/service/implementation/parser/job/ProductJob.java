@@ -68,7 +68,6 @@ public class ProductJob {
         }
 
         WinestyleParserServiceMetricsCollector.sumDetailsParsingDuration(productParsingStart, LocalDateTime.now());
-        WinestyleParserServiceMetricsCollector.incPublished();
 
         return alcohol;
     }

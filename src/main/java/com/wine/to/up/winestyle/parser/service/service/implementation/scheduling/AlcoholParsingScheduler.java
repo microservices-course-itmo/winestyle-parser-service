@@ -6,6 +6,7 @@ import com.wine.to.up.winestyle.parser.service.service.implementation.helpers.en
 import com.wine.to.up.winestyle.parser.service.service.implementation.helpers.enums.City;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -15,12 +16,15 @@ import org.springframework.stereotype.Component;
 public class AlcoholParsingScheduler {
     private final ParsingControllerService parsingControllerService;
 
+    @Value("${spring.task.scheduling.rate.parser.delay}")
+    private int timeout;
+
     @Scheduled(cron = "${spring.task.scheduling.rate.parser.cron}", zone = "EAT")
     public void onScheduleParseAlcoholSpbWine() throws InterruptedException {
         try {
             parsingControllerService.startParsingJob(City.SPB, AlcoholType.WINE);
         } catch (ServiceIsBusyException e) {
-            Thread.sleep(3600000);
+            Thread.sleep(timeout);
             onScheduleParseAlcoholSpbWine();
         }
     }
@@ -30,7 +34,7 @@ public class AlcoholParsingScheduler {
         try {
             parsingControllerService.startParsingJob(City.SPB, AlcoholType.SPARKLING);
         } catch (ServiceIsBusyException e) {
-            Thread.sleep(3600000);
+            Thread.sleep(timeout);
             onScheduleParseAlcoholSpbSparkling();
         }
     }
@@ -40,7 +44,7 @@ public class AlcoholParsingScheduler {
         try {
             parsingControllerService.startParsingJob(City.MSK, AlcoholType.WINE);
         } catch (ServiceIsBusyException e) {
-            Thread.sleep(3600000);
+            Thread.sleep(timeout);
             onScheduleParseAlcoholMskWine();
         }
     }
@@ -50,7 +54,7 @@ public class AlcoholParsingScheduler {
         try {
             parsingControllerService.startParsingJob(City.MSK, AlcoholType.SPARKLING);
         } catch (ServiceIsBusyException e) {
-            Thread.sleep(3600000);
+            Thread.sleep(timeout);
             onScheduleParseAlcoholMskSparkling();
         }
     }
