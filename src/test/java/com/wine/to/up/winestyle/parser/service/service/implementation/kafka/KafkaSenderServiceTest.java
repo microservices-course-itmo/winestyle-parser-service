@@ -2,6 +2,7 @@ package com.wine.to.up.winestyle.parser.service.service.implementation.kafka;
 
 import com.wine.to.up.winestyle.parser.service.domain.entity.Alcohol;
 import com.wine.to.up.winestyle.parser.service.service.RepositoryService;
+import com.wine.to.up.winestyle.parser.service.service.implementation.helpers.enums.AlcoholType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;
@@ -43,7 +44,6 @@ class KafkaSenderServiceTest {
 
         Future<Integer> future = mock(Future.class);
         Mockito.when(future.get()).thenReturn(1);
-
     }
 
     @Test
@@ -54,13 +54,13 @@ class KafkaSenderServiceTest {
 
     @Test
     void sendAllWines() {
-        kafkaSenderService.sendAllWines();
+        kafkaSenderService.sendAllAlcohol(AlcoholType.WINE);
         Mockito.verify(repositoryService, times(1)).getAllWines();
     }
 
     @Test
     void sendAllSparkling() {
-        kafkaSenderService.sendAllSparkling();
+        kafkaSenderService.sendAllAlcohol(AlcoholType.SPARKLING);
         Mockito.verify(repositoryService, times(1)).getAllSparkling();
     }
 }

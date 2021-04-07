@@ -10,6 +10,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+/**
+ * Класс, осуществляющий отправку позиции алкоголя в кафку
+ */
 @Slf4j
 @RequiredArgsConstructor
 @Component
@@ -20,6 +23,11 @@ public class KafkaSender {
     private final ParserApi.WineParsedEvent.Builder kafkaMessageBuilder = ParserApi.WineParsedEvent.newBuilder();
     private Integer sended = 0;
 
+    /**
+     * отправление алкоголя в Кафку
+     * @param alcohol
+     * @return отправленное количество алкоголя
+     */
     public Integer sendAlcoholToKafka(Alcohol alcohol) {
         try {
             kafkaMessageSender.sendMessage(kafkaMessageBuilder

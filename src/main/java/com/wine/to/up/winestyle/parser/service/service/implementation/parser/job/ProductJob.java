@@ -29,7 +29,6 @@ import java.time.LocalDateTime;
 public class ProductJob {
     @Qualifier("ParserDirector")
     private final Director director;
-    private final KafkaMessageSender<ParserApi.WineParsedEvent> kafkaMessageSender;
     private final RepositoryService repositoryService;
     private final Scraper scraper;
     private final ProductBlockSegmentor productBlockSegmentor;
@@ -63,14 +62,12 @@ public class ProductJob {
                 alcohol.setPrice(parser.parsePrice().orElse(null));
                 alcohol.setRating(parser.parseWinestyleRating().orElse(null));
                 repositoryService.add(alcohol);
-                kafkaMessageSender.sendMessage(kafkaMessageBuilder.addWines(director.fillKafkaMessageBuilder(alcohol, alcoholType)).build());
             }
         } catch (NoEntityException ex) {
             alcohol = parseProduct(productElement, kafkaMessageBuilder, city);
         }
 
         WinestyleParserServiceMetricsCollector.sumDetailsParsingDuration(productParsingStart, LocalDateTime.now());
-        WinestyleParserServiceMetricsCollector.incPublished();
 
         return alcohol;
     }
@@ -91,8 +88,6 @@ public class ProductJob {
         Alcohol alcohol = director.makeAlcohol(parser, mainPageUrl, productUrl, alcoholType, city);
 
         repositoryService.add(alcohol);
-
-        kafkaMessageSender.sendMessage(kafkaMessageBuilder.addWines(director.getKafkaMessageBuilder()).build());
 
         return alcohol;
     }

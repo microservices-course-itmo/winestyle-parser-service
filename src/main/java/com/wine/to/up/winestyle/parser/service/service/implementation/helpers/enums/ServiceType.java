@@ -2,5 +2,6 @@ package com.wine.to.up.winestyle.parser.service.service.implementation.helpers.e
 
 public enum ServiceType {
     PARSER,
-    PROXY
+    PROXY,
+    KAFKASENDER
 }

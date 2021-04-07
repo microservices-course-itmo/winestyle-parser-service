@@ -13,6 +13,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class StatusService {
     private final AtomicBoolean isParserBusy = new AtomicBoolean(false);
     private final AtomicBoolean isProxyInitBusy = new AtomicBoolean(false);
+    private final AtomicBoolean isKafkaSendeerProcessBusy = new AtomicBoolean(false);
 
     @Value("${spring.status-service.type.exception}")
     private String unsupportedTypeMessage;
@@ -24,6 +25,9 @@ public class StatusService {
                 break;
             case PROXY:
                 isProxyInitBusy.set(false);
+                break;
+            case KAFKASENDER:
+                isKafkaSendeerProcessBusy.set(false);
                 break;
             default:
                 throw new IllegalArgumentException(unsupportedTypeMessage);
@@ -41,6 +45,8 @@ public class StatusService {
                 return isParserBusy.compareAndSet(false, true);
             case PROXY:
                 return isProxyInitBusy.compareAndSet(false, true);
+            case KAFKASENDER:
+                return isKafkaSendeerProcessBusy.compareAndSet(false, true);
             default:
                 throw new IllegalArgumentException(unsupportedTypeMessage);
         }
@@ -52,6 +58,8 @@ public class StatusService {
                 return isParserBusy.get();
             case PROXY:
                 return isProxyInitBusy.get();
+            case KAFKASENDER:
+                return isKafkaSendeerProcessBusy.get();
             default:
                 throw new IllegalArgumentException(unsupportedTypeMessage);
         }

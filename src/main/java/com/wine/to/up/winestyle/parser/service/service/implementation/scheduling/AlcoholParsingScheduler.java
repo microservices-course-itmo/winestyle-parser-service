@@ -1,7 +1,6 @@
 package com.wine.to.up.winestyle.parser.service.service.implementation.scheduling;
 
 import com.wine.to.up.winestyle.parser.service.controller.exception.ServiceIsBusyException;
-import com.wine.to.up.winestyle.parser.service.service.implementation.controller.MainControllerService;
 import com.wine.to.up.winestyle.parser.service.service.implementation.controller.ParsingControllerService;
 import com.wine.to.up.winestyle.parser.service.service.implementation.helpers.enums.AlcoholType;
 import com.wine.to.up.winestyle.parser.service.service.implementation.helpers.enums.City;
@@ -16,37 +15,47 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class AlcoholParsingScheduler {
     private final ParsingControllerService parsingControllerService;
-    private final MainControllerService mainControllerService;
 
-    @Value("${spring.jsoup.connection.timeout.millis}")
+    @Value("${spring.task.scheduling.rate.parser.delay}")
     private int timeout;
 
     @Scheduled(cron = "${spring.task.scheduling.rate.parser.cron}", zone = "EAT")
-    public void onScheduleParseWine() throws InterruptedException {
+    public void onScheduleParseAlcoholSpbWine() throws InterruptedException {
         try {
             parsingControllerService.startParsingJob(City.SPB, AlcoholType.WINE);
         } catch (ServiceIsBusyException e) {
-            Thread.sleep(3600000);
-            onScheduleParseWine();
+            Thread.sleep(timeout);
+            onScheduleParseAlcoholSpbWine();
         }
     }
 
     @Scheduled(cron = "${spring.task.scheduling.rate.parser.cron}", zone = "EAT")
-    public void onScheduleParseSparkling() throws InterruptedException {
+    public void onScheduleParseAlcoholSpbSparkling() throws InterruptedException {
         try {
             parsingControllerService.startParsingJob(City.SPB, AlcoholType.SPARKLING);
         } catch (ServiceIsBusyException e) {
-            Thread.sleep(3600000);
-            onScheduleParseSparkling();
+            Thread.sleep(timeout);
+            onScheduleParseAlcoholSpbSparkling();
         }
     }
 
-    //@Scheduled(fixedRateString = "${spring.task.scheduling.rate.proxy.fixed.millis}")
-    public void onScheduleLoadProxies() {
+    @Scheduled(cron = "${spring.task.scheduling.rate.parser.cron}", zone = "EAT")
+    public void onScheduleParseAlcoholMskWine() throws InterruptedException {
         try {
-            mainControllerService.startProxiesInitJob(timeout);
+            parsingControllerService.startParsingJob(City.MSK, AlcoholType.WINE);
         } catch (ServiceIsBusyException e) {
-            log.info("Scheduled proxy initialization job is rejected. {}", e.getMessage());
+            Thread.sleep(timeout);
+            onScheduleParseAlcoholMskWine();
+        }
+    }
+
+    @Scheduled(cron = "${spring.task.scheduling.rate.parser.cron}", zone = "EAT")
+    public void onScheduleParseAlcoholMskSparkling() throws InterruptedException {
+        try {
+            parsingControllerService.startParsingJob(City.MSK, AlcoholType.SPARKLING);
+        } catch (ServiceIsBusyException e) {
+            Thread.sleep(timeout);
+            onScheduleParseAlcoholMskSparkling();
         }
     }
 }
